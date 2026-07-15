@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { TypeGrants } from "@src/common/common.enum";
+import { TypeGrants } from "@lms/common";
 import { ChangeAccountHandler } from "@src/account/handler/change.account.handler";
 import { ConfirmAccountHandler } from "@src/account/handler/confirm.account.handler";
 import { HashAccountHandler } from "@src/account/handler/hash.account.handler";

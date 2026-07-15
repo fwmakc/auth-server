@@ -5,7 +5,7 @@ import {
   IdColumn,
   UpdatedColumn,
   VarcharColumn,
-} from "@src/common/common.column";
+} from "@lms/common";
 import { ClientsEntity } from "@src/clients/clients.entity";
 import { UsersEntity } from "@src/db/users/users.entity";
 import { AccountConfirmEntity } from "./account_confirm/account_confirm.entity";

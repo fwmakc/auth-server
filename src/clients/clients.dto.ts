@@ -4,9 +4,9 @@ import {
   DtoCreatedColumn,
   DtoEnumColumn,
   DtoUpdatedColumn,
-} from "@src/common/common.column";
-import { TypeClients } from "@src/common/common.enum";
-import { CommonDto } from "@src/common/common.dto";
+} from "@lms/common";
+import { TypeClients } from "@lms/common";
+import { CommonDto } from "@lms/common";
 import { ClientsRedirectsDto } from "./clients_redirects/clients_redirects.dto";
 
 export class ClientsDto extends CommonDto {

@@ -3,9 +3,9 @@ import {
   DtoCreatedColumn,
   DtoEnumColumn,
   DtoUpdatedColumn,
-} from "@src/common/common.column";
-import { CommonDto } from "@src/common/common.dto";
-import { TypeGenders } from "@src/common/common.enum";
+} from "@lms/common";
+import { CommonDto } from "@lms/common";
+import { TypeGenders } from "@lms/common";
 
 export class UsersDto extends CommonDto {
   @DtoCreatedColumn()

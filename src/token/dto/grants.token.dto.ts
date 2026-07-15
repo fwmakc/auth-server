@@ -1,6 +1,6 @@
-import { DtoColumn, DtoEnumColumn } from "@src/common/common.column";
-import { CommonDto } from "@src/common/common.dto";
-import { TypeGrants } from "@src/common/common.enum";
+import { DtoColumn, DtoEnumColumn } from "@lms/common";
+import { CommonDto } from "@lms/common";
+import { TypeGrants } from "@lms/common";
 
 export class GrantsTokenDto extends CommonDto {
   @DtoEnumColumn(

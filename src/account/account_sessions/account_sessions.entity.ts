@@ -4,7 +4,7 @@ import {
   IdColumn,
   UpdatedColumn,
   VarcharColumn,
-} from "@src/common/common.column";
+} from "@lms/common";
 import { AccountEntity } from "../account.entity";
 
 @Entity({ name: "account_sessions" })

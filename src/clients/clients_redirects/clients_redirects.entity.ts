@@ -4,7 +4,7 @@ import {
   IdColumn,
   UpdatedColumn,
   VarcharColumn,
-} from "@src/common/common.column";
+} from "@lms/common";
 import { ClientsEntity } from "../clients.entity";
 
 @Entity({ name: "clients_redirects" })

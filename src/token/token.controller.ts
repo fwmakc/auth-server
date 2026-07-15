@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req, Res } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
-import { CommonDoc } from "@src/common/common.doc";
+import { CommonDoc } from "@lms/common";
 import { GrantsTokenDto } from "@src/token/dto/grants.token.dto";
 import { GrantsTokenService } from "@src/token/service/grants.token.service";
 

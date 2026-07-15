@@ -15,8 +15,8 @@ import {
   TextColumn,
   UpdatedColumn,
   VarcharColumn,
-} from "@src/common/common.column";
-import { TypeClients } from "@src/common/common.enum";
+} from "@lms/common";
+import { TypeClients } from "@lms/common";
 import { AccountEntity } from "@src/account/account.entity";
 import { ClientsRedirectsEntity } from "./clients_redirects/clients_redirects.entity";
 

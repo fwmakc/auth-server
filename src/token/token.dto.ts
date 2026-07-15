@@ -1,5 +1,5 @@
-import { CommonDto } from "@src/common/common.dto";
-import { DtoColumn } from "@src/common/common.column";
+import { CommonDto } from "@lms/common";
+import { DtoColumn } from "@lms/common";
 
 export class TokenDto extends CommonDto {
   @DtoColumn("Токен доступа")

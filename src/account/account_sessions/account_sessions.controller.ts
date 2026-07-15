@@ -1,7 +1,7 @@
 import { Controller, Get, NotFoundException } from "@nestjs/common";
-import { RelationsDto } from "@src/common/dto/relations.dto";
-import { Data } from "@src/common/common.decorator";
-import { EntityController } from "@src/common/entity.controller";
+import { RelationsDto } from "@lms/common";
+import { Data } from "@lms/common";
+import { EntityController } from "@lms/common";
 import { AccountSessionsDto } from "./account_sessions.dto";
 import { AccountSessionsEntity } from "./account_sessions.entity";
 import { AccountSessionsService } from "./account_sessions.service";
