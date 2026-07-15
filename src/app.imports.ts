@@ -9,6 +9,7 @@ import { MailModule } from "./mail/mail.module";
 import { RandomModule } from "./random/random.module";
 import { TokenModule } from "./token/token.module";
 import { UsersModule } from "./db/users/users.module";
+import { JwksModule } from "./jwks/jwks.module";
 
 export default [
   PassportModule.register({ session: true }),
@@ -18,6 +19,7 @@ export default [
   AccountStrategiesModule,
   ClientsModule,
   ClientsRedirectsModule,
+  JwksModule,
   MailModule,
   RandomModule,
   TokenModule,

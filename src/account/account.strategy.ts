@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
+import { getKeySet } from "@src/jwks/keys";
 import { AccountService } from "./account.service";
 
 @Injectable()
@@ -17,7 +18,8 @@ export class AccountStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: !configService.get("JWT_EXPIRES"),
-      secretOrKey: configService.get("JWT_SECRET"),
+      secretOrKey: getKeySet().publicKey,
+      algorithms: ["RS256"],
     });
   }
 
