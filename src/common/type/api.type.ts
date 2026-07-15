@@ -1,1 +1,1 @@
-export type ApiType = 'noBlock' | undefined;
+export type ApiType = "noBlock" | undefined;

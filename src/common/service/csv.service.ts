@@ -1,8 +1,8 @@
-import { createWriteStream, mkdirSync } from 'fs';
-import * as converter from 'json-2-csv';
-import * as dotenv from 'dotenv';
-import { join } from 'path';
-import { ForbiddenException } from '@nestjs/common';
+import { createWriteStream, mkdirSync } from "fs";
+import * as converter from "json-2-csv";
+import * as dotenv from "dotenv";
+import { join } from "path";
+import { ForbiddenException } from "@nestjs/common";
 
 dotenv.config();
 
@@ -22,7 +22,7 @@ export class CsvService {
     this.batchSize = 1000;
     this.bind = bind;
     this.flattened = {};
-    this.folder = 'csv';
+    this.folder = "csv";
     this.service = service;
 
     this.setConverterOptions();
@@ -34,9 +34,9 @@ export class CsvService {
   setConverterOptions() {
     this.converterOptions = {
       delimiter: {
-        field: ';',
+        field: ";",
         wrap: '"',
-        eol: '\r\n',
+        eol: "\r\n",
       },
       escapeHeaderNestedDots: false,
       excelBOM: true,
@@ -67,9 +67,9 @@ export class CsvService {
   setFilename(filename) {
     const now = new Date();
     const name = filename
-      ? `${filename}.`.replace(/[^0-9A-Za-zА-Яа-я_.-]/giu, '_')
-      : '';
-    const datetime = now.toISOString().slice(0, 19).replace(/\D/giu, '-');
+      ? `${filename}.`.replace(/[^0-9A-Za-zА-Яа-я_.-]/giu, "_")
+      : "";
+    const datetime = now.toISOString().slice(0, 19).replace(/\D/giu, "-");
     this.filename = `${name}${datetime}.csv`;
   }
 
@@ -96,7 +96,7 @@ export class CsvService {
 
     const path = join(process.env.UPLOADS_PATH, this.folder, this.filename);
     const url = `${process.env.UPLOADS_URL}${
-      this.folder ? `/${this.folder}` : ''
+      this.folder ? `/${this.folder}` : ""
     }/${this.filename}`;
 
     const result = await this.exportToCSV(path);
@@ -106,17 +106,17 @@ export class CsvService {
     return {
       ...result,
       duration: `${(finishAt - startedAt) / 1000}sec`,
-      message: 'CSV file creation completed',
+      message: "CSV file creation completed",
       url,
     };
   }
 
   async exportToCSV(filePath: string) {
     const writeStream = createWriteStream(filePath, {
-      flags: 'w',
+      flags: "w",
     });
 
-    writeStream.on('error', (err) => {
+    writeStream.on("error", (err) => {
       writeStream.end();
       throw new ForbiddenException(`Error writing to file: ${err.message}`);
     });
@@ -142,7 +142,7 @@ export class CsvService {
         const json = this.flattenBatch(entries);
         const csv = this.prepareCsv(json);
 
-        writeStream.write(csv + '\r\n', (err) => {
+        writeStream.write(csv + "\r\n", (err) => {
           if (err) {
             writeStream.end();
             throw new ForbiddenException(`Error during write: ${err.message}`);
@@ -167,12 +167,12 @@ export class CsvService {
     };
   }
 
-  flatten(obj, parentKey = '') {
+  flatten(obj, parentKey = "") {
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
         const newKey = parentKey ? `${parentKey}.${key}` : key;
 
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
+        if (typeof obj[key] === "object" && obj[key] !== null) {
           if (Array.isArray(obj[key])) {
             obj[key].forEach((item, index) => {
               this.flatten(item, `${newKey}.${index}`);

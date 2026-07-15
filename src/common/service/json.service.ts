@@ -1,11 +1,11 @@
-import { JsonContains, Raw } from 'typeorm';
+import { JsonContains, Raw } from "typeorm";
 
 export const prepareJsonOrm = (value) => {
-  if (typeof value !== 'object') {
+  if (typeof value !== "object") {
     return;
   }
 
-  if (process.env.DB_TYPE === 'postgres') {
+  if (process.env.DB_TYPE === "postgres") {
     return JsonContains(value);
   }
 

@@ -1,23 +1,23 @@
-import { EntityMetadata } from 'typeorm';
-import { PermissionRegistry } from '@src/common/permission.registry';
+import { EntityMetadata } from "typeorm";
+import { PermissionRegistry } from "@src/common/permission.registry";
 import {
   AccessLevel,
   OperationConfig,
   normalizeAccess,
-} from '@src/common/access.type';
+} from "@src/common/access.type";
 
 function canCreate(level: AccessLevel, bind: any): boolean {
-  if (!bind) return level === 'public';
+  if (!bind) return level === "public";
   switch (level) {
-    case 'public':
+    case "public":
       return true;
-    case 'account':
+    case "account":
       return bind?.id !== undefined || bind?.allow === true;
-    case 'owner':
+    case "owner":
       return true;
-    case 'admin':
+    case "admin":
       return !!bind?.allow;
-    case 'closed':
+    case "closed":
       return false;
     default:
       return true;
@@ -27,7 +27,7 @@ function canCreate(level: AccessLevel, bind: any): boolean {
 export function sanitizeForSave(
   entity: any,
   metadata: EntityMetadata,
-  bind: any,
+  bind: any
 ): void {
   const seen = new WeakSet();
   sanitizeEntity(entity, metadata, bind, seen);
@@ -37,9 +37,9 @@ function sanitizeEntity(
   entity: any,
   metadata: EntityMetadata,
   bind: any,
-  seen: WeakSet<object>,
+  seen: WeakSet<object>
 ): void {
-  if (!entity || typeof entity !== 'object' || seen.has(entity)) return;
+  if (!entity || typeof entity !== "object" || seen.has(entity)) return;
   seen.add(entity);
 
   for (const relation of metadata.relations) {
@@ -59,18 +59,18 @@ function sanitizeEntity(
           relatedMeta,
           config,
           bind,
-          seen,
+          seen
         );
         if (result !== null) sanitized.push(result);
       }
       entity[key] = sanitized;
-    } else if (typeof value === 'object' && value.constructor !== Date) {
+    } else if (typeof value === "object" && value.constructor !== Date) {
       const result = sanitizeRelationItem(
         value,
         relatedMeta,
         config,
         bind,
-        seen,
+        seen
       );
       if (result === null) {
         delete entity[key];
@@ -86,9 +86,9 @@ function sanitizeRelationItem(
   metadata: EntityMetadata,
   config: OperationConfig | undefined,
   bind: any,
-  seen: WeakSet<object>,
+  seen: WeakSet<object>
 ): any | null {
-  if (!item || typeof item !== 'object') return item;
+  if (!item || typeof item !== "object") return item;
 
   const hasId = item.id !== undefined && item.id !== null;
 
@@ -97,7 +97,7 @@ function sanitizeRelationItem(
   }
 
   if (config) {
-    const createLevel = normalizeAccess(config.create, 'public');
+    const createLevel = normalizeAccess(config.create, "public");
     if (canCreate(createLevel, bind)) {
       sanitizeEntity(item, metadata, bind, seen);
       return item;

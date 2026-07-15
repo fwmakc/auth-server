@@ -1,10 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsJSON, IsOptional } from 'class-validator';
-import { DeepPartial } from 'typeorm';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsJSON, IsOptional } from "class-validator";
+import { DeepPartial } from "typeorm";
 
 export function DtoJsonColumn(
   description,
-  options = undefined,
+  options = undefined
 ): PropertyDecorator {
   const { required = false } = options || {};
 

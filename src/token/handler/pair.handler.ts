@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { OneHandler } from '@src/token/handler/one.handler';
+import { Injectable } from "@nestjs/common";
+import { OneHandler } from "@src/token/handler/one.handler";
 
 @Injectable()
 export class PairHandler {
@@ -9,17 +9,17 @@ export class PairHandler {
     const accessTokenData = await this.oneHandler.one(
       {
         ...data,
-        type: 'access',
+        type: "access",
       },
-      'JWT_ACCESS_EXPIRES',
+      "JWT_ACCESS_EXPIRES"
     );
 
     const refreshTokenData = await this.oneHandler.one(
       {
         ...data,
-        type: 'refresh',
+        type: "refresh",
       },
-      'JWT_REFRESH_EXPIRES',
+      "JWT_REFRESH_EXPIRES"
     );
 
     return {

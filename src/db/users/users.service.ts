@@ -1,16 +1,16 @@
-import { DeepPartial, Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CommonService } from '@src/common/common.service';
-import { prepareParams } from '@src/common/service/param_symbol.service';
-import { UsersDto } from './users.dto';
-import { UsersEntity } from './users.entity';
+import { DeepPartial, Repository } from "typeorm";
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { CommonService } from "@src/common/common.service";
+import { prepareParams } from "@src/common/service/param_symbol.service";
+import { UsersDto } from "./users.dto";
+import { UsersEntity } from "./users.entity";
 
 @Injectable()
 export class UsersService extends CommonService<UsersDto, UsersEntity> {
   constructor(
     @InjectRepository(UsersEntity)
-    protected readonly repository: Repository<UsersEntity>,
+    protected readonly repository: Repository<UsersEntity>
   ) {
     super();
   }

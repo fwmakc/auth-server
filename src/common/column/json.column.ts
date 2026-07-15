@@ -1,5 +1,5 @@
-import { Column } from 'typeorm';
-import { IndexedColumn } from './indexed.column';
+import { Column } from "typeorm";
+import { IndexedColumn } from "./indexed.column";
 
 export function JsonColumn(name, options = undefined): PropertyDecorator {
   const { comment = undefined, index = undefined } = options || {};
@@ -14,7 +14,7 @@ export function JsonColumn(name, options = undefined): PropertyDecorator {
       default: null,
       name,
       nullable: true,
-      type: 'json',
+      type: "json",
     })(object, propertyName);
   };
 }

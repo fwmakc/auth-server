@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
-import { FilesInterface } from '@src/files/files.interface';
-import { AttachmentsMailInterface } from './interface/attachments.mail.interface';
-import { MailDto } from './mail.dto';
+import { Injectable } from "@nestjs/common";
+import { MailerService } from "@nestjs-modules/mailer";
+import { FilesInterface } from "@src/files/files.interface";
+import { AttachmentsMailInterface } from "./interface/attachments.mail.interface";
+import { MailDto } from "./mail.dto";
 
 @Injectable()
 export class MailService {
@@ -23,7 +23,7 @@ export class MailService {
         html: options.html,
       })
       .catch((e) => {
-        console.error('send mail error:', e);
+        console.error("send mail error:", e);
       });
     return result;
   }
@@ -31,7 +31,7 @@ export class MailService {
   async sendByTemplate(
     options: MailDto,
     data: object,
-    files: FilesInterface[] = undefined,
+    files: FilesInterface[] = undefined
   ) {
     const attachments = await this.attachments(files);
 
@@ -46,25 +46,25 @@ export class MailService {
         attachments,
       })
       .catch((e) => {
-        console.error('send mail with template error:', e);
+        console.error("send mail with template error:", e);
       });
     return result;
   }
 
   async attachments(
-    files: FilesInterface[],
+    files: FilesInterface[]
   ): Promise<AttachmentsMailInterface[]> {
     const attachments: AttachmentsMailInterface[] = await Promise.all(
       files && files.length
         ? files?.map(
             async (file): Promise<AttachmentsMailInterface> => ({
               filename: file.originalname,
-              content: file.buffer.toString('base64'),
-              encoding: 'base64',
+              content: file.buffer.toString("base64"),
+              encoding: "base64",
               contentType: file.mimetype,
-            }),
+            })
           )
-        : [],
+        : []
     );
     return attachments;
   }

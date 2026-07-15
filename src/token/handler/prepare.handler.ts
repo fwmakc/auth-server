@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { TokenDto } from '@src/token/token.dto';
+import { Injectable } from "@nestjs/common";
+import { TokenDto } from "@src/token/token.dto";
 
 @Injectable()
 export class PrepareHandler {
@@ -14,7 +14,7 @@ export class PrepareHandler {
 
     return {
       access_token,
-      token_type: 'Bearer',
+      token_type: "Bearer",
       expires_in,
       refresh_token,
       state,

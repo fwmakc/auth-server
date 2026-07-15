@@ -1,14 +1,14 @@
-import { Controller, Get, NotFoundException } from '@nestjs/common';
-import { RelationsDto } from '@src/common/dto/relations.dto';
-import { Data } from '@src/common/common.decorator';
-import { EntityController } from '@src/common/entity.controller';
-import { AccountSessionsDto } from './account_sessions.dto';
-import { AccountSessionsEntity } from './account_sessions.entity';
-import { AccountSessionsService } from './account_sessions.service';
+import { Controller, Get, NotFoundException } from "@nestjs/common";
+import { RelationsDto } from "@src/common/dto/relations.dto";
+import { Data } from "@src/common/common.decorator";
+import { EntityController } from "@src/common/entity.controller";
+import { AccountSessionsDto } from "./account_sessions.dto";
+import { AccountSessionsEntity } from "./account_sessions.entity";
+import { AccountSessionsService } from "./account_sessions.service";
 
-@Controller('account/sessions')
+@Controller("account/sessions")
 export class AccountSessionsController extends EntityController({
-  name: 'Сессии',
+  name: "Сессии",
   dto: AccountSessionsDto,
   entity: AccountSessionsEntity,
 })<AccountSessionsDto, AccountSessionsEntity, AccountSessionsService> {
@@ -16,14 +16,14 @@ export class AccountSessionsController extends EntityController({
     super();
   }
 
-  @Get('get_by_auth_id')
+  @Get("get_by_auth_id")
   async getByAuthId(
-    @Data('id') id: number,
-    @Data('relations') relations: Array<RelationsDto>,
+    @Data("id") id: number,
+    @Data("relations") relations: Array<RelationsDto>
   ) {
     const result = await this.service.getByAuthId(id, relations);
     if (!result) {
-      throw new NotFoundException('Any results not found');
+      throw new NotFoundException("Any results not found");
     }
     return result;
   }

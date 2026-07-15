@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 import {
   randomSets,
   randomNames,
   randomEnNames,
   randomRuNames,
-} from './random.const';
+} from "./random.const";
 
 @Injectable()
 export class RandomService {
@@ -23,13 +23,13 @@ export class RandomService {
     return result;
   }
 
-  randomString(min, max = undefined, string = '') {
+  randomString(min, max = undefined, string = "") {
     if (!max) {
       max = min;
     } else if (min !== max) {
       max = this.random(min, max);
     }
-    let result = '';
+    let result = "";
 
     const { length } = string;
     for (let i = 0; i < max; i++) {
@@ -39,14 +39,14 @@ export class RandomService {
     return result;
   }
 
-  randomSet(min, max = undefined, name = '') {
+  randomSet(min, max = undefined, name = "") {
     const sets = randomSets;
 
     const names = !name
       ? Object.keys(sets)
-      : name.replace(/\W+/giu, ' ').split(' ');
+      : name.replace(/\W+/giu, " ").split(" ");
 
-    let string = '';
+    let string = "";
     names.forEach((i) => {
       string += sets[i];
     });
@@ -55,15 +55,15 @@ export class RandomService {
   }
 
   randomNum(min, max = undefined) {
-    return this.randomString(min, max, '0123456789');
+    return this.randomString(min, max, "0123456789");
   }
 
   randomBin(min, max = undefined) {
-    return this.randomString(min, max, '01');
+    return this.randomString(min, max, "01");
   }
 
   randomHex(min, max = undefined) {
-    return this.randomString(min, max, '0123456789ABCDEF');
+    return this.randomString(min, max, "0123456789ABCDEF");
   }
 
   randomArray(n, callback = (i) => i) {
@@ -76,21 +76,21 @@ export class RandomService {
 
   randomOption(...args) {
     if (!args || !args.length) {
-      return '';
+      return "";
     }
-    const options = typeof args[0] === 'object' ? args[0] : args;
+    const options = typeof args[0] === "object" ? args[0] : args;
     const index = this.random(1, options.length) - 1;
     return options[index];
   }
 
   randomEmail(min = 9, max = 30) {
-    const string = '0123456789abcdefghijklmnopqrstuvwxyz._-';
+    const string = "0123456789abcdefghijklmnopqrstuvwxyz._-";
     const result = this.randomString(min, max, string);
     const middle = Math.floor(result.length / 2);
-    const last = this.randomString(2, 4, 'abcdefghijklmnopqrstuvwxyz');
+    const last = this.randomString(2, 4, "abcdefghijklmnopqrstuvwxyz");
     return `${result.substring(0, middle)}@${result.substring(middle)}.${last}`
-      .replace(/\W*@\W*/u, '@')
-      .replace(/\.{2,}/u, '.');
+      .replace(/\W*@\W*/u, "@")
+      .replace(/\.{2,}/u, ".");
   }
 
   randomName({
@@ -111,10 +111,10 @@ export class RandomService {
       `${vowels}${vowels}`.toLowerCase(),
       consonants.toLowerCase(),
     ];
-    let string = this.randomString(min, max, letters.join(''));
+    let string = this.randomString(min, max, letters.join(""));
 
     normals?.forEach((num, index) => {
-      const regexp = new RegExp(`[${letters[index]}]{${+num + 1},}`, 'igu');
+      const regexp = new RegExp(`[${letters[index]}]{${+num + 1},}`, "igu");
       string.match(regexp)?.forEach((n) => {
         string = string.replace(n, n.substring(0, +num));
       });
@@ -122,22 +122,22 @@ export class RandomService {
 
     finals?.forEach((num, index) => {
       const regexp = `[${letters[index]}]{${+num + 1},}$`;
-      const regexpMatch = new RegExp(regexp, 'iu');
-      const regexpReplace = new RegExp(`(.*?)${regexp}`, 'iu');
+      const regexpMatch = new RegExp(regexp, "iu");
+      const regexpReplace = new RegExp(`(.*?)${regexp}`, "iu");
       string.match(regexpMatch)?.forEach((n) => {
         string = string.replace(regexpReplace, `\$1${n.substring(0, +num)}`);
       });
     });
 
-    if (!string.match(new RegExp(`[${letters[0]}]+`, 'iu'))) {
+    if (!string.match(new RegExp(`[${letters[0]}]+`, "iu"))) {
       string = `${string}${this.randomString(1, 1, letters[0])}`;
     }
-    if (!string.match(new RegExp(`[${letters[1]}]+`, 'iu'))) {
+    if (!string.match(new RegExp(`[${letters[1]}]+`, "iu"))) {
       string = `${string}${this.randomString(1, 1, letters[1])}`;
     }
 
     string = `${string.substring(0, 1).toUpperCase()}${string.substring(1)}`;
-    const ending = endings && endings.length ? this.randomOption(endings) : '';
+    const ending = endings && endings.length ? this.randomOption(endings) : "";
     return `${string}${ending}`;
   }
 

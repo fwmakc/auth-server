@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 
 export class Cookie {
   constructor(private request: Request, private response: Response) {}
@@ -6,7 +6,7 @@ export class Cookie {
   set(name: string, data: string | number): void {
     this.response.cookie(name, data, {
       httpOnly: true,
-      path: '/',
+      path: "/",
       secure: false,
     });
   }
@@ -14,7 +14,7 @@ export class Cookie {
   setJson(name: string, data: any): void {
     this.response.cookie(name, JSON.stringify(data), {
       httpOnly: true,
-      path: '/',
+      path: "/",
       secure: false,
     });
   }
@@ -24,7 +24,7 @@ export class Cookie {
   }
 
   getJson(name: string) {
-    return JSON.parse(this.request.cookies[name] || 'null');
+    return JSON.parse(this.request.cookies[name] || "null");
   }
 
   reset(name: string): void {

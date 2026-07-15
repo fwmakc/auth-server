@@ -1,8 +1,8 @@
-import { Module, forwardRef } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { RandomModule } from '@src/random/random.module';
-import { AccountConfirmEntity } from './account_confirm.entity';
-import { AccountConfirmService } from './account_confirm.service';
+import { Module, forwardRef } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { RandomModule } from "@src/random/random.module";
+import { AccountConfirmEntity } from "./account_confirm.entity";
+import { AccountConfirmService } from "./account_confirm.service";
 
 @Module({
   controllers: [],

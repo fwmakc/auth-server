@@ -1,9 +1,9 @@
-import { Index } from 'typeorm';
+import { Index } from "typeorm";
 
 export function IndexedColumn(
-  index = undefined,
+  index = undefined
 ): PropertyDecorator | undefined {
-  if (index === 'unique') {
+  if (index === "unique") {
     return Index({
       unique: true,
     });

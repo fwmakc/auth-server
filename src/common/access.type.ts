@@ -1,10 +1,10 @@
-import { Type } from '@nestjs/common';
+import { Type } from "@nestjs/common";
 
-export type AccessLevel = 'public' | 'account' | 'owner' | 'admin' | 'closed';
+export type AccessLevel = "public" | "account" | "owner" | "admin" | "closed";
 
 export type OperationAccess =
   | AccessLevel
-  | { level: 'owner'; bindPath?: string };
+  | { level: "owner"; bindPath?: string };
 
 export interface OperationConfig {
   create: OperationAccess;
@@ -24,23 +24,23 @@ export interface EntityControllerOptions {
 
 export function normalizeAccess(
   access: OperationAccess | undefined,
-  fallback: AccessLevel = 'public',
+  fallback: AccessLevel = "public"
 ): AccessLevel {
   if (access === undefined) return fallback;
-  if (typeof access === 'string') return access;
+  if (typeof access === "string") return access;
   return access.level;
 }
 
 export function getBindPath(
   access: OperationAccess | undefined,
-  fallback: string,
+  fallback: string
 ): string | undefined {
-  if (access && typeof access === 'object' && access.bindPath) {
+  if (access && typeof access === "object" && access.bindPath) {
     return access.bindPath;
   }
   if (
-    access === 'owner' ||
-    (typeof access === 'object' && access?.level === 'owner')
+    access === "owner" ||
+    (typeof access === "object" && access?.level === "owner")
   ) {
     return fallback;
   }

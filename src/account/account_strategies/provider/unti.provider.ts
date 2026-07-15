@@ -1,16 +1,16 @@
-import axios from 'axios';
-import { Injectable } from '@nestjs/common';
-import { AccountDto } from '@src/account/account.dto';
-import { AccountService } from '@src/account/account.service';
-import { AccountStrategiesService } from '@src/account/account_strategies/account_strategies.service';
-import { ConfigService } from '@nestjs/config';
+import axios from "axios";
+import { Injectable } from "@nestjs/common";
+import { AccountDto } from "@src/account/account.dto";
+import { AccountService } from "@src/account/account.service";
+import { AccountStrategiesService } from "@src/account/account_strategies/account_strategies.service";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class UntiProvider {
   constructor(
     private readonly accountService: AccountService,
     private readonly configService: ConfigService,
-    private readonly strategiesService: AccountStrategiesService,
+    private readonly strategiesService: AccountStrategiesService
   ) {}
 
   async activate(request): Promise<any> {
@@ -34,19 +34,19 @@ export class UntiProvider {
   async getToken(token: string): Promise<any> {
     return axios
       .post(
-        'https://sso.2035.university/oauth2/access_token',
+        "https://sso.2035.university/oauth2/access_token",
         {
-          grant_type: 'authorization_code',
+          grant_type: "authorization_code",
           code: token,
-          client_id: this.configService.get('UNTI_CLIENT_ID'),
-          client_secret: this.configService.get('UNTI_CLIENT_SECRET'),
-          redirect_uri: this.configService.get('UNTI_CLIENT_REDIRECT'),
+          client_id: this.configService.get("UNTI_CLIENT_ID"),
+          client_secret: this.configService.get("UNTI_CLIENT_SECRET"),
+          redirect_uri: this.configService.get("UNTI_CLIENT_REDIRECT"),
         },
         {
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            "Content-Type": "application/x-www-form-urlencoded",
           },
-        },
+        }
       )
       .then((r) => r.data)
       .catch((e) => {
@@ -56,7 +56,7 @@ export class UntiProvider {
 
   async getUser(accessToken: string): Promise<any> {
     return axios
-      .get('https://sso.2035.university/users/me', {
+      .get("https://sso.2035.university/users/me", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -89,7 +89,7 @@ export class UntiProvider {
   async prepareResult(account, profile): Promise<AccountDto> {
     await this.strategiesService.updateBy({
       account: { id: account.id },
-      name: 'unti',
+      name: "unti",
       uid: profile.unti_id,
       json: profile,
       accessToken: profile.accessToken,

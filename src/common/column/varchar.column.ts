@@ -1,19 +1,19 @@
-import { Column } from 'typeorm';
-import { IndexedColumn } from './indexed.column';
+import { Column } from "typeorm";
+import { IndexedColumn } from "./indexed.column";
 
 class VarcharColumnTransformer {
   clearMatch;
 
   constructor(clear) {
-    this.clearMatch = new RegExp(`${clear || ''}`, 'giu');
+    this.clearMatch = new RegExp(`${clear || ""}`, "giu");
   }
 
   to(data: string): string {
-    data = `${data || ''}`.replace(this.clearMatch, '');
+    data = `${data || ""}`.replace(this.clearMatch, "");
     return data;
   }
   from(data: string): string {
-    return `${data || ''}`;
+    return `${data || ""}`;
   }
 }
 
@@ -26,7 +26,7 @@ const lengths = {
 export function VarcharColumn(
   name,
   length: number | string = 255,
-  options = undefined,
+  options = undefined
 ): PropertyDecorator {
   const {
     comment = undefined,
@@ -34,7 +34,7 @@ export function VarcharColumn(
     clear = undefined,
   } = options || {};
 
-  if (typeof length === 'string') {
+  if (typeof length === "string") {
     length = lengths[length] || 255;
   }
 
@@ -50,12 +50,12 @@ export function VarcharColumn(
 
     Column({
       comment,
-      default: '',
+      default: "",
       name,
       nullable: true,
       length,
       transformer,
-      type: 'varchar',
+      type: "varchar",
     })(object, propertyName);
   };
 }

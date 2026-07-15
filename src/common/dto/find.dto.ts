@@ -1,53 +1,53 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 import {
   DeepPartial,
   FindOptionsOrder,
   FindOptionsSelect,
   FindOptionsWhere,
-} from 'typeorm';
-import { RelationsDto } from '@src/common/dto/relations.dto';
-import { SearchType } from '../type/search.type';
+} from "typeorm";
+import { RelationsDto } from "@src/common/dto/relations.dto";
+import { SearchType } from "../type/search.type";
 
 export class FindDto {
   @ApiProperty({
     required: false,
-    description: 'Выбор полей',
+    description: "Выбор полей",
   })
   select?: FindOptionsSelect<any> = undefined;
 
   @ApiProperty({
     required: false,
-    description: 'Выбор',
+    description: "Выбор",
   })
   where?: FindOptionsWhere<any> = undefined;
 
   @ApiProperty({
     required: false,
-    description: 'Поиск',
+    description: "Поиск",
   })
   search?: DeepPartial<any> = undefined;
 
   @ApiProperty({
     required: false,
-    description: 'Сортировка',
+    description: "Сортировка",
   })
-  order?: FindOptionsOrder<any> = { id: 'ASC' };
+  order?: FindOptionsOrder<any> = { id: "ASC" };
 
   @ApiProperty({
     required: false,
-    description: 'Лимит',
+    description: "Лимит",
   })
   limit?: number = undefined;
 
   @ApiProperty({
     required: false,
-    description: 'Число пропускаемых записей',
+    description: "Число пропускаемых записей",
   })
   offset?: number = undefined;
 
   @ApiProperty({
     required: false,
-    description: 'Отношения',
+    description: "Отношения",
   })
   relations?: Array<RelationsDto> = undefined;
 }

@@ -1,5 +1,5 @@
-import { Column } from 'typeorm';
-import { IndexedColumn } from './indexed.column';
+import { Column } from "typeorm";
+import { IndexedColumn } from "./indexed.column";
 
 class BooleanColumnTransformer {
   to(data: any): number {
@@ -13,7 +13,7 @@ class BooleanColumnTransformer {
 export function BooleanColumn(
   name,
   value = false,
-  options = undefined,
+  options = undefined
 ): PropertyDecorator {
   const { comment = undefined, index = undefined } = options || {};
 
@@ -29,7 +29,7 @@ export function BooleanColumn(
       default: defaultValue,
       name,
       transformer: new BooleanColumnTransformer(),
-      type: 'smallint',
+      type: "smallint",
       width: 1,
     })(object, propertyName);
   };

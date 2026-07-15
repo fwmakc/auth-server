@@ -1,26 +1,26 @@
-import { ConfigService } from '@nestjs/config';
-import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
-import { Strategy } from 'passport-oauth2';
-import { AccountService } from '@src/account/account.service';
-import { AccountDto } from '@src/account/account.dto';
-import { AccountStrategiesService } from '@src/account/account_strategies/account_strategies.service';
+import { ConfigService } from "@nestjs/config";
+import { PassportStrategy } from "@nestjs/passport";
+import { Injectable } from "@nestjs/common";
+import { Strategy } from "passport-oauth2";
+import { AccountService } from "@src/account/account.service";
+import { AccountDto } from "@src/account/account.dto";
+import { AccountStrategiesService } from "@src/account/account_strategies/account_strategies.service";
 // import { OauthProvider } from '@src/account/account_strategies/provider/oauth.provider';
 
-import axios from 'axios';
+import axios from "axios";
 // import { Request } from 'express';
 
 @Injectable()
-export class OauthStrategy extends PassportStrategy(Strategy, 'oauth') {
+export class OauthStrategy extends PassportStrategy(Strategy, "oauth") {
   constructor(
     private readonly configService: ConfigService,
     private readonly accountService: AccountService,
-    private readonly accountStrategiesService: AccountStrategiesService, // private readonly oauthProvider: OauthProvider,
+    private readonly accountStrategiesService: AccountStrategiesService // private readonly oauthProvider: OauthProvider,
   ) {
-    const clientID = configService.get('OAUTH_CLIENT_ID');
-    const clientSecret = configService.get('OAUTH_CLIENT_SECRET');
-    const callbackURL = configService.get('OAUTH_CLIENT_REDIRECT');
-    const customAccountServer = configService.get('OAUTH_SERVER');
+    const clientID = configService.get("OAUTH_CLIENT_ID");
+    const clientSecret = configService.get("OAUTH_CLIENT_SECRET");
+    const callbackURL = configService.get("OAUTH_CLIENT_REDIRECT");
+    const customAccountServer = configService.get("OAUTH_SERVER");
     const authorizationURL = `${customAccountServer}/account/?client_id=${clientID}&redirect_uri=${callbackURL}&response_type=code`;
     const tokenURL = `${customAccountServer}/token`;
 
@@ -35,7 +35,7 @@ export class OauthStrategy extends PassportStrategy(Strategy, 'oauth') {
   }
 
   async validate(accessToken: string, refreshToken: string) {
-    const customAccountServer = this.configService.get('OAUTH_SERVER');
+    const customAccountServer = this.configService.get("OAUTH_SERVER");
 
     const profile = await axios
       .get(`${customAccountServer}/account/self`, {
@@ -62,8 +62,8 @@ export class OauthStrategy extends PassportStrategy(Strategy, 'oauth') {
               profile.id,
               profile.users,
               accessToken,
-              refreshToken,
-            ),
+              refreshToken
+            )
         );
     }
 
@@ -76,8 +76,8 @@ export class OauthStrategy extends PassportStrategy(Strategy, 'oauth') {
             profile.id,
             profile.users,
             accessToken,
-            refreshToken,
-          ),
+            refreshToken
+          )
       );
   }
 
@@ -86,11 +86,11 @@ export class OauthStrategy extends PassportStrategy(Strategy, 'oauth') {
     uid,
     profile,
     accessToken,
-    refreshToken,
+    refreshToken
   ): Promise<AccountDto> {
     await this.accountStrategiesService.updateBy({
       account: { id: account.id },
-      name: 'oauth',
+      name: "oauth",
       uid,
       json: profile,
       accessToken,

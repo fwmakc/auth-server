@@ -13,8 +13,8 @@ import {
   Not,
   Or,
   Raw,
-} from 'typeorm';
-import { prepareLikeOrm } from './like.service';
+} from "typeorm";
+import { prepareLikeOrm } from "./like.service";
 
 export const parseWhereObject = (where) => {
   const parsed = {};
@@ -22,9 +22,9 @@ export const parseWhereObject = (where) => {
     return parsed;
   }
   Object.entries(where)?.forEach(([key, value]) => {
-    const [property, ...modifiers] = key.split('.');
+    const [property, ...modifiers] = key.split(".");
 
-    if (modifiers[0] === 'and' || modifiers[0] === 'or') {
+    if (modifiers[0] === "and" || modifiers[0] === "or") {
       if (!Array.isArray(value)) {
         return;
       }
@@ -38,7 +38,7 @@ export const parseWhereObject = (where) => {
       return;
     }
 
-    if (typeof value === 'object' && !Array.isArray(value)) {
+    if (typeof value === "object" && !Array.isArray(value)) {
       parsed[property] = parseWhereObject(value);
       return;
     }
@@ -62,10 +62,10 @@ const prepareAndOrValues = (values, modifiers) => {
     });
     properties.push(tempProperty);
   });
-  if (modifiers[0] === 'and') {
+  if (modifiers[0] === "and") {
     return And(...properties);
   }
-  if (modifiers[0] === 'or') {
+  if (modifiers[0] === "or") {
     return Or(...properties);
   }
 };
@@ -73,77 +73,77 @@ const prepareAndOrValues = (values, modifiers) => {
 const prepareWhereValue = (value, modifier) => {
   let property;
   switch (modifier) {
-    case 'any':
+    case "any":
       if (Array.isArray(value) && value.length > 0) {
         property = Any(value);
       } else {
         throw new Error(
-          `'any' modifier expects an array with more than 1 elements for property '${property}'`,
+          `'any' modifier expects an array with more than 1 elements for property '${property}'`
         );
       }
       break;
-    case 'between':
+    case "between":
       if (Array.isArray(value) && value.length > 1) {
         property = Between(value[0], value[1]);
       } else {
         throw new Error(
-          `'between' modifier expects an array with 2 elements for property '${property}'`,
+          `'between' modifier expects an array with 2 elements for property '${property}'`
         );
       }
       break;
-    case 'boolean':
+    case "boolean":
       const stringValue = `${value}`.trim().toLowerCase();
-      if (stringValue === 'true') {
+      if (stringValue === "true") {
         property = true;
         break;
       }
-      if (stringValue === 'false') {
+      if (stringValue === "false") {
         property = false;
         break;
       }
       property = Boolean(+value);
       break;
-    case 'empty':
+    case "empty":
       property = Raw((alias) => `${alias} IS NULL OR ${alias} = ''`);
       break;
-    case 'in':
+    case "in":
       if (Array.isArray(value) && value.length > 0) {
         property = In(value);
       } else {
         throw new Error(
-          `'in' modifier expects an array with more than 1 elements for property '${property}'`,
+          `'in' modifier expects an array with more than 1 elements for property '${property}'`
         );
       }
       break;
-    case 'less':
+    case "less":
       property = LessThan(value);
       break;
-    case 'lessOrEqual':
+    case "lessOrEqual":
       property = LessThanOrEqual(value);
       break;
-    case 'like':
+    case "like":
       property = prepareLikeOrm(value);
       break;
-    case 'more':
+    case "more":
       property = MoreThan(value);
       break;
-    case 'moreOrEqual':
+    case "moreOrEqual":
       property = MoreThanOrEqual(value);
       break;
-    case 'not':
+    case "not":
       property = Not(value);
       break;
-    case 'null':
+    case "null":
       property = IsNull();
       break;
-    case 'number':
+    case "number":
       property = parseFloat(value);
       break;
-    case 'search':
-      const valuesMap = `${value || ''}`
+    case "search":
+      const valuesMap = `${value || ""}`
         .toLowerCase()
-        .replace(/[^0-9a-zа-я ]/giu, ' ')
-        .split(' ')
+        .replace(/[^0-9a-zа-я ]/giu, " ")
+        .split(" ")
         .filter(Boolean)
         .map((i) => prepareLikeOrm(`%${i}%`));
       if (!valuesMap.length) {
@@ -151,7 +151,7 @@ const prepareWhereValue = (value, modifier) => {
       }
       property = And(...valuesMap);
       break;
-    case 'string':
+    case "string":
       property = `${value}`;
       break;
     default:

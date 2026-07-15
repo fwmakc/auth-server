@@ -1,12 +1,12 @@
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Module } from '@nestjs/common';
-import { APP_FILTER } from '@nestjs/core';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
-import { DataSource } from 'typeorm';
-import { addTransactionalDataSource } from 'typeorm-transactional';
-import { getDbConfig } from '@config/db.config';
-import AppImports from './app.imports';
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { Module } from "@nestjs/common";
+import { APP_FILTER } from "@nestjs/core";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { SentryGlobalFilter, SentryModule } from "@sentry/nestjs/setup";
+import { DataSource } from "typeorm";
+import { addTransactionalDataSource } from "typeorm-transactional";
+import { getDbConfig } from "@config/db.config";
+import AppImports from "./app.imports";
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import AppImports from './app.imports';
       inject: [ConfigService],
       useFactory: getDbConfig,
       async dataSourceFactory(option) {
-        if (!option) throw new Error('Invalid options passed');
+        if (!option) throw new Error("Invalid options passed");
         return addTransactionalDataSource(new DataSource(option));
       },
     }),

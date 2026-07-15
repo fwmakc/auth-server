@@ -1,4 +1,4 @@
-import * as dotenv from 'dotenv';
+import * as dotenv from "dotenv";
 
 dotenv.config();
 
@@ -7,8 +7,8 @@ export const prepareParams = (object) => {
 
   const result = {};
   Object.keys(object).forEach((key, index) => {
-    let symbol = '?';
-    if (dbType === 'postgres') {
+    let symbol = "?";
+    if (dbType === "postgres") {
       symbol = `\$${index + 1}`;
     }
     result[key] = symbol;

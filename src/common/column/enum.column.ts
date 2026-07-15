@@ -1,11 +1,11 @@
-import { Column } from 'typeorm';
-import { IndexedColumn } from './indexed.column';
+import { Column } from "typeorm";
+import { IndexedColumn } from "./indexed.column";
 
 export function EnumColumn(
   name,
   value,
   defaultValue = null,
-  options = undefined,
+  options = undefined
 ): PropertyDecorator {
   const { comment = undefined, index = undefined } = options || {};
 
@@ -20,7 +20,7 @@ export function EnumColumn(
       enum: value,
       name,
       nullable: true,
-      type: 'enum',
+      type: "enum",
     })(object, propertyName);
   };
 }

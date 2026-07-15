@@ -1,15 +1,15 @@
-import { PrimaryGeneratedColumn } from 'typeorm';
+import { PrimaryGeneratedColumn } from "typeorm";
 
-type IdTypes = 'int' | 'bigint';
+type IdTypes = "int" | "bigint";
 
 export function IdColumn(
-  type: IdTypes = 'bigint',
-  comment = undefined,
+  type: IdTypes = "bigint",
+  comment = undefined
 ): PropertyDecorator {
   return function (object: object, propertyName: string) {
     PrimaryGeneratedColumn({
       comment,
-      name: 'id',
+      name: "id",
       type,
       unsigned: true,
     })(object, propertyName);

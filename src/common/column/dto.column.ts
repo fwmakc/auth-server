@@ -1,9 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { DeepPartial } from 'typeorm';
+import { ApiProperty } from "@nestjs/swagger";
+import { DeepPartial } from "typeorm";
 
 export function DtoColumn(
-  description = '',
-  options = undefined,
+  description = "",
+  options = undefined
 ): PropertyDecorator {
   const { required = false, defaultValue = undefined } = options || {};
 

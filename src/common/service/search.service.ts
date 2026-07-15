@@ -1,8 +1,8 @@
-import { SearchType } from '../type/search.type';
+import { SearchType } from "../type/search.type";
 
 export const searchService = (result, search: SearchType) => {
   const { fields, terms, method } = search;
-  const and = `${method || ''}` !== 'or';
+  const and = `${method || ""}` !== "or";
 
   const text = extractValues(result, fields)?.toLowerCase();
   if (and) {
@@ -14,14 +14,14 @@ export const searchService = (result, search: SearchType) => {
 const extractValues = (obj, keys) => {
   return keys
     .map((key) => {
-      const path = key.split('.');
+      const path = key.split(".");
       return path.reduce(
         (acc, part) => (acc && acc[part] !== undefined ? acc[part] : null),
-        obj,
+        obj
       );
     })
     .filter((value) => value !== null)
-    .join(' ');
+    .join(" ");
 };
 
 const textIncludes = (text, term) => {

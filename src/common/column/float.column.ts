@@ -1,5 +1,5 @@
-import { Column } from 'typeorm';
-import { IndexedColumn } from './indexed.column';
+import { Column } from "typeorm";
+import { IndexedColumn } from "./indexed.column";
 
 class FloatColumnTransformer {
   to(data: number): number {
@@ -13,7 +13,7 @@ class FloatColumnTransformer {
 export function FloatColumn(
   name,
   value = 0,
-  options = undefined,
+  options = undefined
 ): PropertyDecorator {
   const {
     comment = undefined,
@@ -36,7 +36,7 @@ export function FloatColumn(
       precision: +precision || 0,
       scale: +scale || 0,
       transformer: new FloatColumnTransformer(),
-      type: 'decimal',
+      type: "decimal",
     })(object, propertyName);
   };
 }

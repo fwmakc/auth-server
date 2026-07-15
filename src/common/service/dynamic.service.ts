@@ -1,17 +1,17 @@
-import * as moment from 'moment';
-import { BadRequestException } from '@nestjs/common';
-import { BaseEntity, DeepPartial, EntityTarget, Repository } from 'typeorm';
-import { CommonDto } from '@src/common/common.dto';
-import { FindDto } from '../dto/find.dto';
-import { CommonService } from '../common.service';
-import { parseDynamicWhereObject } from './dynamic.where.service';
-import { prepareQuotes } from './quotes.service';
-import { BindDto } from '../dto/bind.dto';
-import { parseDynamicSaveObject } from './dynamic.save.service';
+import * as moment from "moment";
+import { BadRequestException } from "@nestjs/common";
+import { BaseEntity, DeepPartial, EntityTarget, Repository } from "typeorm";
+import { CommonDto } from "@src/common/common.dto";
+import { FindDto } from "../dto/find.dto";
+import { CommonService } from "../common.service";
+import { parseDynamicWhereObject } from "./dynamic.where.service";
+import { prepareQuotes } from "./quotes.service";
+import { BindDto } from "../dto/bind.dto";
+import { parseDynamicSaveObject } from "./dynamic.save.service";
 
 export class DynamicService<
   Dto extends CommonDto,
-  Entity extends BaseEntity,
+  Entity extends BaseEntity
 > extends CommonService<Dto, Entity> {
   // protected readonly repository: Repository<Entity>;
   protected readonly repository: Repository<any>;
@@ -23,11 +23,11 @@ export class DynamicService<
     const entityData = parseDynamicSaveObject(entity);
     const keys = Object.keys(entityData)
       .map((key) => `${quotes}${key}${quotes}`)
-      .join(', ');
-    const values = Object.values(entityData).join(', ');
+      .join(", ");
+    const values = Object.values(entityData).join(", ");
 
     const dbType = process.env.DB_TYPE;
-    const returningClause = dbType === 'postgres' ? ' RETURNING id' : '';
+    const returningClause = dbType === "postgres" ? " RETURNING id" : "";
 
     try {
       const query = `
@@ -36,7 +36,7 @@ export class DynamicService<
         VALUES (${values})${returningClause};
       `;
       const result = await this.repository.query(query);
-      return { id: dbType === 'postgres' ? result[0]?.id : result.insertId };
+      return { id: dbType === "postgres" ? result[0]?.id : result.insertId };
     } catch (e) {
       this.error(e);
     }
@@ -51,7 +51,7 @@ export class DynamicService<
     const entityData = parseDynamicSaveObject(entity);
     const set = Object.entries(entityData)
       .map(([key, value]) => `${quotes}${key}${quotes} = ${value}`)
-      .join(', ');
+      .join(", ");
 
     const where = `${quotes}id${quotes} = ${id}`;
 
@@ -69,7 +69,7 @@ export class DynamicService<
 
   async find(
     find: FindDto,
-    bind: BindDto = { allow: true },
+    bind: BindDto = { allow: true }
   ): Promise<Entity[]> {
     const { limit, offset, order, select } = find;
     const { id, name, allow } = bind;
@@ -109,35 +109,35 @@ export class DynamicService<
 
   protected limitToString(limit) {
     limit = Number(limit);
-    return limit ? ` LIMIT ${limit}` : '';
+    return limit ? ` LIMIT ${limit}` : "";
   }
 
   protected offsetToString(offset) {
     offset = Number(offset);
-    return offset ? ` OFFSET ${offset}` : '';
+    return offset ? ` OFFSET ${offset}` : "";
   }
 
   protected orderToString(order) {
-    let orderString = '';
+    let orderString = "";
 
-    if (order && typeof order === 'object' && !Array.isArray(order)) {
+    if (order && typeof order === "object" && !Array.isArray(order)) {
       const quotes = prepareQuotes();
       orderString = Object.entries(order)
         .map(
           ([key, value]) =>
-            `${quotes}${key}${quotes} ${`${value || ''}`.toUpperCase()}`,
+            `${quotes}${key}${quotes} ${`${value || ""}`.toUpperCase()}`
         )
         .filter(Boolean)
-        .join(', ');
+        .join(", ");
     }
 
-    return orderString ? ` ORDER BY ${orderString}` : '';
+    return orderString ? ` ORDER BY ${orderString}` : "";
   }
 
   protected selectToString(select) {
-    let selectString = '';
+    let selectString = "";
 
-    if (select && typeof select === 'object' && !Array.isArray(select)) {
+    if (select && typeof select === "object" && !Array.isArray(select)) {
       select = Object.entries(select)
         .map(([key, value]) => (value !== false ? key : false))
         .filter(Boolean);
@@ -147,16 +147,16 @@ export class DynamicService<
       const quotes = prepareQuotes();
       selectString = select
         .map((value) => `${quotes}${value}${quotes}`)
-        .join(', ');
+        .join(", ");
     }
 
-    return `SELECT ${selectString || '*'}`;
+    return `SELECT ${selectString || "*"}`;
   }
 
   protected whereToString(where) {
     return Array.isArray(where) && where.length > 0
-      ? ` WHERE ${where.map((i) => `(${i})`).join(' AND ')}`
-      : '';
+      ? ` WHERE ${where.map((i) => `(${i})`).join(" AND ")}`
+      : "";
   }
 
   error(e) {

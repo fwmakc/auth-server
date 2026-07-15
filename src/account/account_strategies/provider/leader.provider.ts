@@ -1,16 +1,16 @@
-import axios from 'axios';
-import { Injectable } from '@nestjs/common';
-import { AccountDto } from '@src/account/account.dto';
-import { AccountService } from '@src/account/account.service';
-import { AccountStrategiesService } from '@src/account/account_strategies/account_strategies.service';
-import { ConfigService } from '@nestjs/config';
+import axios from "axios";
+import { Injectable } from "@nestjs/common";
+import { AccountDto } from "@src/account/account.dto";
+import { AccountService } from "@src/account/account.service";
+import { AccountStrategiesService } from "@src/account/account_strategies/account_strategies.service";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class LeaderProvider {
   constructor(
     private readonly accountService: AccountService,
     private readonly configService: ConfigService,
-    private readonly strategiesService: AccountStrategiesService,
+    private readonly strategiesService: AccountStrategiesService
   ) {}
 
   async activate(request): Promise<any> {
@@ -33,11 +33,11 @@ export class LeaderProvider {
 
   async getToken(token: string): Promise<any> {
     return axios
-      .post('https://apps.leader-id.ru/api/v1/oauth/token', {
-        grant_type: 'authorization_code',
+      .post("https://apps.leader-id.ru/api/v1/oauth/token", {
+        grant_type: "authorization_code",
         code: token,
-        client_id: this.configService.get('LEADER_CLIENT_ID'),
-        client_secret: this.configService.get('LEADER_CLIENT_SECRET'),
+        client_id: this.configService.get("LEADER_CLIENT_ID"),
+        client_secret: this.configService.get("LEADER_CLIENT_SECRET"),
       })
       .then((r) => r.data)
       .catch((e) => {
@@ -80,7 +80,7 @@ export class LeaderProvider {
   async prepareResult(account, profile): Promise<AccountDto> {
     await this.strategiesService.updateBy({
       account: { id: account.id },
-      name: 'leaderid',
+      name: "leaderid",
       uid: profile.id,
       json: profile,
       accessToken: profile.accessToken,

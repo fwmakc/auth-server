@@ -1,23 +1,23 @@
-import { ConfigService } from '@nestjs/config';
-import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
-import { Profile, Strategy } from 'passport-google-oauth20';
-import { AccountService } from '@src/account/account.service';
-import { AccountDto } from '@src/account/account.dto';
-import { AccountStrategiesService } from '@src/account/account_strategies/account_strategies.service';
+import { ConfigService } from "@nestjs/config";
+import { PassportStrategy } from "@nestjs/passport";
+import { Injectable } from "@nestjs/common";
+import { Profile, Strategy } from "passport-google-oauth20";
+import { AccountService } from "@src/account/account.service";
+import { AccountDto } from "@src/account/account.dto";
+import { AccountStrategiesService } from "@src/account/account_strategies/account_strategies.service";
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService,
     private readonly accountService: AccountService,
-    private readonly strategiesService: AccountStrategiesService,
+    private readonly strategiesService: AccountStrategiesService
   ) {
     super({
-      clientID: configService.get('GOOGLE_CLIENT_ID'),
-      clientSecret: configService.get('GOOGLE_CLIENT_SECRET'),
-      callbackURL: configService.get('GOOGLE_CLIENT_REDIRECT'),
-      scope: ['profile', 'email'],
+      clientID: configService.get("GOOGLE_CLIENT_ID"),
+      clientSecret: configService.get("GOOGLE_CLIENT_SECRET"),
+      callbackURL: configService.get("GOOGLE_CLIENT_REDIRECT"),
+      scope: ["profile", "email"],
     });
   }
 
@@ -35,12 +35,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
         .create(accountDto)
         .then(
           async (result) =>
-            await this.prepareResult(
-              result,
-              profile,
-              accessToken,
-              refreshToken,
-            ),
+            await this.prepareResult(result, profile, accessToken, refreshToken)
         );
     }
 
@@ -48,7 +43,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
       .update(account.id, accountDto)
       .then(
         async (result) =>
-          await this.prepareResult(result, profile, accessToken, refreshToken),
+          await this.prepareResult(result, profile, accessToken, refreshToken)
       );
   }
 
@@ -56,7 +51,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     account,
     profile,
     accessToken,
-    refreshToken,
+    refreshToken
   ): Promise<AccountDto> {
     const data = profile._json;
     await this.strategiesService.updateBy({

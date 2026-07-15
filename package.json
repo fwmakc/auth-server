@@ -69,6 +69,8 @@
     "@types/passport-local": "^1.0.38",
     "@types/passport-oauth2": "^1.4.15",
     "@types/uuid": "^9.0.5",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^8.0.1",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^8.3.0",

@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { TokenDto } from '@src/token/token.dto';
+import { Injectable } from "@nestjs/common";
+import { TokenDto } from "@src/token/token.dto";
 
-import { OneHandler } from '@src/token/handler/one.handler';
-import { PairHandler } from '@src/token/handler/pair.handler';
-import { PrepareHandler } from '@src/token/handler/prepare.handler';
-import { RefreshHandler } from '@src/token/handler/refresh.handler';
-import { VerifyHandler } from '@src/token/handler/verify.handler';
+import { OneHandler } from "@src/token/handler/one.handler";
+import { PairHandler } from "@src/token/handler/pair.handler";
+import { PrepareHandler } from "@src/token/handler/prepare.handler";
+import { RefreshHandler } from "@src/token/handler/refresh.handler";
+import { VerifyHandler } from "@src/token/handler/verify.handler";
 
 @Injectable()
 export class TokenService {
@@ -14,7 +14,7 @@ export class TokenService {
     private readonly pairHandler: PairHandler,
     private readonly prepareHandler: PrepareHandler,
     private readonly refreshHandler: RefreshHandler,
-    private readonly verifyHandler: VerifyHandler,
+    private readonly verifyHandler: VerifyHandler
   ) {}
 
   async one(data, configKey): Promise<any> {

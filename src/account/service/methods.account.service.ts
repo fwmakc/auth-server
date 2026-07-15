@@ -1,15 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { TypeGrants } from '@src/common/common.enum';
-import { ChangeAccountHandler } from '@src/account/handler/change.account.handler';
-import { ConfirmAccountHandler } from '@src/account/handler/confirm.account.handler';
-import { HashAccountHandler } from '@src/account/handler/hash.account.handler';
-import { LogoutAccountHandler } from '@src/account/handler/logout.account.handler';
-import { RegisterAccountHandler } from '@src/account/handler/register.account.handler';
-import { ResetAccountHandler } from '@src/account/handler/reset.account.handler';
-import { AccountDto } from '@src/account/account.dto';
-import { GrantsTokenDto } from '@src/token/dto/grants.token.dto';
-import { GrantsTokenService } from '@src/token/service/grants.token.service';
-import { OpenAccountService } from './open.account.service';
+import { Injectable } from "@nestjs/common";
+import { TypeGrants } from "@src/common/common.enum";
+import { ChangeAccountHandler } from "@src/account/handler/change.account.handler";
+import { ConfirmAccountHandler } from "@src/account/handler/confirm.account.handler";
+import { HashAccountHandler } from "@src/account/handler/hash.account.handler";
+import { LogoutAccountHandler } from "@src/account/handler/logout.account.handler";
+import { RegisterAccountHandler } from "@src/account/handler/register.account.handler";
+import { ResetAccountHandler } from "@src/account/handler/reset.account.handler";
+import { AccountDto } from "@src/account/account.dto";
+import { GrantsTokenDto } from "@src/token/dto/grants.token.dto";
+import { GrantsTokenService } from "@src/token/service/grants.token.service";
+import { OpenAccountService } from "./open.account.service";
 
 @Injectable()
 export class MethodsAccountService {
@@ -21,7 +21,7 @@ export class MethodsAccountService {
     protected readonly registerAuthHandler: RegisterAccountHandler,
     protected readonly resetAuthHandler: ResetAccountHandler,
     protected readonly grantsTokenService: GrantsTokenService,
-    protected readonly openAccountService: OpenAccountService,
+    protected readonly openAccountService: OpenAccountService
   ) {}
 
   async change(accountDto: AccountDto, code: string, req, res): Promise<any> {
@@ -39,8 +39,8 @@ export class MethodsAccountService {
 
   async confirm(code: string, req, res): Promise<any> {
     let error = {
-      error: 'Bad request',
-      message: 'Invalid confirm code',
+      error: "Bad request",
+      message: "Invalid confirm code",
     };
     const result = await this.confirmAuthHandler.confirm(code).catch((e) => {
       error = e?.response;
@@ -53,8 +53,8 @@ export class MethodsAccountService {
 
   async login(grantsTokenDto: GrantsTokenDto, req, res): Promise<any> {
     let error = {
-      error: 'Unauthorized',
-      message: 'Unknown error',
+      error: "Unauthorized",
+      message: "Unknown error",
     };
     grantsTokenDto.grant_type = TypeGrants.PASSWORD;
     const token = await this.grantsTokenService
@@ -83,7 +83,7 @@ export class MethodsAccountService {
     accountDto: AccountDto,
     subject: string,
     req,
-    res,
+    res
   ): Promise<any> {
     let error;
     const account = await this.registerAuthHandler
@@ -113,7 +113,7 @@ export class MethodsAccountService {
     await this.resetAuthHandler.sendMail(
       accountDto.username,
       subject,
-      confirm.code,
+      confirm.code
     );
     return { success: true };
   }

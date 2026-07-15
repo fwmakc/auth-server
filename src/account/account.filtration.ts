@@ -1,17 +1,17 @@
-import { Response } from 'express';
+import { Response } from "express";
 import {
   ArgumentsHost,
   Catch,
   ExceptionFilter,
   ForbiddenException,
   UnauthorizedException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 
 @Catch(UnauthorizedException, ForbiddenException)
 export class Unauthorized implements ExceptionFilter {
   async catch(
     _exception: ForbiddenException | UnauthorizedException,
-    host: ArgumentsHost,
+    host: ArgumentsHost
   ) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -21,7 +21,7 @@ export class Unauthorized implements ExceptionFilter {
       method,
       url: `${protocol}://${headers.host}${url}`,
     };
-    const data = Buffer.from(JSON.stringify(dataParsed)).toString('base64');
+    const data = Buffer.from(JSON.stringify(dataParsed)).toString("base64");
     response.redirect(`/account/account.html?data=${data}`);
   }
 }

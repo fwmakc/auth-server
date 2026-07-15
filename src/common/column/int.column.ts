@@ -1,5 +1,5 @@
-import { Column, DeepPartial } from 'typeorm';
-import { IndexedColumn } from './indexed.column';
+import { Column, DeepPartial } from "typeorm";
+import { IndexedColumn } from "./indexed.column";
 
 class IntColumnTransformer {
   to(data: number): number {
@@ -13,7 +13,7 @@ class IntColumnTransformer {
 export function IntColumn(
   name,
   value = 0,
-  options = undefined,
+  options = undefined
 ): PropertyDecorator {
   const {
     comment = undefined,
@@ -33,7 +33,7 @@ export function IntColumn(
       default: +value || 0,
       name,
       transformer: new IntColumnTransformer(),
-      type: 'int',
+      type: "int",
     };
 
     if (nullable) {

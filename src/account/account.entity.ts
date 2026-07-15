@@ -1,18 +1,18 @@
-import { BaseEntity, Column, Entity, OneToMany, OneToOne } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToMany, OneToOne } from "typeorm";
 import {
   BooleanColumn,
   CreatedColumn,
   IdColumn,
   UpdatedColumn,
   VarcharColumn,
-} from '@src/common/common.column';
-import { ClientsEntity } from '@src/clients/clients.entity';
-import { UsersEntity } from '@src/db/users/users.entity';
-import { AccountConfirmEntity } from './account_confirm/account_confirm.entity';
-import { AccountSessionsEntity } from './account_sessions/account_sessions.entity';
-import { AccountStrategiesEntity } from './account_strategies/account_strategies.entity';
+} from "@src/common/common.column";
+import { ClientsEntity } from "@src/clients/clients.entity";
+import { UsersEntity } from "@src/db/users/users.entity";
+import { AccountConfirmEntity } from "./account_confirm/account_confirm.entity";
+import { AccountSessionsEntity } from "./account_sessions/account_sessions.entity";
+import { AccountStrategiesEntity } from "./account_strategies/account_strategies.entity";
 
-@Entity({ name: 'accounts' })
+@Entity({ name: "accounts" })
 export class AccountEntity extends BaseEntity {
   @IdColumn()
   id: number;
@@ -23,16 +23,16 @@ export class AccountEntity extends BaseEntity {
   @UpdatedColumn()
   updatedAt?: Date;
 
-  @VarcharColumn('username', 'normal', { index: 'unique' })
+  @VarcharColumn("username", "normal", { index: "unique" })
   username: string;
 
-  @VarcharColumn('password')
+  @VarcharColumn("password")
   password: string;
 
-  @BooleanColumn('is_activated')
+  @BooleanColumn("is_activated")
   isActivated: boolean;
 
-  @BooleanColumn('is_superuser')
+  @BooleanColumn("is_superuser")
   isSuperuser: boolean;
 
   @OneToMany(() => AccountSessionsEntity, (session) => session.account, {

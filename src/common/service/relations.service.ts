@@ -1,4 +1,4 @@
-import { RelationsDto } from '@src/common/dto/relations.dto';
+import { RelationsDto } from "@src/common/dto/relations.dto";
 
 const isNumber = (value) => {
   const num = parseFloat(value);
@@ -26,7 +26,7 @@ export const relationsOrder = (result, relations: Array<RelationsDto>) => {
       if (!name || !order) {
         return;
       }
-      const keys = name.split('.');
+      const keys = name.split(".");
       let currentLevel = item;
 
       keys.forEach((key, index) => {
@@ -35,7 +35,7 @@ export const relationsOrder = (result, relations: Array<RelationsDto>) => {
         }
         if (index === keys.length - 1 && Array.isArray(currentLevel[key])) {
           currentLevel[key] = currentLevel[key].sort((a, b) =>
-            compare(a[order], b[order], desc),
+            compare(a[order], b[order], desc)
           );
         }
         currentLevel = currentLevel[key];

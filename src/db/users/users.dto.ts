@@ -3,9 +3,9 @@ import {
   DtoCreatedColumn,
   DtoEnumColumn,
   DtoUpdatedColumn,
-} from '@src/common/common.column';
-import { CommonDto } from '@src/common/common.dto';
-import { TypeGenders } from '@src/common/common.enum';
+} from "@src/common/common.column";
+import { CommonDto } from "@src/common/common.dto";
+import { TypeGenders } from "@src/common/common.enum";
 
 export class UsersDto extends CommonDto {
   @DtoCreatedColumn()
@@ -14,36 +14,36 @@ export class UsersDto extends CommonDto {
   @DtoUpdatedColumn()
   updatedAt?: Date;
 
-  @DtoColumn('Контактный email, не обязательно совпадает с логином')
+  @DtoColumn("Контактный email, не обязательно совпадает с логином")
   email?: string;
 
-  @DtoColumn('Контактный телефон')
+  @DtoColumn("Контактный телефон")
   phone?: string;
 
-  @DtoColumn('Имя')
+  @DtoColumn("Имя")
   name?: string;
 
-  @DtoColumn('Фамилия')
+  @DtoColumn("Фамилия")
   lastName?: string;
 
-  @DtoColumn('Отчество')
+  @DtoColumn("Отчество")
   parentName?: string;
 
-  @DtoColumn('Ссылка на аватарку')
+  @DtoColumn("Ссылка на аватарку")
   avatar?: string;
 
-  @DtoColumn('Дата рождения')
+  @DtoColumn("Дата рождения")
   birthday?: Date;
 
-  @DtoColumn('Предпочитаемый язык')
+  @DtoColumn("Предпочитаемый язык")
   locale?: string;
 
-  @DtoColumn('Адрес')
+  @DtoColumn("Адрес")
   address?: string;
 
-  @DtoColumn('Временна зона в формате +/-00:00')
+  @DtoColumn("Временна зона в формате +/-00:00")
   timezone?: string;
 
-  @DtoEnumColumn('Пол', TypeGenders, TypeGenders.DEFAULT)
+  @DtoEnumColumn("Пол", TypeGenders, TypeGenders.DEFAULT)
   gender?: TypeGenders;
 }

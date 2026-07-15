@@ -1,9 +1,9 @@
-import * as moment from 'moment';
+import * as moment from "moment";
 
 export const parseDynamicSaveObject = (entity) => {
   const save = {};
   Object.entries(entity).forEach(([key, value]) => {
-    const type = value === null ? 'null' : typeof value;
+    const type = value === null ? "null" : typeof value;
 
     let string = value;
 
@@ -11,15 +11,15 @@ export const parseDynamicSaveObject = (entity) => {
       return;
     }
 
-    if (type === 'null') {
-      string = 'NULL';
+    if (type === "null") {
+      string = "NULL";
     }
 
-    if (type === 'object') {
+    if (type === "object") {
       string = `'${escapeQuotes(JSON.stringify(value))}'`;
     }
 
-    if (type === 'string') {
+    if (type === "string") {
       string = `'${escapeQuotes(value)}'`;
     }
 
@@ -35,15 +35,15 @@ export const parseDynamicSaveObject = (entity) => {
 };
 
 const escapeQuotes = (string) => {
-  return `${string || ''}`.replace(/['\\]/giu, '\\$&');
+  return `${string || ""}`.replace(/['\\]/giu, "\\$&");
 };
 
 const parseDate = (dateValue) => {
-  if (typeof dateValue === 'number') {
+  if (typeof dateValue === "number") {
     return null;
   }
 
-  if (typeof dateValue === 'string') {
+  if (typeof dateValue === "string") {
     if (dateValue?.length < 10 || dateValue?.length > 29) {
       return null;
     }
@@ -55,5 +55,5 @@ const parseDate = (dateValue) => {
     return null;
   }
 
-  return datetime.format('YYYY-MM-DD HH:mm:ss');
+  return datetime.format("YYYY-MM-DD HH:mm:ss");
 };

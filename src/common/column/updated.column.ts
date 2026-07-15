@@ -1,9 +1,9 @@
-import { UpdateDateColumn } from 'typeorm';
-import { IndexedColumn } from './indexed.column';
+import { UpdateDateColumn } from "typeorm";
+import { IndexedColumn } from "./indexed.column";
 
 export function UpdatedColumn(
-  name = 'updated_at',
-  options = undefined,
+  name = "updated_at",
+  options = undefined
 ): PropertyDecorator {
   const { comment = undefined, index = undefined } = options || {};
 

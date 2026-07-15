@@ -1,5 +1,5 @@
-import { IsEmail, IsString } from 'class-validator';
-import { CommonDto } from '@src/common/common.dto';
+import { IsEmail, IsString } from "class-validator";
+import { CommonDto } from "@src/common/common.dto";
 
 export class MailDto extends CommonDto {
   @IsEmail()

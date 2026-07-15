@@ -1,6 +1,6 @@
-import { createHash, webcrypto } from 'node:crypto';
-import * as dotenv from 'dotenv';
-import { BadRequestException } from '@nestjs/common';
+import { createHash, webcrypto } from "node:crypto";
+import * as dotenv from "dotenv";
+import { BadRequestException } from "@nestjs/common";
 
 dotenv.config();
 
@@ -13,31 +13,31 @@ export async function encrypt(data) {
 
     // Импортируем ключ
     const cryptoKey = await webcrypto.subtle.importKey(
-      'raw',
+      "raw",
       new Uint8Array(key.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))),
-      { name: 'AES-GCM' },
+      { name: "AES-GCM" },
       false,
-      ['encrypt'],
+      ["encrypt"]
     );
 
     // Шифруем данные
     const encrypted = await webcrypto.subtle.encrypt(
       {
-        name: 'AES-GCM',
+        name: "AES-GCM",
         iv,
       },
       cryptoKey,
-      new TextEncoder().encode(data),
+      new TextEncoder().encode(data)
     );
 
     // Возвращаем зашифрованные данные с вектором инициализации в виде строк
     return {
       encrypted: Array.from(new Uint8Array(encrypted))
-        .map((byte) => byte.toString(16).padStart(2, '0'))
-        .join(''),
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join(""),
       iv: Array.from(iv)
-        .map((byte) => byte.toString(16).padStart(2, '0'))
-        .join(''),
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join(""),
     };
   } catch (e) {
     throw new BadRequestException(`Error encrypting data: ${e.message}`);
@@ -50,25 +50,25 @@ export async function decrypt(encryptedData, iv) {
   try {
     // Импортируем ключ
     const cryptoKey = await webcrypto.subtle.importKey(
-      'raw',
+      "raw",
       new Uint8Array(key.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))),
-      { name: 'AES-GCM' },
+      { name: "AES-GCM" },
       false,
-      ['decrypt'],
+      ["decrypt"]
     );
 
     // Расшифровываем данные
     const decrypted = await webcrypto.subtle.decrypt(
       {
-        name: 'AES-GCM',
+        name: "AES-GCM",
         iv: new Uint8Array(
-          iv.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)),
+          iv.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
         ),
       },
       cryptoKey,
       new Uint8Array(
-        encryptedData.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)),
-      ),
+        encryptedData.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
+      )
     );
 
     // Возвращаем расшифрованные данные в виде строки
@@ -78,6 +78,6 @@ export async function decrypt(encryptedData, iv) {
   }
 }
 
-export function hash(data, type = 'md5') {
-  return createHash(type).update(data).copy().digest('hex');
+export function hash(data, type = "md5") {
+  return createHash(type).update(data).copy().digest("hex");
 }

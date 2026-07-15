@@ -1,16 +1,16 @@
-import axios from 'axios';
-import { Injectable } from '@nestjs/common';
-import { AccountDto } from '@src/account/account.dto';
-import { AccountService } from '@src/account/account.service';
-import { AccountStrategiesService } from '@src/account/account_strategies/account_strategies.service';
-import { ConfigService } from '@nestjs/config';
+import axios from "axios";
+import { Injectable } from "@nestjs/common";
+import { AccountDto } from "@src/account/account.dto";
+import { AccountService } from "@src/account/account.service";
+import { AccountStrategiesService } from "@src/account/account_strategies/account_strategies.service";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class OauthProvider {
   constructor(
     private readonly accountService: AccountService,
     private readonly configService: ConfigService,
-    private readonly strategiesService: AccountStrategiesService,
+    private readonly strategiesService: AccountStrategiesService
   ) {}
 
   async activate(request): Promise<any> {
@@ -32,13 +32,13 @@ export class OauthProvider {
   }
 
   async getToken(code: string) {
-    const customAccountServer = this.configService.get('OAUTH_SERVER');
-    const redirect_uri = this.configService.get('OAUTH_CLIENT_REDIRECT');
-    const client_id = this.configService.get('OAUTH_CLIENT_ID');
+    const customAccountServer = this.configService.get("OAUTH_SERVER");
+    const redirect_uri = this.configService.get("OAUTH_CLIENT_REDIRECT");
+    const client_id = this.configService.get("OAUTH_CLIENT_ID");
 
     return axios
       .post(`${customAccountServer}/token`, {
-        grant_type: 'authorization_code',
+        grant_type: "authorization_code",
         code,
         client_id,
         redirect_uri,
@@ -50,7 +50,7 @@ export class OauthProvider {
   }
 
   async getUser(accessToken: string, refreshToken: string): Promise<any> {
-    const customAccountServer = this.configService.get('OAUTH_SERVER');
+    const customAccountServer = this.configService.get("OAUTH_SERVER");
 
     return axios
       .get(`${customAccountServer}/account/self`, {
@@ -84,8 +84,8 @@ export class OauthProvider {
               result,
               userData,
               accessToken,
-              refreshToken,
-            ),
+              refreshToken
+            )
         );
     }
 
@@ -93,7 +93,7 @@ export class OauthProvider {
       .update(account.id, accountDto)
       .then(
         async (result) =>
-          await this.prepareResult(result, userData, accessToken, refreshToken),
+          await this.prepareResult(result, userData, accessToken, refreshToken)
       );
   }
 
@@ -101,11 +101,11 @@ export class OauthProvider {
     result,
     userData,
     accessToken,
-    refreshToken,
+    refreshToken
   ): Promise<AccountDto> {
     await this.strategiesService.updateBy({
       account: { id: result.id },
-      name: 'oauthid',
+      name: "oauthid",
       uid: result.id,
       json: userData,
       accessToken,

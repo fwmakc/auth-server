@@ -1,9 +1,9 @@
-import { Column } from 'typeorm';
-import { IndexedColumn } from './indexed.column';
+import { Column } from "typeorm";
+import { IndexedColumn } from "./indexed.column";
 
 export function PositionDescColumn(
-  name = 'position',
-  options = undefined,
+  name = "position",
+  options = undefined
 ): PropertyDecorator {
   const { comment = undefined, index = undefined } = options || {};
 
@@ -17,7 +17,7 @@ export function PositionDescColumn(
       default: 0,
       name,
       nullable: true,
-      type: 'int',
+      type: "int",
       unsigned: true,
     })(object, propertyName);
   };

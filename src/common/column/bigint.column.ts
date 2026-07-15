@@ -1,5 +1,5 @@
-import { Column, DeepPartial } from 'typeorm';
-import { IndexedColumn } from './indexed.column';
+import { Column, DeepPartial } from "typeorm";
+import { IndexedColumn } from "./indexed.column";
 
 class BigIntColumnTransformer {
   to(data: number): number {
@@ -13,7 +13,7 @@ class BigIntColumnTransformer {
 export function BigIntColumn(
   name,
   value = 0,
-  options = undefined,
+  options = undefined
 ): PropertyDecorator {
   const {
     comment = undefined,
@@ -33,7 +33,7 @@ export function BigIntColumn(
       default: +value || 0,
       name,
       transformer: new BigIntColumnTransformer(),
-      type: 'bigint',
+      type: "bigint",
     };
 
     if (nullable) {

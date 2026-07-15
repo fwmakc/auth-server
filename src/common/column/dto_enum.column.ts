@@ -1,12 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum } from 'class-validator';
-import { DeepPartial } from 'typeorm';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsEnum } from "class-validator";
+import { DeepPartial } from "typeorm";
 
 export function DtoEnumColumn(
   description,
   value,
   defaultValue = null,
-  options = undefined,
+  options = undefined
 ): PropertyDecorator {
   const { required = false } = options || {};
 

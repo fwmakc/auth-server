@@ -1,12 +1,12 @@
-import { Column } from 'typeorm';
-import { IndexedColumn } from './indexed.column';
+import { Column } from "typeorm";
+import { IndexedColumn } from "./indexed.column";
 
 class TextColumnTransformer {
   to(data: string): string | null {
     return data ? `${data}` : null;
   }
   from(data: string): string {
-    return `${data || ''}`;
+    return `${data || ""}`;
   }
 }
 
@@ -24,7 +24,7 @@ export function TextColumn(name, options = undefined): PropertyDecorator {
       name,
       nullable: true,
       transformer: new TextColumnTransformer(),
-      type: 'text',
+      type: "text",
     })(object, propertyName);
   };
 }

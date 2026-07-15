@@ -1,5 +1,5 @@
-import { CreateDateColumn } from 'typeorm';
-import { IndexedColumn } from './indexed.column';
+import { CreateDateColumn } from "typeorm";
+import { IndexedColumn } from "./indexed.column";
 
 export function DateColumn(name, options = undefined): PropertyDecorator {
   const { comment = undefined, index = undefined } = options || {};
@@ -11,7 +11,7 @@ export function DateColumn(name, options = undefined): PropertyDecorator {
 
     CreateDateColumn({
       comment,
-      default: () => 'NULL',
+      default: () => "NULL",
       name,
       nullable: true,
     })(object, propertyName);

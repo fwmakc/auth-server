@@ -7,11 +7,11 @@ export const prepareQuotes = () => {
 
   const dbType = process.env.DB_TYPE;
 
-  if (dbType === 'mysql') {
-    return '`';
+  if (dbType === "mysql") {
+    return "`";
   }
 
-  if (dbType === 'postgres') {
+  if (dbType === "postgres") {
     return '"';
   }
 };

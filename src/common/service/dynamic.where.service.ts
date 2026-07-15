@@ -1,5 +1,5 @@
-import { prepareLike } from './like.service';
-import { prepareQuotes } from './quotes.service';
+import { prepareLike } from "./like.service";
+import { prepareQuotes } from "./quotes.service";
 
 export const parseDynamicWhereObject = (where) => {
   const parsed = [];
@@ -10,14 +10,14 @@ export const parseDynamicWhereObject = (where) => {
   const quotes = prepareQuotes();
 
   Object.entries(where)?.forEach(([key, value]) => {
-    const [property, ...modifiers] = key.split('.');
+    const [property, ...modifiers] = key.split(".");
     const propertyName = `${quotes}${property}${quotes}`;
 
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
       return;
     }
 
-    if (modifiers[0] === 'and' || modifiers[0] === 'or') {
+    if (modifiers[0] === "and" || modifiers[0] === "or") {
       if (!Array.isArray(value)) {
         return;
       }
@@ -30,7 +30,7 @@ export const parseDynamicWhereObject = (where) => {
     const tempProperty = prepareDynamicWhereValue(
       propertyName,
       value,
-      modifiers,
+      modifiers
     );
     parsed.push(tempProperty);
   });
@@ -45,7 +45,7 @@ const prepareAndOrValues = (property, values, modifiers) => {
     const tempProperty = prepareDynamicWhereValue(
       property,
       value,
-      otherModifiers,
+      otherModifiers
     );
     properties.push(tempProperty);
   });
@@ -55,95 +55,95 @@ const prepareAndOrValues = (property, values, modifiers) => {
 
 const prepareDynamicWhereValue = (property, value, modifiers) => {
   if (Array.isArray(value) && value.length > 0) {
-    value = value.map((v) => prepareDynamicValue(v)).join(',');
+    value = value.map((v) => prepareDynamicValue(v)).join(",");
     value = `(${value})`;
   }
 
   const like = prepareLike();
 
-  let ifNot = '';
+  let ifNot = "";
   let modifier = modifiers[0];
-  let sign = '=';
+  let sign = "=";
 
-  if (modifiers[0] === 'not') {
-    ifNot = ' NOT';
+  if (modifiers[0] === "not") {
+    ifNot = " NOT";
     modifier = modifiers[1];
-    sign = '!=';
+    sign = "!=";
   }
 
   if (value === null) {
-    modifier = 'null';
+    modifier = "null";
   }
 
   let result;
   switch (modifier) {
-    case 'any':
+    case "any":
       result = `${property}${ifNot} ANY ${value}`;
       break;
-    case 'between':
+    case "between":
       result = `${property}${ifNot} BETWEEN ${value}`;
       break;
-    case 'boolean': {
+    case "boolean": {
       const sv = `${value}`.trim().toLowerCase();
       const bv =
-        sv === 'true' ? true : sv === 'false' ? false : Boolean(+value);
-      result = `${property} ${sign} ${bv ? 'TRUE' : 'FALSE'}`;
+        sv === "true" ? true : sv === "false" ? false : Boolean(+value);
+      result = `${property} ${sign} ${bv ? "TRUE" : "FALSE"}`;
       break;
     }
-    case 'empty':
+    case "empty":
       result = `${property} IS${ifNot} NULL AND ${property} ${sign} ''`;
       break;
-    case 'in':
+    case "in":
       result = `${property}${ifNot} IN ${value}`;
       break;
-    case 'less':
-      sign = '<';
+    case "less":
+      sign = "<";
       if (ifNot) {
-        sign = '>=';
+        sign = ">=";
       }
       result = `${property} ${sign} ${parseFloat(value)}`;
       break;
-    case 'lessOrEqual':
-      sign = '<=';
+    case "lessOrEqual":
+      sign = "<=";
       if (ifNot) {
-        sign = '>';
+        sign = ">";
       }
       result = `${property} ${sign} ${parseFloat(value)}`;
       break;
-    case 'like':
+    case "like":
       result = `${property}${ifNot} ${like} '${value}'`;
       break;
-    case 'more':
-      sign = '>';
+    case "more":
+      sign = ">";
       if (ifNot) {
-        sign = '<=';
+        sign = "<=";
       }
       result = `${property} ${sign} ${parseFloat(value)}`;
       break;
-    case 'moreOrEqual':
-      sign = '>=';
+    case "moreOrEqual":
+      sign = ">=";
       if (ifNot) {
-        sign = '<';
+        sign = "<";
       }
       result = `${property} ${sign} ${parseFloat(value)}`;
       break;
-    case 'null':
+    case "null":
       result = `${property} IS${ifNot} NULL`;
       break;
-    case 'number':
+    case "number":
       value = parseFloat(value);
       result = `${property} ${sign} ${value}`;
       break;
-    case 'search':
-      result = `${value || ''}`
+    case "search":
+      result = `${value || ""}`
         .toLowerCase()
-        .replace(/[^0-9a-zа-я ]/giu, ' ')
-        .split(' ')
+        .replace(/[^0-9a-zа-я ]/giu, " ")
+        .split(" ")
         .filter(Boolean)
         .map((i) => `(${property}${ifNot} ${like} '%${i}%')`)
-        .join(' AND ');
+        .join(" AND ");
       break;
-    case 'string':
+    case "string":
       value = `'${value}'`;
       result = `${property} ${sign} ${value}`;
       break;
@@ -156,13 +156,13 @@ const prepareDynamicWhereValue = (property, value, modifiers) => {
 };
 
 const prepareDynamicValue = (value) => {
-  if (value === undefined || value === '') {
+  if (value === undefined || value === "") {
     return "''";
   }
   if (value === null) {
-    return 'NULL';
+    return "NULL";
   }
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     return `'${value}'`;
   }
   return value;

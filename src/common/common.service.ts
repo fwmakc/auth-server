@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException } from "@nestjs/common";
 import {
   And,
   BaseEntity,
@@ -12,30 +12,30 @@ import {
   MoreThan,
   MoreThanOrEqual,
   Repository,
-} from 'typeorm';
-import { RelationsDto } from '@src/common/dto/relations.dto';
-import { relationsOrder } from '@src/common/service/relations.service';
-import { CommonDto } from '@src/common/common.dto';
-import { FindDto } from './dto/find.dto';
-import { FindManyDto } from './dto/find_many.dto';
-import { FindOneDto } from './dto/find_one.dto';
-import { parseWhereObject } from './service/where.service';
+} from "typeorm";
+import { RelationsDto } from "@src/common/dto/relations.dto";
+import { relationsOrder } from "@src/common/service/relations.service";
+import { CommonDto } from "@src/common/common.dto";
+import { FindDto } from "./dto/find.dto";
+import { FindManyDto } from "./dto/find_many.dto";
+import { FindOneDto } from "./dto/find_one.dto";
+import { parseWhereObject } from "./service/where.service";
 import {
   removePrivateFields,
   stripWriteFields,
-} from './service/private_fields.service';
-import { sanitizeForSave } from './service/sanitize.service';
-import { searchService } from './service/search.service';
-import { bind } from './service/bind.service';
-import { CsvService } from './service/csv.service';
-import { BindDto } from './dto/bind.dto';
+} from "./service/private_fields.service";
+import { sanitizeForSave } from "./service/sanitize.service";
+import { searchService } from "./service/search.service";
+import { bind } from "./service/bind.service";
+import { CsvService } from "./service/csv.service";
+import { BindDto } from "./dto/bind.dto";
 
 export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
   protected readonly repository: Repository<Entity>;
 
   async find(
     find: FindDto = {},
-    bind: BindDto = { allow: true },
+    bind: BindDto = { allow: true }
   ): Promise<Entity[]> {
     const {
       relations,
@@ -45,7 +45,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
       ...otherParams
     } = find;
 
-    const { id, name, key = 'id', allow } = bind;
+    const { id, name, key = "id", allow } = bind;
 
     let where = parseWhereObject(find.where);
     // "username.not.like": "%user%"
@@ -53,8 +53,8 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
 
     if (id !== undefined && !allow) {
       const bindValue = { [key]: id };
-      if (name.includes('.')) {
-        const segments = name.split('.');
+      if (name.includes(".")) {
+        const segments = name.split(".");
         let nested: any = bindValue;
         for (let i = segments.length - 1; i >= 0; i--) {
           nested = { [segments[i]]: nested };
@@ -68,7 +68,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
     const relationNames = relations?.map((i) => i.name) || [];
     if (
       id !== undefined &&
-      !name.includes('.') &&
+      !name.includes(".") &&
       !relationNames.includes(name)
     ) {
       relationNames.push(name);
@@ -97,7 +97,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
           .filter(Boolean);
       }
 
-      if (id !== undefined && !allow && name.includes('.')) {
+      if (id !== undefined && !allow && name.includes(".")) {
         const seen = new Set();
         result = result.filter((item: any) => {
           if (seen.has(item.id)) return false;
@@ -115,24 +115,24 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
 
   async findFirst(
     find: FindDto,
-    bind: BindDto = { allow: true },
+    bind: BindDto = { allow: true }
   ): Promise<Entity> {
     const [result] = await this.find(
       {
         ...find,
         limit: 1,
       },
-      bind,
+      bind
     );
     return result;
   }
 
   async findMany(
     findMany: FindManyDto,
-    bind: BindDto = { allow: true },
+    bind: BindDto = { allow: true }
   ): Promise<Entity[]> {
     const { ids, ...find } = findMany;
-    const order: FindOptionsOrder<any> = { id: 'ASC' };
+    const order: FindOptionsOrder<any> = { id: "ASC" };
     const where: FindOptionsWhere<any> = {
       id: In(ids?.map((i) => Number(i) || 0)),
     };
@@ -144,13 +144,13 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
         limit: 0,
         offset: 0,
       },
-      bind,
+      bind
     );
   }
 
   async findOne(
     findOne: FindOneDto,
-    bind: BindDto = { allow: true },
+    bind: BindDto = { allow: true }
   ): Promise<Entity> {
     const { id, ...find } = findOne;
     const where: FindOptionsWhere<any> = { ...find.where, id };
@@ -161,7 +161,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
         limit: 1,
         offset: 0,
       },
-      bind,
+      bind
     );
     return result;
   }
@@ -173,13 +173,13 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
   }
 
   async countDistinct(field: string, find: FindDto): Promise<number> {
-    const qb = this.repository.createQueryBuilder('t');
+    const qb = this.repository.createQueryBuilder("t");
 
     const where = parseWhereObject(find.where);
     if (where) qb.where(where);
 
     const result = await qb
-      .select(`COUNT(DISTINCT t.${field})`, 'count')
+      .select(`COUNT(DISTINCT t.${field})`, "count")
       .getRawOne();
 
     return Number(result?.count || 0);
@@ -188,7 +188,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
   async csv(
     find: FindDto,
     filename: string,
-    bind: BindDto = { allow: true },
+    bind: BindDto = { allow: true }
   ): Promise<any> {
     const csvService = new CsvService({
       service: this,
@@ -203,7 +203,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
   async create(
     dto: Dto,
     relations: Array<RelationsDto> = undefined,
-    bind: BindDto = { allow: true },
+    bind: BindDto = { allow: true }
   ): Promise<Entity> {
     // next this columns from bind
     delete dto.id;
@@ -211,8 +211,8 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
     // delete dto.updatedAt;
 
     if (bind.id !== undefined) {
-      const relationName = bind.name || 'account';
-      if (!relationName.includes('.')) {
+      const relationName = bind.name || "account";
+      if (!relationName.includes(".")) {
         const resolvedId = await this.resolveBindRelationId(bind);
         if (resolvedId !== null) {
           dto[relationName] = { id: resolvedId };
@@ -232,7 +232,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
           id,
           relations,
         },
-        bind,
+        bind
       );
     } catch (e) {
       this.error(e);
@@ -279,15 +279,15 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
   async upsert(
     dto: Dto,
     relations: Array<RelationsDto> = undefined,
-    bind: BindDto = { allow: true },
+    bind: BindDto = { allow: true }
   ): Promise<Entity> {
     delete dto.id;
 
     const entity: DeepPartial<any> = { ...dto };
 
     if (bind.id !== undefined) {
-      const relationName = bind.name || 'account';
-      if (!relationName.includes('.')) {
+      const relationName = bind.name || "account";
+      if (!relationName.includes(".")) {
         const resolvedId = await this.resolveBindRelationId(bind);
         if (resolvedId !== null) {
           entity[relationName] = { id: resolvedId };
@@ -308,7 +308,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
     id: number,
     dto: Dto,
     relations: Array<RelationsDto> = undefined,
-    bind: BindDto = { allow: true },
+    bind: BindDto = { allow: true }
   ): Promise<Entity> {
     if (id === undefined) {
       return;
@@ -336,7 +336,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
           id,
           relations,
         },
-        bind,
+        bind
       );
     } catch (e) {
       this.error(e);
@@ -345,30 +345,30 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
 
   async updateEntity(entity: DeepPartial<any>): Promise<any> {
     const idType = this.getIdType();
-    entity.id = idType === 'bigint' ? `${entity.id}` : +entity.id;
+    entity.id = idType === "bigint" ? `${entity.id}` : +entity.id;
     return await this.repository.save(entity);
   }
 
   getIdType(): string {
     const column: DeepPartial<any> = this.repository.metadata.columns.find(
-      (column) => column.propertyName === 'id',
+      (column) => column.propertyName === "id"
     );
-    return column?.type || 'int';
+    return column?.type || "int";
   }
 
   private async resolveBindRelationId(
-    bind: BindDto,
+    bind: BindDto
   ): Promise<number | string | null> {
-    const key = bind.key || 'id';
-    if (key === 'id') {
+    const key = bind.key || "id";
+    if (key === "id") {
       return bind.id;
     }
-    const name = bind.name || 'account';
-    const segments = name.split('.');
+    const name = bind.name || "account";
+    const segments = name.split(".");
     let currentMetadata = this.repository.metadata;
     for (const segment of segments) {
       const relation = currentMetadata.relations.find(
-        (r) => r.propertyName === segment,
+        (r) => r.propertyName === segment
       );
       if (!relation) {
         return null;
@@ -376,7 +376,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
       currentMetadata = relation.inverseEntityMetadata;
     }
     const relatedRepo = this.repository.manager.getRepository(
-      currentMetadata.target,
+      currentMetadata.target
     );
     const related = await relatedRepo.findOne({
       where: { [key]: bind.id } as any,
@@ -402,12 +402,12 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
   async sortPosition(
     field: string,
     find: FindDto,
-    bind: BindDto = { allow: true },
+    bind: BindDto = { allow: true }
   ): Promise<boolean> {
     this.validatePositionField(field);
 
     if (!find.order) {
-      find.order = { [field]: 'asc', id: 'asc' } as FindOptionsOrder<any>;
+      find.order = { [field]: "asc", id: "asc" } as FindOptionsOrder<any>;
     }
 
     const entries = await this.find(find, bind);
@@ -416,8 +416,8 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
       return;
     }
 
-    if (typeof entries?.[0]?.[field] !== 'number') {
-      this.error({ message: 'cannot position by non-numeric field' });
+    if (typeof entries?.[0]?.[field] !== "number") {
+      this.error({ message: "cannot position by non-numeric field" });
     }
 
     try {
@@ -431,10 +431,10 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
               const resolvedId = await this.resolveBindRelationId(bind);
               resetWhere = {
                 ...resetWhere,
-                [bind.name || 'account']:
+                [bind.name || "account"]:
                   resolvedId !== null
                     ? { id: resolvedId }
-                    : { [bind.key || 'id']: bind.id },
+                    : { [bind.key || "id"]: bind.id },
               };
             }
             if (Object.keys(resetWhere).length > 0) {
@@ -449,7 +449,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
           });
 
           await transactionalManager.save(entityTarget, entries);
-        },
+        }
       );
 
       return true;
@@ -462,7 +462,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
     id: number,
     field: string,
     position: number,
-    bind: BindDto = { allow: true },
+    bind: BindDto = { allow: true }
   ): Promise<boolean> {
     this.validatePositionField(field);
 
@@ -477,15 +477,15 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
           [field]: true,
         },
       },
-      bind,
+      bind
     );
 
     if (!entrie) {
       return false;
     }
 
-    if (typeof entrie[field] !== 'number') {
-      this.error({ message: 'cannot position by non-numeric field' });
+    if (typeof entrie[field] !== "number") {
+      this.error({ message: "cannot position by non-numeric field" });
     }
 
     const lastEntrie: DeepPartial<any> = await this.findFirst(
@@ -495,10 +495,10 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
           [field]: true,
         },
         order: {
-          [field]: 'DESC',
+          [field]: "DESC",
         },
       },
-      bind,
+      bind
     );
 
     const lastPosition = +lastEntrie?.[field] || 0;
@@ -537,7 +537,7 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
           await transactionalManager.update(
             entityTarget,
             whereEntries,
-            updateEntries,
+            updateEntries
           );
 
           const updateCurrentEntrie: DeepPartial<any> = {
@@ -546,9 +546,9 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
           await transactionalManager.update(
             entityTarget,
             id,
-            updateCurrentEntrie,
+            updateCurrentEntrie
           );
-        },
+        }
       );
 
       return true;
@@ -562,20 +562,20 @@ export class CommonService<Dto extends CommonDto, Entity extends BaseEntity> {
   }
 
   private validatePositionField(field: string) {
-    if (!field || typeof field !== 'string') {
-      throw new BadRequestException('Field name is required');
+    if (!field || typeof field !== "string") {
+      throw new BadRequestException("Field name is required");
     }
     if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(field)) {
       throw new BadRequestException(`Invalid field name: ${field}`);
     }
     const primaryColumns = this.repository.metadata.primaryColumns.map(
-      (c) => c.propertyName,
+      (c) => c.propertyName
     );
     if (primaryColumns.includes(field)) {
       throw new BadRequestException(`Cannot sort by primary key: ${field}`);
     }
     const columnNames = this.repository.metadata.columns.map(
-      (c) => c.propertyName,
+      (c) => c.propertyName
     );
     if (!columnNames.includes(field)) {
       throw new BadRequestException(`Unknown field: ${field}`);

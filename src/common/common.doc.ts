@@ -1,4 +1,4 @@
-import { applyDecorators, HttpStatus } from '@nestjs/common';
+import { applyDecorators, HttpStatus } from "@nestjs/common";
 import {
   ApiOperation,
   ApiBody,
@@ -8,8 +8,8 @@ import {
   ApiResponse,
   ApiTags,
   ApiExtraModels,
-} from '@nestjs/swagger';
-import { RelationsDto } from '@src/common/dto/relations.dto';
+} from "@nestjs/swagger";
+import { RelationsDto } from "@src/common/dto/relations.dto";
 
 export const CommonDoc = ({
   title,
@@ -29,8 +29,8 @@ export const CommonDoc = ({
         query.required = false;
       }
       if (!query.required) {
-        query.type = `${query.type || ''}${
-          query.type ? ', ' : ''
+        query.type = `${query.type || ""}${
+          query.type ? ", " : ""
         }необязательный`;
       }
       if (query.example) {
@@ -46,7 +46,7 @@ export const CommonDoc = ({
         param.required = false;
       }
       if (!param.required) {
-        param.type = `${param.type ? `${param.type}, ` : ''}необязательный`;
+        param.type = `${param.type ? `${param.type}, ` : ""}необязательный`;
       }
       if (param.example) {
         param.example = JSON.stringify(param.example);
@@ -75,16 +75,16 @@ export const CommonDoc = ({
   decorators.push(
     ApiResponse({
       status: HttpStatus.OK,
-      description: 'Выполнено',
+      description: "Выполнено",
       type: success,
-    }),
+    })
   );
 
   decorators.push(
     ApiResponse({
       status: HttpStatus.BAD_REQUEST,
-      description: 'Ошибка',
-    }),
+      description: "Ошибка",
+    })
   );
 
   return applyDecorators(...decorators);

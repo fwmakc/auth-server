@@ -1,6 +1,6 @@
-import { BaseEntity, Entity, JoinColumn, OneToOne } from 'typeorm';
-import { TypeGenders } from '@src/common/common.enum';
-import { AccountEntity } from '@src/account/account.entity';
+import { BaseEntity, Entity, JoinColumn, OneToOne } from "typeorm";
+import { TypeGenders } from "@src/common/common.enum";
+import { AccountEntity } from "@src/account/account.entity";
 import {
   CreatedColumn,
   DateColumn,
@@ -8,15 +8,15 @@ import {
   IdColumn,
   UpdatedColumn,
   VarcharColumn,
-} from '@src/common/common.column';
+} from "@src/common/common.column";
 
-@Entity({ name: 'users' })
+@Entity({ name: "users" })
 export class UsersEntity extends BaseEntity {
   @IdColumn()
   id: number;
 
   @OneToOne(() => AccountEntity)
-  @JoinColumn({ name: 'account_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: "account_id", referencedColumnName: "id" })
   account: AccountEntity;
 
   @CreatedColumn()
@@ -25,36 +25,36 @@ export class UsersEntity extends BaseEntity {
   @UpdatedColumn()
   updatedAt?: Date;
 
-  @VarcharColumn('email')
+  @VarcharColumn("email")
   email?: string;
 
-  @VarcharColumn('phone', 'tiny', { clear: '[^0-9]' })
+  @VarcharColumn("phone", "tiny", { clear: "[^0-9]" })
   phone?: string;
 
-  @VarcharColumn('name')
+  @VarcharColumn("name")
   name?: string;
 
-  @VarcharColumn('last_name')
+  @VarcharColumn("last_name")
   lastName?: string;
 
-  @VarcharColumn('parent_name')
+  @VarcharColumn("parent_name")
   parentName?: string;
 
-  @VarcharColumn('avatar', 'long')
+  @VarcharColumn("avatar", "long")
   avatar?: string;
 
-  @DateColumn('birthday')
+  @DateColumn("birthday")
   birthday?: Date;
 
-  @VarcharColumn('locale', 'tiny')
+  @VarcharColumn("locale", "tiny")
   locale?: string;
 
-  @VarcharColumn('address', 'medium')
+  @VarcharColumn("address", "medium")
   address?: string;
 
-  @VarcharColumn('timezone', 'tiny')
+  @VarcharColumn("timezone", "tiny")
   timezone?: string;
 
-  @EnumColumn('gender', TypeGenders, TypeGenders.DEFAULT)
+  @EnumColumn("gender", TypeGenders, TypeGenders.DEFAULT)
   gender?: TypeGenders;
 }
