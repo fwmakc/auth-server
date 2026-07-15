@@ -3,6 +3,7 @@ import { Module, forwardRef } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
 import { AccountController } from "./account.controller";
+import { InternalAccountController } from "./internal.account.controller";
 import { AccountEntity } from "./account.entity";
 import { AccountService } from "./account.service";
 import { AccountStrategy } from "./account.strategy";
@@ -35,6 +36,7 @@ import { UsersModule } from "@src/db/users/users.module";
     FormsAccountController,
     MethodsAccountController,
     OpenAccountController,
+    InternalAccountController,
   ],
   imports: [
     TypeOrmModule.forFeature([AccountEntity]),
