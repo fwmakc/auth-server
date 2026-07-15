@@ -25,6 +25,6 @@ export class AccountConfirmEntity extends BaseEntity {
   @VarcharColumn("code", "long")
   code: string;
 
-  @VarcharColumn("code", "tiny")
+  @VarcharColumn("type", "tiny")
   type: string;
 }
