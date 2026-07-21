@@ -1,7 +1,7 @@
 import { Repository } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CommonService } from "@lms/common";
+import { CommonService } from "@core/common";
 import { ClientsRedirectsDto } from "./clients_redirects.dto";
 import { ClientsRedirectsEntity } from "./clients_redirects.entity";
 

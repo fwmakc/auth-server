@@ -1,6 +1,6 @@
 import { Controller, Get, NotFoundException } from "@nestjs/common";
 import { ApiTags, ApiExcludeEndpoint } from "@nestjs/swagger";
-import { Account, Self } from "@lms/common";
+import { Account, Self } from "@core/common";
 import { AccountDto } from "./account.dto";
 import { AccountService } from "./account.service";
 

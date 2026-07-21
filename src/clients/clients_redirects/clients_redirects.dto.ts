@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { DtoColumn, DtoCreatedColumn, DtoUpdatedColumn } from "@lms/common";
-import { CommonDto } from "@lms/common";
+import { DtoColumn, DtoCreatedColumn, DtoUpdatedColumn } from "@core/common";
+import { CommonDto } from "@core/common";
 import { ClientsDto } from "@src/clients/clients.dto";
 
 export class ClientsRedirectsDto extends CommonDto {

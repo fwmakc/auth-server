@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { AccountSessionsService } from "@src/account/account_sessions/account_sessions.service";
-import { Cookie } from "@lms/common";
+import { Cookie } from "@core/common";
 
 @Injectable()
 export class LogoutAccountHandler {

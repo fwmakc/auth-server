@@ -1,5 +1,5 @@
-import { DtoColumn, DtoCreatedColumn, DtoUpdatedColumn } from "@lms/common";
-import { CommonDto } from "@lms/common";
+import { DtoColumn, DtoCreatedColumn, DtoUpdatedColumn } from "@core/common";
+import { CommonDto } from "@core/common";
 
 export class AccountConfirmDto extends CommonDto {
   @DtoCreatedColumn()

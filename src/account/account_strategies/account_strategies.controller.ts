@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
-import { Cookie } from "@lms/common";
+import { Cookie } from "@core/common";
 import { TokenService } from "@src/token/token.service";
 
 import { AccountStrategiesService } from "./account_strategies.service";
@@ -23,7 +23,7 @@ import { UntiProvider } from "./provider/unti.provider";
 
 import { AccountSessionsService } from "../account_sessions/account_sessions.service";
 import { AccountDto } from "../account.dto";
-import { Account, Self } from "@lms/common";
+import { Account, Self } from "@core/common";
 import { OpenAccountService } from "../service/open.account.service";
 
 @ApiTags("Стратегии авторизации")

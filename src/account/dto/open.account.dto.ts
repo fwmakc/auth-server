@@ -1,6 +1,6 @@
-import { DtoColumn, DtoEnumColumn } from "@lms/common";
-import { CommonDto } from "@lms/common";
-import { TypeResponses } from "@lms/common";
+import { DtoColumn, DtoEnumColumn } from "@core/common";
+import { CommonDto } from "@core/common";
+import { TypeResponses } from "@core/common";
 
 export class OpenAccountDto extends CommonDto {
   @DtoEnumColumn("Тип запроса. Один из token или code", TypeResponses, {

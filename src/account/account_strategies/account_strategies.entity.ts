@@ -5,7 +5,7 @@ import {
   JsonColumn,
   UpdatedColumn,
   VarcharColumn,
-} from "@lms/common";
+} from "@core/common";
 import { AccountEntity } from "../account.entity";
 
 @Entity({ name: "account_strategies" })

@@ -2,7 +2,7 @@ import { Controller, Get, NotFoundException, Query } from "@nestjs/common";
 import { ClientsService } from "@src/clients/clients.service";
 import { ClientsDto } from "@src/clients/clients.dto";
 import { Client, SelfClient } from "@src/clients/clients.decorator";
-import { EntityController } from "@lms/common";
+import { EntityController } from "@core/common";
 import { ClientsEntity } from "@src/clients/clients.entity";
 import { ApiExcludeEndpoint } from "@nestjs/swagger";
 

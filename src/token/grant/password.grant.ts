@@ -2,7 +2,7 @@ import { Injectable, BadRequestException } from "@nestjs/common";
 import { AccountService } from "@src/account/account.service";
 import { GrantsTokenDto } from "@src/token/dto/grants.token.dto";
 import { TokenService } from "@src/token/token.service";
-import { Cookie } from "@lms/common";
+import { Cookie } from "@core/common";
 
 @Injectable()
 export class PasswordGrant {
