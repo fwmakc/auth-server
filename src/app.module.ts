@@ -6,7 +6,6 @@ import { SentryGlobalFilter, SentryModule } from "@sentry/nestjs/setup";
 import { DataSource } from "typeorm";
 import { addTransactionalDataSource } from "typeorm-transactional";
 import { getDbConfig } from "@config/db.config";
-import { EventBusModule } from "@core/common";
 import AppImports from "./app.imports";
 
 let transactionalDataSource: DataSource | undefined;
@@ -27,7 +26,6 @@ let transactionalDataSource: DataSource | undefined;
         return transactionalDataSource;
       },
     }),
-    EventBusModule,
     ...AppImports,
   ],
   providers: [

@@ -9,14 +9,15 @@ export class ConfirmAccountHandler {
     protected readonly accountConfirmService: AccountConfirmService
   ) {}
 
-  async confirm(code: string): Promise<boolean> {
+  async confirm(code: string): Promise<any> {
     const confirm = await this.accountConfirmService.validate(code);
     if (confirm) {
       const { account } = confirm;
       await this.accountService.update(account.id, {
         isActivated: true,
       });
+      return account;
     }
-    return !!confirm;
+    return null;
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { TypeGrants } from "@core/common";
+import { EventClientService } from "@src/event-client/event-client.service";
 import { ChangeAccountHandler } from "@src/account/handler/change.account.handler";
 import { ConfirmAccountHandler } from "@src/account/handler/confirm.account.handler";
 import { HashAccountHandler } from "@src/account/handler/hash.account.handler";
@@ -21,7 +22,8 @@ export class MethodsAccountService {
     protected readonly registerAuthHandler: RegisterAccountHandler,
     protected readonly resetAuthHandler: ResetAccountHandler,
     protected readonly grantsTokenService: GrantsTokenService,
-    protected readonly openAccountService: OpenAccountService
+    protected readonly openAccountService: OpenAccountService,
+    protected readonly eventClient: EventClientService
   ) {}
 
   async change(accountDto: AccountDto, code: string, req, res): Promise<any> {
@@ -42,12 +44,16 @@ export class MethodsAccountService {
       error: "Bad request",
       message: "Invalid confirm code",
     };
-    const result = await this.confirmAuthHandler.confirm(code).catch((e) => {
+    const account = await this.confirmAuthHandler.confirm(code).catch((e) => {
       error = e?.response;
     });
-    if (!result) {
+    if (!account) {
       return error;
     }
+    this.eventClient.publish("user.confirmed", {
+      userId: account.id,
+      username: account.username,
+    });
     return { success: true };
   }
 
@@ -97,6 +103,10 @@ export class MethodsAccountService {
     if (!account.isActivated) {
       await this.registerAuthHandler.sendMail(account, subject);
     }
+    this.eventClient.publish("user.registered", {
+      userId: account.id,
+      username: account.username,
+    });
     return { success: true };
   }
 
@@ -115,6 +125,9 @@ export class MethodsAccountService {
       subject,
       confirm.code
     );
+    this.eventClient.publish("password.reset", {
+      username: accountDto.username,
+    });
     return { success: true };
   }
 
