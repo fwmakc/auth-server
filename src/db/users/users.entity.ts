@@ -1,5 +1,5 @@
 import { BaseEntity, Entity, JoinColumn, OneToOne } from "typeorm";
-import { TypeGenders } from "@core/common";
+import { TypeGenders } from "api-server-toolkit";
 import { AccountEntity } from "@src/account/account.entity";
 import {
   CreatedColumn,
@@ -8,7 +8,7 @@ import {
   IdColumn,
   UpdatedColumn,
   VarcharColumn,
-} from "@core/common";
+} from "api-server-toolkit";
 
 @Entity({ name: "users" })
 export class UsersEntity extends BaseEntity {

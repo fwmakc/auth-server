@@ -15,8 +15,8 @@ import {
   TextColumn,
   UpdatedColumn,
   VarcharColumn,
-} from "@core/common";
-import { TypeClients } from "@core/common";
+} from "api-server-toolkit";
+import { TypeClients } from "api-server-toolkit";
 import { AccountEntity } from "@src/account/account.entity";
 import { ClientsRedirectsEntity } from "./clients_redirects/clients_redirects.entity";
 

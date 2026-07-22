@@ -35,7 +35,7 @@ import { ClientsRedirectsEntity } from "@src/clients/clients_redirects/clients_r
 import { UsersEntity } from "@src/db/users/users.entity";
 
 import { genSalt, hash } from "bcryptjs";
-import { TypeClients } from "@core/common";
+import { TypeClients } from "api-server-toolkit";
 
 const TEST_ENTITIES = [
   AccountEntity,

@@ -1,15 +1,15 @@
 import { Repository } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CommonService } from "@core/common";
-import { encrypt, decrypt } from "@core/common";
-import { FindDto } from "@core/common";
-import { FindManyDto } from "@core/common";
-import { FindOneDto } from "@core/common";
-import { RelationsDto } from "@core/common";
+import { CommonService } from "api-server-toolkit";
+import { encrypt, decrypt } from "api-server-toolkit";
+import { FindDto } from "api-server-toolkit";
+import { FindManyDto } from "api-server-toolkit";
+import { FindOneDto } from "api-server-toolkit";
+import { RelationsDto } from "api-server-toolkit";
 import { AccountStrategiesDto } from "./account_strategies.dto";
 import { AccountStrategiesEntity } from "./account_strategies.entity";
-import { BindDto } from "@core/common";
+import { BindDto } from "api-server-toolkit";
 
 @Injectable()
 export class AccountStrategiesService extends CommonService<

@@ -2,8 +2,8 @@ import { compare } from "bcryptjs";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { CommonService } from "@core/common";
-import { RelationsDto } from "@core/common";
+import { CommonService } from "api-server-toolkit";
+import { RelationsDto } from "api-server-toolkit";
 import { AccountDto } from "./account.dto";
 import { AccountEntity } from "./account.entity";
 

@@ -1,5 +1,5 @@
-import { DtoColumn, DtoCreatedColumn, DtoUpdatedColumn } from "@core/common";
-import { CommonDto } from "@core/common";
+import { DtoColumn, DtoCreatedColumn, DtoUpdatedColumn } from "api-server-toolkit";
+import { CommonDto } from "api-server-toolkit";
 
 export class AccountConfirmDto extends CommonDto {
   @DtoCreatedColumn()

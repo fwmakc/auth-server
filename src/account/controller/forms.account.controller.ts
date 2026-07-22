@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, Post, Req, Res } from "@nestjs/common";
 import { AccountDto } from "@src/account/account.dto";
 import { ApiTags } from "@nestjs/swagger";
-import { Account } from "@core/common";
-import { CommonDoc } from "@core/common";
+import { Account } from "api-server-toolkit";
+import { CommonDoc } from "api-server-toolkit";
 import { FormsAccountService } from "@src/account/service/forms.account.service";
 import { GrantsTokenDto } from "@src/token/dto/grants.token.dto";
 

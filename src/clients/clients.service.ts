@@ -3,13 +3,13 @@ import { genSalt, hash } from "bcryptjs";
 import { Repository } from "typeorm";
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CommonService } from "@core/common";
-import { RelationsDto } from "@core/common";
+import { CommonService } from "api-server-toolkit";
+import { RelationsDto } from "api-server-toolkit";
 import { TokenService } from "@src/token/token.service";
 import { ClientsDto } from "./clients.dto";
 import { ClientsEntity } from "./clients.entity";
 import { ClientsRedirectsService } from "./clients_redirects/clients_redirects.service";
-import { BindDto } from "@core/common";
+import { BindDto } from "api-server-toolkit";
 
 @Injectable()
 export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {

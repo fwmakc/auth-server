@@ -4,7 +4,7 @@ import {
   IdColumn,
   UpdatedColumn,
   VarcharColumn,
-} from "@core/common";
+} from "api-server-toolkit";
 import { ClientsEntity } from "../clients.entity";
 
 @Entity({ name: "clients_redirects" })

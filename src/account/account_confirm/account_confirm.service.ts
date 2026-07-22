@@ -2,7 +2,7 @@ import { v4 } from "uuid";
 import { FindOptionsWhere, MoreThan, Repository } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { hash } from "@core/common";
+import { hash } from "api-server-toolkit";
 import { RandomService } from "@src/random/random.service";
 import { AccountConfirmEntity } from "./account_confirm.entity";
 

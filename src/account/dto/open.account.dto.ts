@@ -1,6 +1,6 @@
-import { DtoColumn, DtoEnumColumn } from "@core/common";
-import { CommonDto } from "@core/common";
-import { TypeResponses } from "@core/common";
+import { DtoColumn, DtoEnumColumn } from "api-server-toolkit";
+import { CommonDto } from "api-server-toolkit";
+import { TypeResponses } from "api-server-toolkit";
 
 export class OpenAccountDto extends CommonDto {
   @DtoEnumColumn("Тип запроса. Один из token или code", TypeResponses, {

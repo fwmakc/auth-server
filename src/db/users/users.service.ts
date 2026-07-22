@@ -1,8 +1,8 @@
 import { DeepPartial, Repository } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CommonService } from "@core/common";
-import { prepareParams } from "@core/common";
+import { CommonService } from "api-server-toolkit";
+import { prepareParams } from "api-server-toolkit";
 import { UsersDto } from "./users.dto";
 import { UsersEntity } from "./users.entity";
 

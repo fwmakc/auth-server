@@ -4,9 +4,9 @@ import {
   DtoCreatedColumn,
   DtoEnumColumn,
   DtoUpdatedColumn,
-} from "@core/common";
-import { TypeClients } from "@core/common";
-import { CommonDto } from "@core/common";
+} from "api-server-toolkit";
+import { TypeClients } from "api-server-toolkit";
+import { CommonDto } from "api-server-toolkit";
 import { ClientsRedirectsDto } from "./clients_redirects/clients_redirects.dto";
 
 export class ClientsDto extends CommonDto {

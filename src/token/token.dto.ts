@@ -1,5 +1,5 @@
-import { CommonDto } from "@core/common";
-import { DtoColumn } from "@core/common";
+import { CommonDto } from "api-server-toolkit";
+import { DtoColumn } from "api-server-toolkit";
 
 export class TokenDto extends CommonDto {
   @DtoColumn("Токен доступа")

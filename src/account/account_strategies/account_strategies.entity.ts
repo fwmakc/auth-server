@@ -5,7 +5,7 @@ import {
   JsonColumn,
   UpdatedColumn,
   VarcharColumn,
-} from "@core/common";
+} from "api-server-toolkit";
 import { AccountEntity } from "../account.entity";
 
 @Entity({ name: "account_strategies" })

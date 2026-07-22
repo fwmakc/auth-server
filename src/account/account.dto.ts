@@ -1,7 +1,7 @@
 import { IsEmail, IsString, MinLength } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { DtoColumn, DtoCreatedColumn, DtoUpdatedColumn } from "@core/common";
-import { CommonDto } from "@core/common";
+import { DtoColumn, DtoCreatedColumn, DtoUpdatedColumn } from "api-server-toolkit";
+import { CommonDto } from "api-server-toolkit";
 import { AccountSessionsDto } from "./account_sessions/account_sessions.dto";
 import { AccountStrategiesDto } from "./account_strategies/account_strategies.dto";
 import { AccountConfirmDto } from "./account_confirm/account_confirm.dto";

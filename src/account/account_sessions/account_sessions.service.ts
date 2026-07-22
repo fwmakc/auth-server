@@ -1,8 +1,8 @@
 import { Repository } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CommonService } from "@core/common";
-import { RelationsDto } from "@core/common";
+import { CommonService } from "api-server-toolkit";
+import { RelationsDto } from "api-server-toolkit";
 import { AccountSessionsDto } from "./account_sessions.dto";
 import { AccountSessionsEntity } from "./account_sessions.entity";
 

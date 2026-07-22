@@ -1,6 +1,6 @@
 import { Body, Controller, Get } from "@nestjs/common";
 import { ApiExcludeController } from "@nestjs/swagger";
-import { Account } from "@core/common";
+import { Account } from "api-server-toolkit";
 import { RandomService } from "./random.service";
 
 @ApiExcludeController()

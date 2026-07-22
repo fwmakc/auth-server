@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { TypeGrants } from "@core/common";
+import { TypeGrants } from "api-server-toolkit";
 import { EventClientService } from "@src/event-client/event-client.service";
 import { ChangeAccountHandler } from "@src/account/handler/change.account.handler";
 import { ConfirmAccountHandler } from "@src/account/handler/confirm.account.handler";

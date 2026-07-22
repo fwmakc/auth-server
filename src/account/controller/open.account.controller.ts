@@ -2,9 +2,9 @@ import { Controller, Get, Req, Res } from "@nestjs/common";
 import { OpenAccountService } from "@src/account/service/open.account.service";
 import { OpenAccountDto } from "@src/account/dto/open.account.dto";
 import { ApiTags } from "@nestjs/swagger";
-import { Data } from "@core/common";
-import { CommonDoc } from "@core/common";
-import { Cookie } from "@core/common";
+import { Data } from "api-server-toolkit";
+import { CommonDoc } from "api-server-toolkit";
+import { Cookie } from "api-server-toolkit";
 import { ConfigService } from "@nestjs/config";
 
 @ApiTags("OAuth 2.0")

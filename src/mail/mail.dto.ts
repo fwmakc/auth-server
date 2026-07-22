@@ -1,5 +1,5 @@
 import { IsEmail, IsString } from "class-validator";
-import { CommonDto } from "@core/common";
+import { CommonDto } from "api-server-toolkit";
 
 export class MailDto extends CommonDto {
   @IsEmail()

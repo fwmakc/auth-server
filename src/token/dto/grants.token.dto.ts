@@ -1,6 +1,6 @@
-import { DtoColumn, DtoEnumColumn } from "@core/common";
-import { CommonDto } from "@core/common";
-import { TypeGrants } from "@core/common";
+import { DtoColumn, DtoEnumColumn } from "api-server-toolkit";
+import { CommonDto } from "api-server-toolkit";
+import { TypeGrants } from "api-server-toolkit";
 
 export class GrantsTokenDto extends CommonDto {
   @DtoEnumColumn(
