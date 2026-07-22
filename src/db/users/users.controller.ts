@@ -15,6 +15,7 @@ export class UsersController extends EntityController({
     update: "owner",
     delete: "owner",
   },
+  relations: ["account"],
 })<UsersDto, UsersEntity, UsersService> {
   constructor(readonly service: UsersService) {
     super();

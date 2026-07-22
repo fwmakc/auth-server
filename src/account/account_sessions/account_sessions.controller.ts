@@ -11,6 +11,13 @@ export class AccountSessionsController extends EntityController({
   name: "Сессии",
   dto: AccountSessionsDto,
   entity: AccountSessionsEntity,
+  operations: {
+    read: "owner",
+    create: "owner",
+    update: "owner",
+    delete: "owner",
+  },
+  relations: ["account"],
 })<AccountSessionsDto, AccountSessionsEntity, AccountSessionsService> {
   constructor(readonly service: AccountSessionsService) {
     super();
