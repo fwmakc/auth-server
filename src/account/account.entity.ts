@@ -35,6 +35,12 @@ export class AccountEntity extends BaseEntity {
   @BooleanColumn("is_superuser")
   isSuperuser: boolean;
 
+  @BooleanColumn("is_deleted")
+  isDeleted: boolean;
+
+  @Column({ type: "timestamp", nullable: true, name: "deleted_at" })
+  deletedAt: Date | null;
+
   @OneToMany(() => AccountSessionsEntity, (session) => session.account, {
     cascade: true,
   })

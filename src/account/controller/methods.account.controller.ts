@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, Res } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Req, Res } from "@nestjs/common";
 import { AccountDto } from "@src/account/account.dto";
 import { ApiTags } from "@nestjs/swagger";
 import { Account } from "api-server-toolkit";
@@ -77,5 +77,25 @@ export class MethodsAccountController {
   @Post("hash/:string")
   async hash(@Param("string") string: string) {
     return await this.methodsAccountService.hash(string);
+  }
+
+  @Account()
+  @Post("deactivate")
+  async deactivate(
+    @Body("password") password: string,
+    @Req() req: any,
+    @Res({ passthrough: true }) res: any
+  ) {
+    return await this.methodsAccountService.deactivate(password, req, res);
+  }
+
+  @Account()
+  @Delete("delete/:id")
+  async delete(
+    @Param("id") id: string,
+    @Req() req: any,
+    @Res({ passthrough: true }) res: any
+  ) {
+    return await this.methodsAccountService.delete(Number(id), req, res);
   }
 }

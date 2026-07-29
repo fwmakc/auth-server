@@ -31,6 +31,9 @@ export class AccountStrategy extends PassportStrategy(Strategy) {
     if (!account.id || (!account.isActivated && !key)) {
       throw new ForbiddenException("You have no rights!");
     }
+    if (account.isDeleted) {
+      throw new UnauthorizedException("Account is deleted");
+    }
     return account;
   }
 }

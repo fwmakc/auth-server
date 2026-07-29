@@ -13,6 +13,8 @@ import { MethodsAccountController } from "./controller/methods.account.controlle
 import { OpenAccountController } from "./controller/open.account.controller";
 import { ChangeAccountHandler } from "./handler/change.account.handler";
 import { ConfirmAccountHandler } from "./handler/confirm.account.handler";
+import { DeactivateAccountHandler } from "./handler/deactivate.account.handler";
+import { DeleteAccountHandler } from "./handler/delete.account.handler";
 import { HashAccountHandler } from "./handler/hash.account.handler";
 import { LogoutAccountHandler } from "./handler/logout.account.handler";
 import { RegisterAccountHandler } from "./handler/register.account.handler";
@@ -26,7 +28,7 @@ import { AccountSessionsModule } from "./account_sessions/account_sessions.modul
 import { AccountStrategiesModule } from "./account_strategies/account_strategies.module";
 
 import { ClientsModule } from "@src/clients/clients.module";
-import { EventClientModule } from "@src/event-client/event-client.module";
+import { EventClientModule } from "api-server-toolkit";
 import { MailModule } from "@src/mail/mail.module";
 import { TokenModule } from "@src/token/token.module";
 import { UsersModule } from "@src/db/users/users.module";
@@ -60,6 +62,8 @@ import { UsersModule } from "@src/db/users/users.module";
 
     ChangeAccountHandler,
     ConfirmAccountHandler,
+    DeactivateAccountHandler,
+    DeleteAccountHandler,
     HashAccountHandler,
     LogoutAccountHandler,
     RegisterAccountHandler,

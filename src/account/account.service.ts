@@ -21,6 +21,8 @@ export class AccountService extends CommonService<AccountDto, AccountEntity> {
     relations: Array<RelationsDto> = undefined
   ): Promise<AccountEntity> {
     delete accountDto.isSuperuser;
+    delete (accountDto as any).isDeleted;
+    delete (accountDto as any).deletedAt;
     return await super.create(accountDto, relations);
   }
 
@@ -30,6 +32,8 @@ export class AccountService extends CommonService<AccountDto, AccountEntity> {
     relations: Array<RelationsDto> = undefined
   ): Promise<AccountEntity> {
     delete accountDto.isSuperuser;
+    delete (accountDto as any).isDeleted;
+    delete (accountDto as any).deletedAt;
     return await super.update(id, accountDto, relations);
   }
 
@@ -52,6 +56,18 @@ export class AccountService extends CommonService<AccountDto, AccountEntity> {
     if (!account.isActivated) {
       throw new UnauthorizedException("Not activated");
     }
+    if (account.isDeleted) {
+      throw new UnauthorizedException("Account is deleted");
+    }
     return account;
+  }
+
+  async hardDelete(id: number): Promise<void> {
+    await this.repository.manager.transaction(async (manager) => {
+      await manager.query("DELETE FROM account_confirm WHERE account_id = $1", [id]);
+      await manager.query("DELETE FROM clients WHERE account_id = $1", [id]);
+      await manager.query("DELETE FROM users WHERE account_id = $1", [id]);
+      await manager.query("DELETE FROM accounts WHERE id = $1", [id]);
+    });
   }
 }

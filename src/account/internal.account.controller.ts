@@ -22,7 +22,7 @@ export class InternalAccountController {
   @Get("info/:id")
   async getInfo(
     @Param("id", ParseIntPipe) id: number,
-    @Headers("x-internal-key") internalKey: string
+    @Headers("x-internal-api-key") internalKey: string
   ) {
     const expectedKey = this.configService.get("INTERNAL_API_KEY");
     if (!expectedKey || internalKey !== expectedKey) {

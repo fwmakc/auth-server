@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@casl/ability": "^6.5.0",
-    "api-server-toolkit": "github:fwmakc/api-server-toolkit#master",
     "@nestjs-modules/mailer": "^1.9.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.2",
@@ -25,6 +24,7 @@
     "@nestjs/typeorm": "^9.0.1",
     "@sentry/nestjs": "^10.21.0",
     "@supercharge/request-ip": "^1.2.0",
+    "api-server-toolkit": "github:fwmakc/api-server-toolkit#b5fc209",
     "axios": "^1.6.7",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",

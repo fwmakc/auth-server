@@ -5,7 +5,6 @@ import { AccountEntity } from "@src/account/account.entity";
 import { AccountService } from "@src/account/account.service";
 import { AccountConfirmService } from "@src/account/account_confirm/account_confirm.service";
 import { HashAccountHandler } from "@src/account/handler/hash.account.handler";
-import { MailService } from "@src/mail/mail.service";
 
 @Injectable()
 export class RegisterAccountHandler {
@@ -13,7 +12,6 @@ export class RegisterAccountHandler {
     protected readonly accountService: AccountService,
     protected readonly accountConfirmService: AccountConfirmService,
     protected readonly configService: ConfigService,
-    protected readonly mailService: MailService,
     protected readonly hashAuthHandler: HashAccountHandler
   ) {}
 
@@ -39,23 +37,10 @@ export class RegisterAccountHandler {
     return await this.accountService.create(accountDto);
   }
 
-  async sendMail(account: AccountDto, subject): Promise<void> {
-    const { username } = account;
-
-    // закомментируйте строки ниже, если пользователь будет сразу же активирован
-    // используйте generate чтобы генерировать код из цифр
+  async sendMail(account: AccountDto): Promise<string> {
     const confirm = await this.accountConfirmService.create(account);
     const url = this.configService.get("FORM_CONFIRM");
 
-    await this.mailService.sendByTemplate(
-      {
-        to: username,
-        subject,
-        template: "register",
-      },
-      {
-        url: `${url}?code=${confirm.code}`,
-      }
-    );
+    return `${url}?code=${confirm.code}`;
   }
 }

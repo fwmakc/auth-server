@@ -23,8 +23,7 @@ import { MailService } from "@src/mail/mail.service";
 import { RandomModule } from "@src/random/random.module";
 import { TokenModule } from "@src/token/token.module";
 import { UsersModule } from "@src/db/users/users.module";
-import { EventClientModule } from "@src/event-client/event-client.module";
-import { EventClientService } from "@src/event-client/event-client.service";
+import { IEventClient } from "api-server-toolkit";
 
 import { AccountEntity } from "@src/account/account.entity";
 import { AccountConfirmEntity } from "@src/account/account_confirm/account_confirm.entity";
@@ -144,7 +143,7 @@ export const createTestModule = async (): Promise<TestingModule> => {
       send: jest.fn().mockResolvedValue(undefined),
       sendByTemplate: jest.fn().mockResolvedValue(undefined),
     })
-    .overrideProvider(EventClientService)
+    .overrideProvider(IEventClient)
     .useValue({
       publish: mockPublish,
     })

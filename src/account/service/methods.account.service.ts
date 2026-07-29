@@ -1,8 +1,9 @@
-import { Injectable } from "@nestjs/common";
-import { TypeGrants } from "api-server-toolkit";
-import { EventClientService } from "@src/event-client/event-client.service";
+import { Injectable, Inject } from "@nestjs/common";
+import { TypeGrants, IEventClient } from "api-server-toolkit";
 import { ChangeAccountHandler } from "@src/account/handler/change.account.handler";
 import { ConfirmAccountHandler } from "@src/account/handler/confirm.account.handler";
+import { DeactivateAccountHandler } from "@src/account/handler/deactivate.account.handler";
+import { DeleteAccountHandler } from "@src/account/handler/delete.account.handler";
 import { HashAccountHandler } from "@src/account/handler/hash.account.handler";
 import { LogoutAccountHandler } from "@src/account/handler/logout.account.handler";
 import { RegisterAccountHandler } from "@src/account/handler/register.account.handler";
@@ -17,13 +18,15 @@ export class MethodsAccountService {
   constructor(
     protected readonly changeAuthHandler: ChangeAccountHandler,
     protected readonly confirmAuthHandler: ConfirmAccountHandler,
+    protected readonly deactivateAuthHandler: DeactivateAccountHandler,
+    protected readonly deleteAuthHandler: DeleteAccountHandler,
     protected readonly hashAuthHandler: HashAccountHandler,
     protected readonly logoutAuthHandler: LogoutAccountHandler,
     protected readonly registerAuthHandler: RegisterAccountHandler,
     protected readonly resetAuthHandler: ResetAccountHandler,
     protected readonly grantsTokenService: GrantsTokenService,
     protected readonly openAccountService: OpenAccountService,
-    protected readonly eventClient: EventClientService
+    @Inject(IEventClient) protected readonly eventClient: IEventClient
   ) {}
 
   async change(accountDto: AccountDto, code: string, req, res): Promise<any> {
@@ -53,6 +56,7 @@ export class MethodsAccountService {
     this.eventClient.publish("user.confirmed", {
       userId: account.id,
       username: account.username,
+      email: account.username,
     });
     return { success: true };
   }
@@ -101,12 +105,21 @@ export class MethodsAccountService {
       return error;
     }
     if (!account.isActivated) {
-      await this.registerAuthHandler.sendMail(account, subject);
+      const confirmUrl = await this.registerAuthHandler.sendMail(account);
+      this.eventClient.publish("user.registered", {
+        userId: account.id,
+        username: account.username,
+        email: account.username,
+        subject,
+        confirmUrl,
+      });
+    } else {
+      this.eventClient.publish("user.registered", {
+        userId: account.id,
+        username: account.username,
+        email: account.username,
+      });
     }
-    this.eventClient.publish("user.registered", {
-      userId: account.id,
-      username: account.username,
-    });
     return { success: true };
   }
 
@@ -120,13 +133,51 @@ export class MethodsAccountService {
     if (!confirm?.code) {
       return error;
     }
-    await this.resetAuthHandler.sendMail(
+    const resetUrl = await this.resetAuthHandler.sendMail(
       accountDto.username,
-      subject,
       confirm.code
     );
     this.eventClient.publish("password.reset", {
       username: accountDto.username,
+      email: accountDto.username,
+      subject,
+      resetUrl,
+    });
+    return { success: true };
+  }
+
+  async deactivate(password: string, req, res): Promise<any> {
+    let error;
+    const account = await this.deactivateAuthHandler
+      .deactivate(req.user, password, req, res)
+      .catch((e) => {
+        error = e?.response;
+      });
+    if (!account) {
+      return error;
+    }
+    this.eventClient.publish("user.deactivated", {
+      userId: account.id,
+      username: account.username,
+      email: account.username,
+    });
+    return { success: true };
+  }
+
+  async delete(targetUserId: number, req, res): Promise<any> {
+    let error;
+    const account = await this.deleteAuthHandler
+      .delete(targetUserId, req)
+      .catch((e) => {
+        error = e?.response;
+      });
+    if (!account) {
+      return error;
+    }
+    this.eventClient.publish("user.deleted", {
+      userId: account.id,
+      username: account.username,
+      email: account.username,
     });
     return { success: true };
   }
