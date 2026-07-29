@@ -1,5 +1,12 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { TypeGrants, IEventClient } from "api-server-toolkit";
+import {
+  UserRegisteredDto,
+  UserConfirmedDto,
+  PasswordResetDto,
+  UserDeactivatedDto,
+  UserDeletedDto,
+} from "event-server/contracts";
 import { ChangeAccountHandler } from "@src/account/handler/change.account.handler";
 import { ConfirmAccountHandler } from "@src/account/handler/confirm.account.handler";
 import { DeactivateAccountHandler } from "@src/account/handler/deactivate.account.handler";
@@ -57,7 +64,7 @@ export class MethodsAccountService {
       userId: account.id,
       username: account.username,
       email: account.username,
-    });
+    } as UserConfirmedDto);
     return { success: true };
   }
 
@@ -112,13 +119,13 @@ export class MethodsAccountService {
         email: account.username,
         subject,
         confirmUrl,
-      });
+      } as UserRegisteredDto);
     } else {
       this.eventClient.publish("user.registered", {
         userId: account.id,
         username: account.username,
         email: account.username,
-      });
+      } as UserRegisteredDto);
     }
     return { success: true };
   }
@@ -142,7 +149,7 @@ export class MethodsAccountService {
       email: accountDto.username,
       subject,
       resetUrl,
-    });
+    } as PasswordResetDto);
     return { success: true };
   }
 
@@ -160,7 +167,7 @@ export class MethodsAccountService {
       userId: account.id,
       username: account.username,
       email: account.username,
-    });
+    } as UserDeactivatedDto);
     return { success: true };
   }
 
@@ -178,7 +185,7 @@ export class MethodsAccountService {
       userId: account.id,
       username: account.username,
       email: account.username,
-    });
+    } as UserDeletedDto);
     return { success: true };
   }
 
