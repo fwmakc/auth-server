@@ -1,4 +1,4 @@
-import axios from "axios";
+import { httpPost, httpGet } from "api-server-toolkit";
 import { Injectable } from "@nestjs/common";
 import { AccountDto } from "@src/account/account.dto";
 import { AccountService } from "@src/account/account.service";
@@ -32,30 +32,34 @@ export class LeaderProvider {
   }
 
   async getToken(token: string): Promise<any> {
-    return axios
-      .post("https://apps.leader-id.ru/api/v1/oauth/token", {
-        grant_type: "authorization_code",
-        code: token,
-        client_id: this.configService.get("LEADER_CLIENT_ID"),
-        client_secret: this.configService.get("LEADER_CLIENT_SECRET"),
-      })
-      .then((r) => r.data)
-      .catch((e) => {
-        console.error(e);
-      });
+    try {
+      const { data } = await httpPost(
+        "https://apps.leader-id.ru/api/v1/oauth/token",
+        {
+          grant_type: "authorization_code",
+          code: token,
+          client_id: this.configService.get("LEADER_CLIENT_ID"),
+          client_secret: this.configService.get("LEADER_CLIENT_SECRET"),
+        }
+      );
+      return data;
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   async getUser(userId: string, accessToken: string): Promise<any> {
-    return axios
-      .get(`https://apps.leader-id.ru/api/v1/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-      .then((r) => r.data)
-      .catch((e) => {
-        console.error(e);
-      });
+    try {
+      const { data } = await httpGet(
+        `https://apps.leader-id.ru/api/v1/users/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+      return data;
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   async validate(profile) {

@@ -7,7 +7,7 @@ import { AccountDto } from "@src/account/account.dto";
 import { AccountStrategiesService } from "@src/account/account_strategies/account_strategies.service";
 // import { OauthProvider } from '@src/account/account_strategies/provider/oauth.provider';
 
-import axios from "axios";
+import { httpGet } from "api-server-toolkit";
 // import { Request } from 'express';
 
 @Injectable()
@@ -37,13 +37,14 @@ export class OauthStrategy extends PassportStrategy(Strategy, "oauth") {
   async validate(accessToken: string, refreshToken: string) {
     const customAccountServer = this.configService.get("OAUTH_SERVER");
 
-    const profile = await axios
-      .get(`${customAccountServer}/account/self`, {
+    const { data: profile } = await httpGet(
+      `${customAccountServer}/account/self`,
+      {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      })
-      .then((r) => r.data);
+      }
+    );
 
     const account = await this.accountService.findByUsername(profile.username);
 
