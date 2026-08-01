@@ -41,6 +41,7 @@
     "event-server": "github:fwmakc/event-server#00adccd",
     "express-session": "^1.17.3",
     "fs": "^0.0.1-security",
+    "helmet": "^8.3.0",
     "js-yaml": "^4.1.0",
     "json-2-csv": "^5.5.9",
     "mime-types": "^2.1.35",

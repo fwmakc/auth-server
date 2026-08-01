@@ -1,8 +1,10 @@
 import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
+import { ValidationPipe, Logger } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import * as Sentry from "@sentry/nestjs";
 import redoc from "redoc-express";
+import helmet from "helmet";
 import { join } from "path";
 import { AppModule } from "@src/app.module";
 import * as cookieParser from "cookie-parser";
@@ -48,8 +50,18 @@ async function bootstrap() {
       preflightContinue: false,
       optionsSuccessStatus: 204,
     },
-    logger: console,
+    logger: ["error", "warn", "log"],
   });
+
+  app.use(helmet());
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   if (process.env.MORGAN_LOG_FORMAT) {
     app.use(morgan(process.env.MORGAN_LOG_FORMAT));
@@ -98,15 +110,19 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3001;
   const ip = process.env.IP || "localhost";
-  const message = `Auth server running\nin ${process.env.NODE_ENV} mode on ${port} port\nat http://${ip}:${port}`;
+  const logger = new Logger("Bootstrap");
 
-  await app.listen(port, ip).then(() => {
-    console.log(message);
-  });
+  await app.listen(port, ip);
+  logger.log(
+    `Auth server running in ${process.env.NODE_ENV} mode on port ${port} at http://${ip}:${port}`,
+  );
 
   process.on("SIGINT", () => {
     app.close();
   });
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error("Failed to start auth server:", err);
+  process.exit(1);
+});

@@ -10,12 +10,10 @@ export class SessionSerializer extends PassportSerializer {
   }
 
   serializeUser(account: AccountEntity, done) {
-    console.log("serializeUser");
     done(undefined, account);
   }
 
   async deserializeUser(payload: any, done) {
-    console.log("deserializeUser");
     const account = await this.accountService.findOne({ id: payload.id });
     return done(undefined, account ?? undefined);
   }
