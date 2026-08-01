@@ -19,4 +19,8 @@ export class UntiStrategy extends PassportStrategy(Strategy, "unti") {
       tokenURL: "https://sso.2035.university/oauth2/access_token",
     });
   }
+
+  async validate(accessToken: string, refreshToken: string, profile: any) {
+    return { accessToken, profile };
+  }
 }

@@ -20,4 +20,8 @@ export class LeaderStrategy extends PassportStrategy(Strategy, "leader") {
       tokenURL: "https://leader-id.ru/",
     });
   }
+
+  async validate(accessToken: string, refreshToken: string, profile: any) {
+    return { accessToken, profile };
+  }
 }
