@@ -2,7 +2,7 @@
 
 OAuth2 authorization server with partial OIDC support — registration, login, JWT issuance (RS256), social login, and event-driven account lifecycle notifications.
 
-Port **3001**. Part of the fwmakc microservices split (Stage 2, Issue #6).
+Port **3001**. Part of the microservices split (Stage 2, Issue #6).
 
 ---
 
