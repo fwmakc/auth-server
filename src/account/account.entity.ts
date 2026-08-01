@@ -1,7 +1,8 @@
-import { BaseEntity, Column, Entity, OneToMany, OneToOne } from "typeorm";
+import { BaseEntity, Entity, OneToMany, OneToOne } from "typeorm";
 import {
   BooleanColumn,
   CreatedColumn,
+  DateColumn,
   IdColumn,
   UpdatedColumn,
   VarcharColumn,
@@ -38,7 +39,7 @@ export class AccountEntity extends BaseEntity {
   @BooleanColumn("is_deleted")
   isDeleted: boolean;
 
-  @Column({ type: "timestamp", nullable: true, name: "deleted_at" })
+  @DateColumn("deleted_at")
   deletedAt: Date | null;
 
   @OneToMany(() => AccountSessionsEntity, (session) => session.account, {
