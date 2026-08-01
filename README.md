@@ -305,6 +305,36 @@ npm run migration:fake   # Mark as applied without executing
 
 ---
 
+## Integration into existing infrastructure
+
+**Already have auth?** You can use auth-server alongside an existing provider:
+- Use auth-server as the OAuth2 provider for new services, keep existing auth for legacy
+- Point all services at auth-server's `/.well-known/jwks.json` for JWT verification
+- Social login (Google, Leader-ID, UNTI) works out of the box
+
+**Replacing Keycloak / Auth0?** auth-server provides:
+- Standard OAuth2 flows (authorization code, password, refresh, client credentials)
+- JWKS endpoint for asymmetric JWT verification (no shared secret)
+- Social login with Google, Leader-ID, UNTI/2030
+- Client management for first-party and third-party apps
+
+## Migration
+
+**From a monolith:** auth-server was extracted from a monolithic backend. The extraction is
+clean — all auth concerns (registration, login, JWT, sessions, social, password reset) live
+here. Your domain services only need to verify JWTs via JWKS.
+
+**To another provider:** JWT verification is standard RS256/JWKS. Any service that verifies
+auth-server's tokens will work with any compliant provider after updating the JWKS URL.
+
+## AI-friendly documentation
+
+- `ai-context.md` — auto-generated structured reference. Run `npm run ai-context`.
+- Swagger UI at `/swagger` — interactive API exploration
+- ReDoc at `/redoc` — readable API documentation
+
+---
+
 ## Port Assignments
 
 | Service | Port |
