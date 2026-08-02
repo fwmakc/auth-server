@@ -1,8 +1,17 @@
 # Auth Server
 
-OAuth2 authorization server with partial OIDC support — registration, login, JWT issuance (RS256), social login, and event-driven account lifecycle notifications.
+> OAuth2 authorization server — JWT RS256, social login, password reset, event-driven notifications.
 
-Port **3001**. Part of the microservices split (Stage 2, Issue #6).
+## What This Is
+
+A **working scaffold** — not a demo, not a toy. Production-ready OAuth2 provider
+with JWT signing (RS256), JWKS endpoint, social login (Google, Leader-ID, UNTI),
+and event publishing. Clone it, configure your OAuth clients, deploy.
+
+Part of a [microservices stack](https://github.com/fwmakc/gateway-server) —
+other services verify JWTs via `/.well-known/jwks.json`.
+
+Port **3001**.
 
 ---
 
@@ -261,7 +270,7 @@ auth-server:
 
 ---
 
-## Development
+## Quick start
 
 ```bash
 cp .env.example .env
@@ -269,6 +278,9 @@ cp .env.example .env
 npm install
 npm run dev
 ```
+
+Auth server runs on port **3001**.
+Swagger UI at `http://localhost:3001/swagger`.
 
 ### Testing
 
@@ -361,6 +373,17 @@ REST + JSON, documented via Swagger/ReDoc.
 
 You get a production-ready auth system without the pain of building it
 yourself.
+
+## Related Services
+
+| Service | Role | Repo |
+|---------|------|------|
+| api-server | Domain CRUD — verifies JWT from auth-server | [fwmakc/api-server](https://github.com/fwmakc/api-server) |
+| event-server | Receives auth events (user.registered, etc.) | [fwmakc/event-server](https://github.com/fwmakc/event-server) |
+| message-server | Sends welcome/reset emails triggered by auth events | [fwmakc/message-server](https://github.com/fwmakc/message-server) |
+| api-server-toolkit | Shared library (guards, columns, bootstrap) | [fwmakc/api-server-toolkit](https://github.com/fwmakc/api-server-toolkit) |
+| gateway-server | Nginx reverse proxy + Docker Compose | [fwmakc/gateway-server](https://github.com/fwmakc/gateway-server) |
+| scaffold | Template for new services | [fwmakc/scaffold](https://github.com/fwmakc/scaffold) |
 
 ---
 
