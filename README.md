@@ -1,5 +1,9 @@
 # Auth Server
 
+[![Tests](https://github.com/fwmakc/auth-server/actions/workflows/test.yml/badge.svg)](https://github.com/fwmakc/auth-server/actions/workflows/test.yml)
+[![Version](https://img.shields.io/badge/version-v2.0.0-blue)](https://github.com/fwmakc/auth-server/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/fwmakc/auth-server/blob/master/LICENSE)
+
 > OAuth2 authorization server — JWT RS256, social login, password reset, event-driven notifications.
 
 ## What This Is

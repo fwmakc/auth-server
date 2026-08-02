@@ -2,7 +2,27 @@
   "name": "auth-server",
   "version": "2.0.0",
   "description": "OAuth2 authorization server — registration, login, JWT issuance, social login",
+  "license": "MIT",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "github:fwmakc/auth-server"
+  },
+  "keywords": [
+    "nestjs",
+    "oauth2",
+    "jwt",
+    "rs256",
+    "jwks",
+    "authentication",
+    "authorization",
+    "social-login",
+    "passport"
+  ],
+  "bugs": {
+    "url": "https://github.com/fwmakc/auth-server/issues"
+  },
+  "homepage": "https://github.com/fwmakc/auth-server#readme",
   "license": "MIT",
   "scripts": {
     "build": "nest build",
