@@ -327,11 +327,40 @@ here. Your domain services only need to verify JWTs via JWKS.
 **To another provider:** JWT verification is standard RS256/JWKS. Any service that verifies
 auth-server's tokens will work with any compliant provider after updating the JWKS URL.
 
-## AI-friendly documentation
+## AI-Friendly Documentation
 
-- `ai-context.md` — auto-generated structured reference. Run `npm run ai-context`.
-- Swagger UI at `/swagger` — interactive API exploration
-- ReDoc at `/redoc` — readable API documentation
+This service is designed for AI-assisted development. You can feed context
+to any LLM (ChatGPT, Claude, Cursor, Copilot) and get code that follows
+all conventions — without reading the entire codebase.
+
+### ai-context.md
+Auto-generated structured reference: every controller, route, service,
+entity, and DTO. Run `npm run ai-context` to regenerate.
+
+### Swagger UI
+Interactive API exploration at `/swagger` — test registration, login,
+OAuth flows, password reset. See request/response schemas, copy curl commands.
+
+### ReDoc
+Clean, readable documentation at `/redoc` — share with your team.
+
+### Why this matters
+An LLM with `ai-context.md` can generate OAuth2 client configurations,
+JWT verification code, and social login integrations that match your
+existing patterns — without studying the auth-server source code.
+
+## Backend-Only — Bring Your Own Frontend
+
+This service provides OAuth2 authentication, JWT issuance, and social login.
+No frontend included, by design.
+
+The auth flow is standard OAuth2 — use any OAuth2 client library:
+Passport.js, Auth.js, AppAuth, firebase-auth, or roll your own with
+`fetch`. Registration, login, password reset, social callback — all
+REST + JSON, documented via Swagger/ReDoc.
+
+You get a production-ready auth system without the pain of building it
+yourself.
 
 ---
 
