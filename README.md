@@ -339,6 +339,143 @@ here. Your domain services only need to verify JWTs via JWKS.
 **To another provider:** JWT verification is standard RS256/JWKS. Any service that verifies
 auth-server's tokens will work with any compliant provider after updating the JWKS URL.
 
+## Keycloak Comparison & Migration
+
+### Feature Comparison
+
+| Category | auth-server | Keycloak |
+|----------|-------------|----------|
+| **Auth flows** | password, refresh, auth code, client credentials, custom `key` grant | password, refresh, auth code, client credentials, device, implicit |
+| **Identity standards** | OIDC (discovery, JWKS, `/userinfo`), OAuth2 | OIDC (certified), OAuth2, SAML 2.0 |
+| **JWT signing** | RS256 only | RS256, ES256, HS256, PS256 |
+| **Social login** | Google, Leader-ID, UNTI/2035, custom OAuth2 | Any OIDC/SAML provider via identity brokering |
+| **User federation** | — | LDAP, Active Directory |
+| **Multi-tenancy** | Single tenant | Realms (full isolation per tenant) |
+| **Authorization** | `isSuperuser` boolean + CASL/ability | Realm/client roles, composite roles, groups, UMA 2.0 |
+| **Admin UI** | API-only (Swagger/ReDoc) | Full admin console + account console |
+| **Themes** | — | Customizable login/account/admin themes |
+| **Events** | Webhook via event-server (user.registered, password.reset, etc.) | Built-in event bus, admin events, audit log |
+| **WebAuthn/Passkey** | — | Built-in |
+| **Step-up auth** | — | Built-in |
+| **Session management** | DB-backed session log | Distributed (Infinispan), revocable, idle/timeout |
+| **Tech stack** | Node.js / NestJS | Java / Quarkus (JVM) |
+| **Resource footprint** | ~100 MB RAM | ~500 MB – 1 GB RAM (JVM) |
+| **Docker image** | ~150 MB | ~600 MB |
+| **Startup time** | ~2 s | ~10–15 s |
+| **Source ownership** | Full — every line is yours, readable NestJS | Open source, but Java/Quarkus internals are complex |
+
+### Where auth-server Wins
+
+- **Simplicity** — the entire auth logic is a few thousand lines of readable NestJS. No
+  SPI development, no theme XML, no realm export/import ceremony.
+- **Resource footprint** — runs in ~100 MB of RAM. Keycloak needs 5–10x that for the JVM
+  alone. On a small VPS, this is the difference between fitting and not fitting.
+- **Full source ownership** — every line is yours to read, debug, and modify. No black-box
+  framework internals, no "why did Keycloak do this?" spelunking through Java stack traces.
+- **Domain-specific social login** — Leader-ID and UNTI/2035 (Russian platforms) are
+  pre-built. In Keycloak, you'd configure these as custom OIDC identity providers.
+- **Event-driven integration** — publishes typed events (`user.registered`,
+  `password.reset`) through event-server. Downstream services (message-server, etc.)
+  react via webhooks. Keycloak has admin events, but the integration model is different.
+- **Toolkit integration** — `@Account()`, `@Self()`, `accessGuard`, and `EntityController`
+  are designed for this auth-server's JWT shape. Zero glue code.
+- **Customization speed** — change TypeScript, restart, done. Keycloak customizations
+  require Java SPI development, Keycloak Config CLI, or theme overrides.
+- **No admin console overhead** — if you don't need a UI for user management, Keycloak's
+  console is unnecessary weight. auth-server is API-first; manage users via REST.
+
+### Where Keycloak Wins
+
+- **Battle-tested** — enterprise-grade, security audited, used by large organizations.
+- **Multi-tenancy** — realms provide full tenant isolation (separate users, clients,
+  identity providers, themes). auth-server is single-tenant.
+- **Identity brokering** — any SAML/OIDC provider can be a login method. auth-server
+  supports OAuth2 providers but not SAML.
+- **User federation** — LDAP/Active Directory integration out of the box. auth-server
+  has no federation — all users are local.
+- **Fine-grained authorization** — UMA 2.0, permission tickets, resource-scoped policies,
+  composite roles, groups. auth-server has `isSuperuser` + CASL/ability.
+- **Admin console** — full UI for user/role/group/client management with self-service
+  account console. auth-server is API-only.
+- **WebAuthn/Passkey** — built-in support. auth-server does not have this.
+- **Community/ecosystem** — huge community, extensive documentation, many third-party
+  guides and integrations.
+
+### Migration: auth-server → Keycloak
+
+JWT verification is standard RS256/JWKS, so your consuming services need minimal changes
+(just update the JWKS URL). The migration work is on the identity provider side:
+
+1. **Export users** — query `accounts` + `users` tables from PostgreSQL. Map to Keycloak's
+   realm import JSON format (`username`, `email`, `enabled`, `credentials`). Password
+   hashes are bcrypt (`bcryptjs`) — Keycloak supports bcrypt import via realm JSON.
+
+2. **Create realm** — set up a Keycloak realm matching your auth-server's namespace.
+
+3. **Recreate OAuth2 clients** — for each entry in the `clients` table, create a Keycloak
+   client with the same `client_id`, `client_secret`, redirect URIs (from
+   `clients_redirects`), and grant types.
+
+4. **Configure identity providers** — set up Google as a built-in OIDC provider. For
+   Leader-ID and UNTI/2035, add custom OIDC identity providers with the same
+   `CLIENT_ID` / `CLIENT_SECRET` / `CLIENT_REDIRECT` from your `.env`.
+
+5. **Protocol mapper for `isSuperuser`** — add a claim mapper in Keycloak that maps the
+   `admin` role (or a custom `superuser` role) to an `isSuperuser: true` JWT claim. This
+   keeps the toolkit's `JwtAdminGuard` working without code changes.
+
+6. **Update JWKS URL** — point all consuming services at Keycloak's
+   `/.well-known/jwks.json` instead of auth-server's. RS256 is RS256 — tokens verify
+   the same way.
+
+7. **Replace event integration** — Keycloak has an admin event listener SPI. Configure an
+   HTTP event listener (e.g. `keycloak-event-listener-http`) to send events to event-server,
+   or replace event-server's auth-related contracts with Keycloak webhooks.
+
+8. **Decommission** — shut down auth-server once all traffic flows through Keycloak.
+
+### Migration: Keycloak → auth-server
+
+Moving from Keycloak to auth-server gives you a lighter stack, full source control, and
+toolkit integration — at the cost of multi-tenancy, LDAP federation, and fine-grained
+authorization.
+
+1. **Export Keycloak realm** — use `kc.sh export` or the admin REST API to export the realm
+   JSON (users, clients, identity providers, roles).
+
+2. **Import users** — map Keycloak users to the `accounts` table:
+   - `username` → `accounts.username` (Keycloak username or email)
+   - `enabled` → `accounts.is_activated`
+   - `email` → `accounts.username` (auth-server uses email as username)
+   - Passwords: Keycloak's default hash is PBKDF2. You have two options:
+     - Trigger password reset for all users (simplest, safest)
+     - Add a PBKDF2 verifier alongside bcrypt in the login flow (more work)
+
+3. **Recreate OAuth2 clients** — for each Keycloak client, insert a row in `clients` with
+   matching `client_id`, `client_secret`, `client_type`, and redirect URIs.
+
+4. **Configure social login** — set up Google via `GOOGLE_CLIENT_ID` etc. For other
+   Keycloak identity providers, use the custom OAuth2 strategy (`OAUTH_*` env vars).
+
+5. **Map roles** — Keycloak `admin` / `superadmin` role → set `is_superuser = true` on the
+   matching accounts. Other roles are not natively supported (CASL/ability can be extended).
+
+6. **Update JWKS URL** — point services at auth-server's `/.well-known/jwks.json`.
+
+7. **Replace Keycloak events** — subscribe auth-server's event publishing
+   (`user.registered`, `password.reset`, etc.) to event-server. If you used Keycloak's
+   admin event listener, replace those webhooks with auth-server's event contracts.
+
+8. **Limitations** — if you used Keycloak features that auth-server doesn't have, plan
+   alternatives:
+   - **LDAP/AD federation** — sync users into PostgreSQL via a script, or run LDAP
+     alongside auth-server
+   - **SAML providers** — not supported; convert to OIDC or drop
+   - **Multi-tenancy (realms)** — run multiple auth-server instances, or add a `tenant_id`
+     column (requires toolkit fork — see toolkit's "Changing the Domain Model" guide)
+   - **Admin console** — manage users via REST API + Swagger UI
+   - **WebAuthn/Passkey** — not available; use password + social login
+
 ## AI-Friendly Documentation
 
 This service is designed for AI-assisted development. You can feed context
