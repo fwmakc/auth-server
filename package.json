@@ -41,7 +41,7 @@
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.10",
-    "event-server": "github:fwmakc/event-server#master",
+    "event-server": "github:fwmakc/event-server#v1.0.0",
     "express-session": "^1.17.3",
     "helmet": "^8.3.0",
     "js-yaml": "^4.1.0",
