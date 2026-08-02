@@ -26,6 +26,7 @@ export const getDbConfig = async (
   logging: config.get<string>("DB_LOG") === "true",
 
   entities: [join(__dirname, "../**/*.entity{.ts,.js}")],
-  migrations: [join(__dirname, "../typeorm/migrations/*.ts")],
+  migrations: [join(__dirname, "../typeorm/migrations/*{.ts,.js}")],
   migrationsTableName: "migrations_typeorm",
+  migrationsRun: config.get<string>("DB_MIGRATIONS_RUN", "false") === "true",
 });

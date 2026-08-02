@@ -6,7 +6,7 @@ import { SentryGlobalFilter, SentryModule } from "@sentry/nestjs/setup";
 import { DataSource } from "typeorm";
 import { addTransactionalDataSource } from "typeorm-transactional";
 import { getDbConfig } from "@config/db.config";
-import { HealthModule } from "@src/health/health.module";
+import { HealthModule } from "api-server-toolkit/health";
 import AppImports from "./app.imports";
 
 let transactionalDataSource: DataSource | undefined;
@@ -28,7 +28,7 @@ let transactionalDataSource: DataSource | undefined;
       },
     }),
     ...AppImports,
-    HealthModule,
+    HealthModule.forRoot("auth-server"),
   ],
   providers: [
     {

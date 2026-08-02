@@ -21,8 +21,8 @@ const config = {
   password: process.env.DB_PASSWORD,
   port: Number(process.env.DB_PORT),
 
-  entities: [join(__dirname, "../../dist/**/*.entity{.ts,.js}")],
-  migrations: [join(__dirname, "../../dist/typeorm/migrations/*{.ts,.js}")],
+  entities: [join(__dirname, "../**/*.entity{.ts,.js}")],
+  migrations: [join(__dirname, "../typeorm/migrations/*{.ts,.js}")],
   migrationsTableName: "migrations_typeorm",
 } as DataSourceOptions;
 
