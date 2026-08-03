@@ -4,7 +4,7 @@
 [![Version](https://img.shields.io/badge/version-v0.5.0-blue)](https://github.com/fwmakc/auth-server/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/fwmakc/auth-server/blob/master/LICENSE)
 
-> OAuth2 authorization server — JWT RS256, social login, password reset, event-driven notifications.
+> Reference implementation: authentication service pattern — JWT RS256, JWKS endpoint, SSO, event-driven lifecycle.
 
 ## What This Is
 
@@ -16,6 +16,20 @@ Part of a [microservices stack](https://github.com/fwmakc/gateway-server) —
 other services verify JWTs via `/.well-known/jwks.json`.
 
 Port **3001**.
+
+---
+
+## Pattern
+
+This service demonstrates the **auth service pattern** in the toolkit stack:
+
+- **JWT signing (RS256)** — asymmetric keys, private signs, JWKS verifies
+- **JWKS endpoint** — other services validate tokens without sharing the private key
+- **Social login** — Google, Leader-ID, UNTI, custom OAuth2 providers
+- **Event publishing** — `user.registered`, `user.confirmed`, `password.reset` via event-server
+- **Two auth surfaces** — forms (HTML redirects) and methods (JSON API)
+
+Clone this when you need: authentication, authorization, OIDC, social login, or session management.
 
 ---
 
