@@ -19,7 +19,7 @@ export class ResetAccountHandler {
     if (!account) {
       throw new UnauthorizedException("User not found");
     }
-    return await this.accountConfirmService.create(account, "reset");
+    return await this.accountConfirmService.generate(account, "reset");
   }
 
   async sendMail(

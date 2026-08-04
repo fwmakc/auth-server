@@ -1,6 +1,7 @@
 import { Body, Controller, Post, Req, Res } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { CommonDoc } from "api-server-toolkit";
+import { Throttle } from "@nestjs/throttler";
 import { GrantsTokenDto } from "@src/token/dto/grants.token.dto";
 import { GrantsTokenService } from "@src/token/service/grants.token.service";
 
@@ -9,6 +10,7 @@ import { GrantsTokenService } from "@src/token/service/grants.token.service";
 export class TokenController {
   constructor(private readonly grantsTokenService: GrantsTokenService) {}
 
+  @Throttle({ auth: { ttl: 60000, limit: 10 } })
   @Post("/")
   @CommonDoc({
     title: "Базовый метод получения токена",

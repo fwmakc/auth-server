@@ -44,7 +44,7 @@ export class AccountService extends CommonService<AccountDto, AccountEntity> {
   async login(accountDto: AccountDto): Promise<AccountEntity> {
     const account = await this.findByUsername(accountDto.username);
     if (!account) {
-      await compare(accountDto.password, "$2a$10$dummyhashvaluefornonexistentuser123456789012");
+      await compare(accountDto.password, "$2a$10$A0RBchd2m9OR5L3JjxveC.3Ti.g9NG4CQ0b91ll/t4M5tcPlWoqOG");
       throw new UnauthorizedException("Invalid credentials");
     }
     const isValidPassword = await compare(

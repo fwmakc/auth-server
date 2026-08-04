@@ -17,6 +17,7 @@ export class UntiStrategy extends PassportStrategy(Strategy, "unti") {
         "UNTI_CLIENT_REDIRECT"
       )}&response_type=code`,
       tokenURL: "https://sso.2035.university/oauth2/access_token",
+      state: true,
     });
   }
 

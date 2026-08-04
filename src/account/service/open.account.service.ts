@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
+import { Injectable, BadRequestException, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createHmac, timingSafeEqual } from "crypto";
 import { OpenAccountDto } from "@src/account/dto/open.account.dto";
@@ -10,6 +10,7 @@ import { TokenService } from "@src/token/token.service";
 @Injectable()
 export class OpenAccountService {
   private readonly hmacSecret: string;
+  private readonly logger = new Logger(OpenAccountService.name);
 
   constructor(
     private readonly clientsService: ClientsService,
@@ -19,7 +20,14 @@ export class OpenAccountService {
     this.hmacSecret =
       this.configService.get<string>("CODE_HMAC_SECRET") ||
       this.configService.get<string>("AES_SECRET") ||
-      "fallback-code-secret-change-me";
+      "";
+    if (!this.hmacSecret) {
+      this.logger.warn(
+        "CODE_HMAC_SECRET / AES_SECRET not set — using ephemeral random key. " +
+        "Authorization codes will not survive restart. Set a secret in production."
+      );
+      this.hmacSecret = require("crypto").randomBytes(32).toString("hex");
+    }
   }
 
   private signCode(data: object): string {

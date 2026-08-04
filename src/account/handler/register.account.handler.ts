@@ -38,7 +38,7 @@ export class RegisterAccountHandler {
   }
 
   async sendMail(account: AccountDto): Promise<string> {
-    const confirm = await this.accountConfirmService.create(account);
+    const confirm = await this.accountConfirmService.generate(account);
     const url = this.configService.get("FORM_CONFIRM");
 
     return `${url}?code=${confirm.code}`;

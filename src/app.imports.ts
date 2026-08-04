@@ -5,11 +5,10 @@ import { AccountSessionsModule } from "./account/account_sessions/account_sessio
 import { AccountStrategiesModule } from "./account/account_strategies/account_strategies.module";
 import { ClientsModule } from "./clients/clients.module";
 import { ClientsRedirectsModule } from "./clients/clients_redirects/clients_redirects.module";
+import { JwksModule } from "./jwks/jwks.module";
 import { MailModule } from "./mail/mail.module";
-import { RandomModule } from "./random/random.module";
 import { TokenModule } from "./token/token.module";
 import { UsersModule } from "./db/users/users.module";
-import { JwksModule } from "./jwks/jwks.module";
 
 export default [
   PassportModule.register({ session: false }),
@@ -21,7 +20,6 @@ export default [
   ClientsRedirectsModule,
   JwksModule,
   MailModule,
-  RandomModule,
   TokenModule,
   UsersModule,
 ];

@@ -72,7 +72,7 @@ export class AccountStrategiesController {
 
   @Get("oauth/redirect")
   @Header("content-type", "application/json")
-  // @UseGuards(OauthGuard)
+  @UseGuards(OauthGuard)
   async oauthRedirect(@Req() req: any, @Res({ passthrough: true }) res: any) {
     const profile = await this.oauthProvider.activate(req);
     if (!profile) {
@@ -136,7 +136,7 @@ export class AccountStrategiesController {
   }
 
   @Get("leader/redirect")
-  // @UseGuards(LeaderGuard)
+  @UseGuards(LeaderGuard)
   async leaderRedirect(@Req() req: any, @Res({ passthrough: true }) res: any) {
     const profile = await this.leaderProvider.activate(req);
     if (!profile) {
@@ -171,7 +171,7 @@ export class AccountStrategiesController {
   }
 
   @Get("2035/redirect")
-  // @UseGuards(UntiGuard)
+  @UseGuards(UntiGuard)
   async untiRedirect(@Req() req: any, @Res({ passthrough: true }) res: any) {
     const profile = await this.untiProvider.activate(req);
     if (!profile) {

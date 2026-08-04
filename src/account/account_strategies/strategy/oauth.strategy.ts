@@ -30,6 +30,7 @@ export class OauthStrategy extends PassportStrategy(Strategy, "oauth") {
       authorizationURL,
       tokenURL,
       callbackURL,
+      state: true,
       // scope: ['profile', 'email'],
     });
   }

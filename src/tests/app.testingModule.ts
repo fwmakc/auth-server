@@ -18,7 +18,6 @@ import { ClientsRedirectsModule } from "@src/clients/clients_redirects/clients_r
 import { JwksModule } from "@src/jwks/jwks.module";
 import { MailModule } from "@src/mail/mail.module";
 import { MailService } from "@src/mail/mail.service";
-import { RandomModule } from "@src/random/random.module";
 import { TokenModule } from "@src/token/token.module";
 import { UsersModule } from "@src/db/users/users.module";
 import { IEventClient } from "api-server-toolkit";
@@ -129,7 +128,6 @@ export const createTestModule = async (): Promise<TestingModule> => {
       ClientsRedirectsModule,
       JwksModule,
       MailModule,
-      RandomModule,
       TokenModule,
       UsersModule,
     ],

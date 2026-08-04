@@ -18,6 +18,7 @@ export class LeaderStrategy extends PassportStrategy(Strategy, "leader") {
         "LEADER_CLIENT_REDIRECT"
       )}&response_type=code`,
       tokenURL: "https://leader-id.ru/",
+      state: true,
     });
   }
 
