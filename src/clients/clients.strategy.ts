@@ -17,7 +17,6 @@ export class ClientsStrategy extends PassportStrategy(Strategy, "clients") {
         ExtractJwt.fromBodyField("client_secret"),
         ExtractJwt.fromHeader("client_secret"),
       ]),
-      ignoreExpiration: !configService.get("JWT_EXPIRES"),
       secretOrKey: getKeySet().publicKey,
       algorithms: ["RS256"],
       passReqToCallback: true,

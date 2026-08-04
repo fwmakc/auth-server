@@ -74,6 +74,7 @@ export class MethodsAccountController {
     );
   }
 
+  @Account()
   @Post("hash/:string")
   async hash(@Param("string") string: string) {
     return await this.methodsAccountService.hash(string);

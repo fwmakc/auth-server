@@ -2,16 +2,14 @@ import { v4 } from "uuid";
 import { FindOptionsWhere, MoreThan, Repository } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { hash } from "api-server-toolkit";
-import { RandomService } from "@src/random/random.service";
+import { randomInt } from "crypto";
 import { AccountConfirmEntity } from "./account_confirm.entity";
 
 @Injectable()
 export class AccountConfirmService {
   constructor(
     @InjectRepository(AccountConfirmEntity)
-    protected readonly repository: Repository<AccountConfirmEntity>,
-    protected readonly randomService: RandomService
+    protected readonly repository: Repository<AccountConfirmEntity>
   ) {}
 
   async findById(id: number): Promise<AccountConfirmEntity> {
@@ -24,11 +22,10 @@ export class AccountConfirmService {
 
   async findByCode(code: string, type = "code"): Promise<AccountConfirmEntity> {
     const where: FindOptionsWhere<any> = { code, type };
-    if (type === "reset") {
-      const now = new Date();
-      now.setHours(now.getHours() - 1);
-      where.createdAt = MoreThan(now);
-    }
+    const now = new Date();
+    const maxAge = type === "reset" ? 1 : 24;
+    now.setHours(now.getHours() - maxAge);
+    where.createdAt = MoreThan(now);
     return await this.repository.findOne({
       where,
       relations: ["account"],
@@ -47,7 +44,7 @@ export class AccountConfirmService {
         id: account.id,
       },
       type,
-      code: `${v4()}-${hash(account.id)}`,
+      code: v4(),
     };
 
     await this.repository.delete({
@@ -62,11 +59,7 @@ export class AccountConfirmService {
   }
 
   async generate(account, type = "code") {
-    const code = this.randomService.randomNum(6);
-    const exists = await this.findByCode(code);
-    if (exists) {
-      return await this.generate(account);
-    }
+    const code = String(randomInt(100000, 1000000));
     const entrie = {
       account: {
         id: account.id,

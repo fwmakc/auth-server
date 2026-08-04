@@ -10,12 +10,18 @@ describe("Auth Flows — register, confirm, login, reset", () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let moduleRef: TestingModule;
+  let accessToken: string;
 
   beforeAll(async () => {
     const ctx = await createHttpTestApp();
     app = ctx.app;
     moduleRef = ctx.moduleRef;
     dataSource = moduleRef.get(DataSource);
+
+    const res = await request(app.getHttpServer())
+      .post("/account/methods/login")
+      .send({ username: "alice@test", password: "password123" });
+    accessToken = res.body.access_token;
   });
 
   afterAll(async () => {
@@ -297,9 +303,16 @@ describe("Auth Flows — register, confirm, login, reset", () => {
   // HASH
   // ═══════════════════════════════════════════════════════════
   describe("POST /account/methods/hash/:string", () => {
-    it("hash a string → {success: true, hash: ...}", async () => {
+    it("without token → 401", async () => {
+      await request(app.getHttpServer())
+        .post("/account/methods/hash/teststring")
+        .expect(401);
+    });
+
+    it("with token → {success: true, hash: ...}", async () => {
       const res = await request(app.getHttpServer())
         .post("/account/methods/hash/teststring")
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(201);
 
       expect(res.body.success).toBe(true);

@@ -44,20 +44,21 @@ export class AccountService extends CommonService<AccountDto, AccountEntity> {
   async login(accountDto: AccountDto): Promise<AccountEntity> {
     const account = await this.findByUsername(accountDto.username);
     if (!account) {
-      throw new UnauthorizedException("User not found");
+      await compare(accountDto.password, "$2a$10$dummyhashvaluefornonexistentuser123456789012");
+      throw new UnauthorizedException("Invalid credentials");
     }
     const isValidPassword = await compare(
       accountDto.password,
       account.password
     );
     if (!isValidPassword) {
-      throw new UnauthorizedException("Invalid password");
+      throw new UnauthorizedException("Invalid credentials");
     }
     if (!account.isActivated) {
-      throw new UnauthorizedException("Not activated");
+      throw new UnauthorizedException("Invalid credentials");
     }
     if (account.isDeleted) {
-      throw new UnauthorizedException("Account is deleted");
+      throw new UnauthorizedException("Invalid credentials");
     }
     return account;
   }

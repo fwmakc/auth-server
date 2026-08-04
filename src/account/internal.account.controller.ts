@@ -9,6 +9,7 @@ import {
 } from "@nestjs/common";
 import { ApiExcludeController } from "@nestjs/swagger";
 import { ConfigService } from "@nestjs/config";
+import { timingSafeEqual } from "crypto";
 import { AccountService } from "./account.service";
 
 @ApiExcludeController()
@@ -19,13 +20,21 @@ export class InternalAccountController {
     private readonly configService: ConfigService
   ) {}
 
+  private verifyInternalKey(provided: string): boolean {
+    const expected = this.configService.get("INTERNAL_API_KEY");
+    if (!expected || !provided) return false;
+    const a = Buffer.from(provided);
+    const b = Buffer.from(expected);
+    if (a.length !== b.length) return false;
+    return timingSafeEqual(a, b);
+  }
+
   @Get("info/:id")
   async getInfo(
     @Param("id", ParseIntPipe) id: number,
     @Headers("x-internal-api-key") internalKey: string
   ) {
-    const expectedKey = this.configService.get("INTERNAL_API_KEY");
-    if (!expectedKey || internalKey !== expectedKey) {
+    if (!this.verifyInternalKey(internalKey)) {
       throw new NotFoundException();
     }
 

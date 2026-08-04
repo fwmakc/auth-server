@@ -1,4 +1,6 @@
 import { Injectable, BadRequestException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { createHmac, timingSafeEqual } from "crypto";
 import { OpenAccountDto } from "@src/account/dto/open.account.dto";
 import { ClientsDto } from "@src/clients/clients.dto";
 import { ClientsEntity } from "@src/clients/clients.entity";
@@ -7,10 +9,46 @@ import { TokenService } from "@src/token/token.service";
 
 @Injectable()
 export class OpenAccountService {
+  private readonly hmacSecret: string;
+
   constructor(
     private readonly clientsService: ClientsService,
-    private readonly tokenService: TokenService
-  ) {}
+    private readonly tokenService: TokenService,
+    private readonly configService: ConfigService
+  ) {
+    this.hmacSecret =
+      this.configService.get<string>("CODE_HMAC_SECRET") ||
+      this.configService.get<string>("AES_SECRET") ||
+      "fallback-code-secret-change-me";
+  }
+
+  private signCode(data: object): string {
+    const payload = Buffer.from(JSON.stringify(data)).toString("base64");
+    const signature = createHmac("sha256", this.hmacSecret)
+      .update(payload)
+      .digest("base64url");
+    return `${payload}.${signature}`;
+  }
+
+  private verifyCodeSignature(code: string): object {
+    const [payload, signature] = code.split(".");
+    if (!payload || !signature) {
+      throw new BadRequestException("Invalid authorization code format");
+    }
+    const expected = createHmac("sha256", this.hmacSecret)
+      .update(payload)
+      .digest("base64url");
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expected);
+    if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) {
+      throw new BadRequestException("Invalid authorization code signature");
+    }
+    try {
+      return JSON.parse(Buffer.from(payload, "base64").toString("utf8"));
+    } catch {
+      throw new BadRequestException("Malformed authorization code");
+    }
+  }
 
   async code(
     clientsDto: ClientsDto,
@@ -86,7 +124,7 @@ export class OpenAccountService {
       client_id: clientsDto.client_id,
       redirect_uri: clientsDto.redirect_uri,
     };
-    const code = await Buffer.from(JSON.stringify(data)).toString("base64");
+    const code = this.signCode(data);
 
     clientsDto.code = code;
     delete (clientsDto as any).account;
@@ -100,8 +138,7 @@ export class OpenAccountService {
   }
 
   async codeVerify(code: string, clientsDto: ClientsDto): Promise<number> {
-    const decoded = await Buffer.from(code, "base64").toString("ascii");
-    const data = JSON.parse(decoded);
+    const data = this.verifyCodeSignature(code) as any;
     const { timestamp, id, client_id, redirect_uri } = data;
 
     const clientIdMatched = clientsDto.client_id === client_id;

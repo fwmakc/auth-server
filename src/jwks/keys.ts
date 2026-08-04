@@ -1,5 +1,6 @@
 import * as crypto from "crypto";
 import * as fs from "fs";
+import { Logger } from "@nestjs/common";
 
 export interface RsaJwk {
   kty: string;
@@ -46,6 +47,12 @@ export function getKeySet(): KeySet {
     privateKey = fs.readFileSync(privateKeyPath, "utf8");
     publicKey = fs.readFileSync(publicKeyPath, "utf8");
   } else {
+    const logger = new Logger("JWKS");
+    logger.warn(
+      "JWT_PRIVATE_KEY_PATH / JWT_PUBLIC_KEY_PATH not set or files missing. " +
+      "Using ephemeral keys — all tokens invalidated on restart, multi-instance broken. " +
+      "Set key paths in production."
+    );
     const { privateKey: priv, publicKey: pub } = crypto.generateKeyPairSync(
       "rsa",
       { modulusLength: 2048 }
