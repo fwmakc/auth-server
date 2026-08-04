@@ -90,10 +90,9 @@ export class AccountStrategiesService extends CommonService<
   async decodeEntries(
     authStrategiesDto: Array<AccountStrategiesEntity>
   ): Promise<AccountStrategiesEntity[]> {
-    for await (const [index, item] of authStrategiesDto.entries()) {
-      authStrategiesDto[index] = await this.decodeTokens(item);
-    }
-    return authStrategiesDto;
+    return await Promise.all(
+      authStrategiesDto.map((item) => this.decodeTokens(item)),
+    );
   }
 
   async updateBy(
