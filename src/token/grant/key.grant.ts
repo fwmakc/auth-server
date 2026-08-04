@@ -5,9 +5,6 @@ import { TokenService } from "@src/token/token.service";
 import { Cookie } from "api-server-toolkit";
 import { UsersService } from "@src/db/users/users.service";
 
-// мы делаем жесткое привязывание к сущности обучаемых только для того,
-// чтобы работала обратная совместимость с беспарольным доступом
-
 @Injectable()
 export class KeyGrant {
   constructor(
@@ -40,7 +37,10 @@ export class KeyGrant {
 
     let account = await this.accountService.findByUsername(user.email);
     if (!account) {
-      account = await this.accountService.create({ username: user.email });
+      account = await this.accountService.create({
+        username: user.email,
+        isActivated: true,
+      });
       if (!account) {
         throw new BadRequestException(
           "User authentication failed. Unknown account",
@@ -60,9 +60,6 @@ export class KeyGrant {
         "invalid_user"
       );
     }
-    // if (request) {
-    //   await this.accountSessionsService.start(account, request);
-    // }
     if (response) {
       const cookie = new Cookie(request, response);
       cookie.set("id", account.id);

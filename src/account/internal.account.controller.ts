@@ -1,11 +1,11 @@
 import {
   Controller,
   Get,
+  Header,
   Headers,
   NotFoundException,
   Param,
   ParseIntPipe,
-  UseGuards,
 } from "@nestjs/common";
 import { ApiExcludeController } from "@nestjs/swagger";
 import { ConfigService } from "@nestjs/config";
@@ -15,10 +15,14 @@ import { AccountService } from "./account.service";
 @ApiExcludeController()
 @Controller("account/internal")
 export class InternalAccountController {
+  private readonly cacheTtl: number;
+
   constructor(
     private readonly accountService: AccountService,
     private readonly configService: ConfigService
-  ) {}
+  ) {
+    this.cacheTtl = Number(this.configService.get("INTERNAL_INFO_CACHE_TTL")) || 30;
+  }
 
   private verifyInternalKey(provided: string): boolean {
     const expected = this.configService.get("INTERNAL_API_KEY");
@@ -30,6 +34,7 @@ export class InternalAccountController {
   }
 
   @Get("info/:id")
+  @Header("Cache-Control", `max-age=30`)
   async getInfo(
     @Param("id", ParseIntPipe) id: number,
     @Headers("x-internal-api-key") internalKey: string

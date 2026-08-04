@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import { genSalt, hash } from "bcryptjs";
+import { genSalt, hash, compare } from "bcryptjs";
 import { Repository } from "typeorm";
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -69,7 +69,7 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
       },
       "JWT_CLIENTS_EXPIRES"
     );
-    client.client_secret = clientSecretData.token;
+    client.client_secret = await hash(clientSecretData.token, await genSalt(10));
     const updated = await this.update(client.id, client, relations, bind);
     return updated ? client : null;
   }
@@ -78,15 +78,10 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
     let client;
     try {
       client = await this.repository.findOne({
-        where: {
-          client_id,
-          client_secret,
-        },
+        where: { client_id },
       });
     } catch (e) {
-      // grant_type=password
-      console.error("Clients verify error", e);
-      throw new BadRequestException(e.message, {
+      throw new BadRequestException("Invalid client request", {
         cause: new Error(),
         description: "invalid_request",
       });
@@ -101,6 +96,14 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
       throw new BadRequestException(
         "Client is not authorized or has the rights to this request",
         { cause: new Error(), description: "unauthorized_client" }
+      );
+    }
+
+    const isMatch = await compare(client_secret, client.client_secret);
+    if (!isMatch) {
+      throw new BadRequestException(
+        "Client is unknown, not registered, or parameters are set incorrectly",
+        { cause: new Error(), description: "invalid_client" }
       );
     }
     return client;

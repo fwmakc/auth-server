@@ -1,5 +1,5 @@
 import { httpPost, httpGet } from "api-server-toolkit";
-import { Injectable } from "@nestjs/common";
+import { Injectable, BadRequestException, Logger } from "@nestjs/common";
 import { AccountDto } from "@src/account/account.dto";
 import { AccountService } from "@src/account/account.service";
 import { AccountStrategiesService } from "@src/account/account_strategies/account_strategies.service";
@@ -63,6 +63,10 @@ export class LeaderProvider {
   }
 
   async validate(profile) {
+    if (!profile.emailConfirmed && !profile.phoneConfirmed) {
+      throw new BadRequestException("Email or phone not verified by Leader-ID");
+    }
+
     const account = await this.accountService.findByUsername(profile.email);
 
     const accountDto: AccountDto = {

@@ -1,6 +1,6 @@
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
-import { Injectable } from "@nestjs/common";
+import { Injectable, ForbiddenException } from "@nestjs/common";
 import { Profile, Strategy } from "passport-google-oauth20";
 import { AccountService } from "@src/account/account.service";
 import { AccountDto } from "@src/account/account.dto";
@@ -24,11 +24,16 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
 
   async validate(accessToken: string, refreshToken: string, profile: Profile) {
     const data = profile._json;
+
+    if (!data.email_verified) {
+      throw new ForbiddenException("Email not verified by provider");
+    }
+
     const account = await this.accountService.findByUsername(data.email);
 
     const accountDto: AccountDto = {
       username: data.email,
-      isActivated: !!data.email_verified,
+      isActivated: true,
     };
 
     if (!account) {

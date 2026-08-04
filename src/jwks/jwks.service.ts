@@ -21,9 +21,10 @@ export class JwksService {
   }
 
   getIssuer() {
-    const port = this.configService.get("PORT") || "3001";
-    const ip = this.configService.get("IP") || "localhost";
-    return `http://${ip}:${port}`;
+    return (
+      this.configService.get<string>("ISSUER") ||
+      `http://${this.configService.get("IP") || "localhost"}:${this.configService.get("PORT") || "3001"}`
+    );
   }
 
   getOidcDiscovery() {
@@ -44,7 +45,7 @@ export class JwksService {
         "client_secret_post",
         "client_secret_basic",
       ],
-      response_types_supported: ["token", "code"],
+      response_types_supported: ["code"],
       scopes_supported: ["openid", "profile", "email"],
       claims_supported: [
         "sub",

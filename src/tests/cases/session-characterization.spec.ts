@@ -189,7 +189,7 @@ describe("Session Characterization — tests to lock current behavior before rem
       expect([302, 500]).toContain(res.status);
     });
 
-    it("with id cookie + response_type=token → redirects with token", async () => {
+    it("with id cookie + response_type=token → 400 (implicit flow removed)", async () => {
       const res = await request(app.getHttpServer())
         .get("/account")
         .set("Cookie", ["id=1"])
@@ -200,8 +200,7 @@ describe("Session Characterization — tests to lock current behavior before rem
           state: "xyz",
         });
 
-      expect(res.status).toBe(302);
-      expect(res.headers.location).toContain("token=");
+      expect(res.status).toBe(400);
     });
   });
 

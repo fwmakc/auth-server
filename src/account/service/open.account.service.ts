@@ -98,9 +98,9 @@ export class OpenAccountService {
 
   async verify(openAccountDto: OpenAccountDto): Promise<ClientsDto> {
     const { client_id, redirect_uri, response_type } = openAccountDto;
-    if (["code", "token"].indexOf(response_type) < 0) {
+    if (response_type !== "code") {
       throw new BadRequestException(
-        "Specified type of response_type field is not supported in this request",
+        "Specified type of response_type field is not supported in this request. Use 'code'.",
         "invalid_request"
       );
     }
