@@ -12,7 +12,7 @@ import { UsersModule } from "./db/users/users.module";
 import { JwksModule } from "./jwks/jwks.module";
 
 export default [
-  PassportModule.register({ session: true }),
+  PassportModule.register({ session: false }),
   AccountModule,
   AccountConfirmModule,
   AccountSessionsModule,

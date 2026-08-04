@@ -9,7 +9,6 @@ import { AccountStrategiesService } from "./account_strategies.service";
 import { LeaderProvider } from "./provider/leader.provider";
 import { OauthProvider } from "./provider/oauth.provider";
 import { UntiProvider } from "./provider/unti.provider";
-import { SessionSerializer } from "./serializer/session.serializer";
 import { GoogleStrategy } from "./strategy/google.strategy";
 import { LeaderStrategy } from "./strategy/leader.strategy";
 import { OauthStrategy } from "./strategy/oauth.strategy";
@@ -28,7 +27,6 @@ import { AccountSessionsModule } from "../account_sessions/account_sessions.modu
     ConfigModule,
   ],
   providers: [
-    SessionSerializer,
     AccountStrategiesService,
     GoogleStrategy,
     LeaderProvider,

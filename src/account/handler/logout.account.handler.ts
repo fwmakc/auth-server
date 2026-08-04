@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { AccountSessionsService } from "@src/account/account_sessions/account_sessions.service";
 import { Cookie } from "api-server-toolkit";
 
@@ -12,11 +12,8 @@ export class LogoutAccountHandler {
     if (!request || !request?.user) {
       return false;
     }
-    try {
-      await this.accountSessionsService.destroy(request?.user, request);
-    } catch {
-      throw new UnauthorizedException("Session does not exist!");
-    }
+
+    await this.accountSessionsService.destroy(request.user, request);
     delete request.user;
 
     const cookie = new Cookie(request, response);

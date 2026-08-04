@@ -35,22 +35,11 @@ export class AccountSessionsService extends CommonService<
   }
 
   async start(account, request) {
-    const { session } = request;
-    if (!session) {
-      return;
-    }
-    session.save(async (e) => {
-      await this.log(account, request, e ? "create error" : "create");
-    });
+    return await this.log(account, request, "create");
   }
 
   async destroy(account, request) {
-    const { session } = request;
-    if (session) {
-      await session.destroy(async (e) => {
-        await this.log(account, request, e ? "destroy error" : "destroy");
-      });
-    }
+    return await this.log(account, request, "destroy");
   }
 
   async getByAuthId(

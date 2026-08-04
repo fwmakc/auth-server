@@ -7,8 +7,6 @@ import { JwtModule } from "@nestjs/jwt";
 import { DataSource } from "typeorm";
 import { addTransactionalDataSource, initializeTransactionalContext } from "typeorm-transactional";
 import * as cookieParser from "cookie-parser";
-import * as session from "express-session";
-import * as passport from "passport";
 import { getKeySet } from "@src/jwks/keys";
 
 import { AccountModule } from "@src/account/account.module";
@@ -60,8 +58,6 @@ function setTestEnv() {
   process.env.JWT_REFRESH_EXPIRES = "30d";
   process.env.JWT_CLIENTS_EXPIRES = "30d";
   process.env.JWT_EXPIRES = "true";
-  process.env.SESSION_SECRET = "test-session-secret";
-  process.env.SESSION_EXPIRES = "2592000";
   process.env.AES_SECRET = "change_me_to_32_characters__";
   process.env.ROOT_PATH = ".";
   process.env.FORM_CONFIRM = "http://localhost/confirm";
@@ -118,7 +114,7 @@ export const createTestModule = async (): Promise<TestingModule> => {
         dropSchema: true,
         logging: false,
       }),
-      PassportModule.register({ session: true }),
+      PassportModule.register({ session: false }),
       JwtModule.register({
         privateKey: keySet.privateKey,
         publicKey: keySet.publicKey,
@@ -163,15 +159,6 @@ export const createHttpTestApp = async (): Promise<{
   const app = moduleRef.createNestApplication();
 
   app.use(cookieParser());
-  app.use(
-    session({
-      secret: "test-session-secret",
-      resave: false,
-      saveUninitialized: false,
-    })
-  );
-  app.use(passport.initialize());
-  app.use(passport.session());
 
   await app.init();
 

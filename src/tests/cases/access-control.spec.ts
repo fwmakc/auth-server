@@ -87,14 +87,14 @@ describe("Access Control — guards, internal API, logout", () => {
     it("with wrong internal key → 404", async () => {
       await request(app.getHttpServer())
         .get("/account/internal/info/1")
-        .set("x-internal-key", "wrong-key")
+        .set("x-internal-api-key", "wrong-key")
         .expect(404);
     });
 
     it("with valid internal key → 200, returns account info", async () => {
       const res = await request(app.getHttpServer())
         .get("/account/internal/info/1")
-        .set("x-internal-key", "test-internal-key")
+        .set("x-internal-api-key", "test-internal-key")
         .expect(200);
 
       expect(Number(res.body.id)).toBe(1);
@@ -106,7 +106,7 @@ describe("Access Control — guards, internal API, logout", () => {
     it("with valid key, non-existent user → 404", async () => {
       await request(app.getHttpServer())
         .get("/account/internal/info/9999")
-        .set("x-internal-key", "test-internal-key")
+        .set("x-internal-api-key", "test-internal-key")
         .expect(404);
     });
   });
