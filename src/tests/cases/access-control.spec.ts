@@ -72,6 +72,13 @@ describe("Access Control — guards, internal API, logout", () => {
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(201);
     });
+
+    it("second logout with same token → 201 (stateless, token still valid)", async () => {
+      await request(app.getHttpServer())
+        .post("/account/methods/logout")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(201);
+    });
   });
 
   // ═══════════════════════════════════════════════════════════

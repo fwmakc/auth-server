@@ -72,7 +72,7 @@ describe("Auth Flows — register, confirm, login, reset", () => {
       );
     });
 
-    it("register duplicate activated user → error", async () => {
+    it("register duplicate activated user → 400", async () => {
       const res = await request(app.getHttpServer())
         .post("/account/methods/register")
         .send({
@@ -80,9 +80,8 @@ describe("Auth Flows — register, confirm, login, reset", () => {
           password: "password123",
           subject: "Confirm",
         })
-        .expect(201);
+        .expect(400);
 
-      expect(res.body.success).toBeFalsy();
       expect(JSON.stringify(res.body)).toContain("already in the system");
     });
 
@@ -124,21 +123,20 @@ describe("Auth Flows — register, confirm, login, reset", () => {
       );
     });
 
-    it("confirm with invalid code → error", async () => {
+    it("confirm with invalid code → {success: false}", async () => {
       const res = await request(app.getHttpServer())
         .get("/account/methods/confirm/invalid-code-999999")
         .expect(200);
 
-      expect(res.body.success).toBeFalsy();
-      expect(res.body.error).toBeDefined();
+      expect(res.body.success).toBe(false);
     });
 
-    it("confirm with already used code → error", async () => {
+    it("confirm with already used code → {success: false}", async () => {
       const res = await request(app.getHttpServer())
         .get("/account/methods/confirm/confirm-alice-code-123456")
         .expect(200);
 
-      expect(res.body.success).toBeFalsy();
+      expect(res.body.success).toBe(false);
     });
   });
 
@@ -162,43 +160,40 @@ describe("Auth Flows — register, confirm, login, reset", () => {
       expect(res.body.expires_in).toBeGreaterThan(0);
     });
 
-    it("login with wrong password → error", async () => {
+    it("login with wrong password → 401", async () => {
       const res = await request(app.getHttpServer())
         .post("/account/methods/login")
         .send({
           username: "bob@test",
           password: "wrongpassword",
         })
-        .expect(201);
+        .expect(401);
 
-      expect(res.body.success).toBeFalsy();
-      expect(res.body.error).toBe("Unauthorized");
+      expect(res.body.message).toBe("Invalid credentials");
     });
 
-    it("login with unactivated account → error", async () => {
+    it("login with unactivated account → 401", async () => {
       const res = await request(app.getHttpServer())
         .post("/account/methods/login")
         .send({
           username: "pending@test",
           password: "password123",
         })
-        .expect(201);
+        .expect(401);
 
-      expect(res.body.success).toBeFalsy();
-      expect(res.body.error).toBe("Unauthorized");
+      expect(res.body.message).toBe("Invalid credentials");
     });
 
-    it("login with non-existent user → error", async () => {
+    it("login with non-existent user → 401", async () => {
       const res = await request(app.getHttpServer())
         .post("/account/methods/login")
         .send({
           username: "ghost@test",
           password: "password123",
         })
-        .expect(201);
+        .expect(401);
 
-      expect(res.body.success).toBeFalsy();
-      expect(res.body.error).toBe("Unauthorized");
+      expect(res.body.message).toBe("Invalid credentials");
     });
   });
 
@@ -224,16 +219,14 @@ describe("Auth Flows — register, confirm, login, reset", () => {
       );
     });
 
-    it("reset non-existent user → error", async () => {
-      const res = await request(app.getHttpServer())
+    it("reset non-existent user → 401", async () => {
+      await request(app.getHttpServer())
         .post("/account/methods/reset")
         .send({
           username: "ghost@test",
           subject: "Reset",
         })
-        .expect(201);
-
-      expect(res.body.success).toBeFalsy();
+        .expect(401);
     });
 
     it("reset for alice → create fresh code via API, then change password", async () => {
@@ -274,28 +267,24 @@ describe("Auth Flows — register, confirm, login, reset", () => {
       expect(res.body.success).toBe(true);
     });
 
-    it("old password no longer works after change", async () => {
-      const res = await request(app.getHttpServer())
+    it("old password no longer works after change → 401", async () => {
+      await request(app.getHttpServer())
         .post("/account/methods/login")
         .send({
           username: "alice@test",
           password: "password123",
         })
-        .expect(201);
-
-      expect(res.body.success).toBeFalsy();
+        .expect(401);
     });
 
-    it("change password with invalid code → error", async () => {
-      const res = await request(app.getHttpServer())
+    it("change password with invalid code → 400", async () => {
+      await request(app.getHttpServer())
         .post("/account/methods/change/invalid-reset-code-999999")
         .send({
           username: "alice@test",
           password: "anotherpassword123",
         })
-        .expect(201);
-
-      expect(res.body.success).toBeFalsy();
+        .expect(400);
     });
   });
 

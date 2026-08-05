@@ -23,9 +23,11 @@ export class LogoutAccountHandler {
     await this.accountSessionsService.destroy(request.user, request);
     delete request.user;
 
-    const cookie = new Cookie(request, response);
-    cookie.reset("id");
-    cookie.reset("query");
+    if (response) {
+      const cookie = new Cookie(request, response);
+      cookie.reset("id");
+      cookie.reset("query");
+    }
 
     return true;
   }
