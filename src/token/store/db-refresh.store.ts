@@ -1,6 +1,6 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, UnauthorizedException, Logger, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, LessThan } from "typeorm";
 import { createHash, randomUUID } from "crypto";
 import { RefreshTokenEntity } from "./refresh-token.entity";
 
@@ -15,11 +15,44 @@ export interface IssuedRefreshToken {
 }
 
 @Injectable()
-export class DbRefreshStore {
+export class DbRefreshStore implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(DbRefreshStore.name);
+  private cleanupTimer: NodeJS.Timeout | null = null;
+  private readonly cleanupInterval = 3600000; // 1 hour
+
   constructor(
     @InjectRepository(RefreshTokenEntity)
     private readonly repo: Repository<RefreshTokenEntity>
   ) {}
+
+  onModuleInit() {
+    this.scheduleCleanup();
+    this.logger.log("Refresh token cleanup scheduled (every 1 hour)");
+  }
+
+  onModuleDestroy() {
+    if (this.cleanupTimer) clearTimeout(this.cleanupTimer);
+  }
+
+  private scheduleCleanup() {
+    this.cleanupTimer = setTimeout(async () => {
+      await this.runCleanup();
+      this.scheduleCleanup();
+    }, this.cleanupInterval);
+  }
+
+  private async runCleanup() {
+    try {
+      const result = await this.repo.delete({
+        expiresAt: LessThan(new Date()),
+      });
+      if (result.affected > 0) {
+        this.logger.log(`Cleanup: deleted ${result.affected} expired refresh tokens`);
+      }
+    } catch (err) {
+      this.logger.error(`Cleanup failed: ${err.message}`);
+    }
+  }
 
   private hash(token: string): string {
     return createHash("sha256").update(token).digest("hex");
