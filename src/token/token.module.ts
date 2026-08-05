@@ -1,4 +1,4 @@
-import { Module, forwardRef } from "@nestjs/common";
+import { Module, forwardRef, Logger } from "@nestjs/common";
 import { TokenController } from "@src/token/token.controller";
 import { TokenService } from "@src/token/token.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -30,6 +30,14 @@ import {
 } from "@src/token/store";
 
 const useDbStore = process.env.REFRESH_TOKEN_STORE === "db";
+
+if (!useDbStore) {
+  new Logger("TokenModule").warn(
+    "REFRESH_TOKEN_STORE is not set to 'db'. " +
+    "Refresh token revocation (POST /token/revoke, logout, deactivate) is a no-op. " +
+    "Set REFRESH_TOKEN_STORE=db to enable revocable refresh tokens."
+  );
+}
 
 @Module({
   controllers: [TokenController],
