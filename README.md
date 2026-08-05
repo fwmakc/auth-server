@@ -97,6 +97,8 @@ Vue frontend ──> auth-server (REST, JWT)
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | POST | `/token` | — | Token issuance (dispatches on `grant_type`) |
+| POST | `/token/revoke` | — | Revoke refresh token (RFC 7009) |
+| DELETE | `/token/revoke/:id` | Superuser | Revoke all refresh tokens for account |
 | GET | `/account` | — | OAuth2 `/authorize` (authorization_code flow only) |
 
 **Supported grant types:**
@@ -113,6 +115,41 @@ Vue frontend ──> auth-server (REST, JWT)
 > clients only** (your own frontend/backend). Third-party applications must use the
 > `authorization_code` flow. This grant type is deprecated in OAuth 2.1. Rate-limited
 > at 10 requests/minute via `@nestjs/throttler`.
+
+### Token Revocation (RFC 7009)
+
+**Self-service — revoke your own refresh token:**
+
+```
+POST /token/revoke
+Content-Type: application/json
+
+{ "token": "r_abc123..." }
+```
+
+- No authentication required (RFC 7009 — token is proof of possession)
+- Always returns `200 {success: true}` (even if token not found — no info leak)
+- Stateless mode: no-op (JWT can't be revoked)
+- DB mode (`REFRESH_TOKEN_STORE=db`): marks token as `revoked=true`
+
+**Superuser — revoke all tokens for an account:**
+
+```
+DELETE /token/revoke/5
+Authorization: Bearer <superuser_token>
+```
+
+- Requires superuser account
+- Revokes ALL refresh tokens for the specified account ID
+- Use case: admin panel "kill all sessions for user #5"
+
+**Automatic revocation:**
+
+| Action | What happens |
+|--------|-------------|
+| `POST /account/methods/logout` | `revokeAll(accountId)` |
+| `POST /account/methods/deactivate` | `revokeAll(accountId)` |
+| `POST /token` (refresh grant) | `revoke(old) → issue(new)` (rotation) |
 
 ### OIDC / Well-Known
 
