@@ -1,7 +1,7 @@
 # Auth Server
 
 [![Tests](https://github.com/fwmakc/auth-server/actions/workflows/test.yml/badge.svg)](https://github.com/fwmakc/auth-server/actions/workflows/test.yml)
-[![Version](https://img.shields.io/badge/version-v0.5.0-blue)](https://github.com/fwmakc/auth-server/releases)
+[![Version](https://img.shields.io/badge/version-v0.6.0-blue)](https://github.com/fwmakc/auth-server/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/fwmakc/auth-server/blob/master/LICENSE)
 
 > Reference implementation: authentication service pattern — JWT RS256, JWKS endpoint, SSO, event-driven lifecycle.
