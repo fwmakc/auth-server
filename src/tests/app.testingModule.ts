@@ -16,8 +16,6 @@ import { AccountStrategiesModule } from "@src/account/account_strategies/account
 import { ClientsModule } from "@src/clients/clients.module";
 import { ClientsRedirectsModule } from "@src/clients/clients_redirects/clients_redirects.module";
 import { JwksModule } from "@src/jwks/jwks.module";
-import { MailModule } from "@src/mail/mail.module";
-import { MailService } from "@src/mail/mail.service";
 import { TokenModule } from "@src/token/token.module";
 import { UsersModule } from "@src/db/users/users.module";
 import { IEventClient } from "api-server-toolkit";
@@ -129,16 +127,10 @@ export const createTestModule = async (): Promise<TestingModule> => {
       ClientsModule,
       ClientsRedirectsModule,
       JwksModule,
-      MailModule,
       TokenModule,
       UsersModule,
     ],
   })
-    .overrideProvider(MailService)
-    .useValue({
-      send: jest.fn().mockResolvedValue(undefined),
-      sendByTemplate: jest.fn().mockResolvedValue(undefined),
-    })
     .overrideProvider(IEventClient)
     .useValue({
       publish: mockPublish,

@@ -6,7 +6,6 @@ import { AccountStrategiesModule } from "./account/account_strategies/account_st
 import { ClientsModule } from "./clients/clients.module";
 import { ClientsRedirectsModule } from "./clients/clients_redirects/clients_redirects.module";
 import { JwksModule } from "./jwks/jwks.module";
-import { MailModule } from "./mail/mail.module";
 import { TokenModule } from "./token/token.module";
 import { UsersModule } from "./db/users/users.module";
 
@@ -19,7 +18,6 @@ export default [
   ClientsModule,
   ClientsRedirectsModule,
   JwksModule,
-  MailModule,
   TokenModule,
   UsersModule,
 ];

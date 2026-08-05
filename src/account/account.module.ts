@@ -29,7 +29,6 @@ import { AccountStrategiesModule } from "./account_strategies/account_strategies
 
 import { ClientsModule } from "@src/clients/clients.module";
 import { EventClientModule } from "api-server-toolkit";
-import { MailModule } from "@src/mail/mail.module";
 import { TokenModule } from "@src/token/token.module";
 import { UsersModule } from "@src/db/users/users.module";
 
@@ -47,7 +46,6 @@ import { UsersModule } from "@src/db/users/users.module";
     forwardRef(() => AccountSessionsModule),
     forwardRef(() => AccountStrategiesModule),
     forwardRef(() => ClientsModule),
-    forwardRef(() => MailModule),
     forwardRef(() => TokenModule),
     forwardRef(() => UsersModule),
     EventClientModule,
