@@ -1,4 +1,4 @@
-import { Module, forwardRef, Logger } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { TokenController } from "@src/token/token.controller";
 import { TokenService } from "@src/token/token.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -22,22 +22,7 @@ import { RefreshTokenGrant } from "@src/token/grant/refresh_token.grant";
 import { AccountModule } from "@src/account/account.module";
 import { UsersModule } from "@src/db/users/users.module";
 
-import {
-  IREFRESH_TOKEN_STORE,
-  StatelessRefreshStore,
-  DbRefreshStore,
-  RefreshTokenEntity,
-} from "@src/token/store";
-
-const useDbStore = process.env.REFRESH_TOKEN_STORE === "db";
-
-if (!useDbStore) {
-  new Logger("TokenModule").warn(
-    "REFRESH_TOKEN_STORE is not set to 'db'. " +
-    "Refresh token revocation (POST /token/revoke, logout, deactivate) is a no-op. " +
-    "Set REFRESH_TOKEN_STORE=db to enable revocable refresh tokens."
-  );
-}
+import { DbRefreshStore, RefreshTokenEntity } from "@src/token/store";
 
 @Module({
   controllers: [TokenController],
@@ -48,9 +33,7 @@ if (!useDbStore) {
       inject: [ConfigService],
       useFactory: getJwtConfig,
     }),
-    ...(useDbStore
-      ? [TypeOrmModule.forFeature([RefreshTokenEntity])]
-      : []),
+    TypeOrmModule.forFeature([RefreshTokenEntity]),
     forwardRef(() => ClientsModule),
     forwardRef(() => AccountModule),
     forwardRef(() => UsersModule),
@@ -71,12 +54,8 @@ if (!useDbStore) {
     RefreshHandler,
     VerifyHandler,
 
-    useDbStore ? DbRefreshStore : StatelessRefreshStore,
-    {
-      provide: IREFRESH_TOKEN_STORE,
-      useExisting: useDbStore ? DbRefreshStore : StatelessRefreshStore,
-    },
+    DbRefreshStore,
   ],
-  exports: [TokenService, GrantsTokenService, IREFRESH_TOKEN_STORE],
+  exports: [TokenService, GrantsTokenService, DbRefreshStore],
 })
 export class TokenModule {}

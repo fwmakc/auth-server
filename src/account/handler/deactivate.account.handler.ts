@@ -1,17 +1,16 @@
-import { Inject, Injectable, Optional, UnauthorizedException } from "@nestjs/common";
+import { Injectable, Optional, UnauthorizedException } from "@nestjs/common";
 import { compare } from "bcryptjs";
 import { AccountService } from "@src/account/account.service";
 import { AccountSessionsService } from "@src/account/account_sessions/account_sessions.service";
 import { Cookie } from "api-server-toolkit";
-import { IRefreshTokenStore, IREFRESH_TOKEN_STORE } from "@src/token/store";
+import { DbRefreshStore } from "@src/token/store";
 
 @Injectable()
 export class DeactivateAccountHandler {
   constructor(
     protected readonly accountService: AccountService,
     protected readonly accountSessionsService: AccountSessionsService,
-    @Inject(IREFRESH_TOKEN_STORE) @Optional()
-    protected readonly refreshStore?: IRefreshTokenStore
+    @Optional() protected readonly refreshStore?: DbRefreshStore
   ) {}
 
   async deactivate(account: any, password: string, request: any, response: any): Promise<any> {

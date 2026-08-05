@@ -29,6 +29,7 @@ import { AccountStrategiesEntity } from "@src/account/account_strategies/account
 import { ClientsEntity } from "@src/clients/clients.entity";
 import { ClientsRedirectsEntity } from "@src/clients/clients_redirects/clients_redirects.entity";
 import { UsersEntity } from "@src/db/users/users.entity";
+import { RefreshTokenEntity } from "@src/token/store";
 
 import { genSalt, hash } from "bcryptjs";
 import { TypeClients } from "api-server-toolkit";
@@ -41,6 +42,7 @@ const TEST_ENTITIES = [
   ClientsEntity,
   ClientsRedirectsEntity,
   UsersEntity,
+  RefreshTokenEntity,
 ];
 
 function setTestEnv() {

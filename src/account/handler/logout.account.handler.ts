@@ -1,14 +1,13 @@
-import { Inject, Injectable, Optional } from "@nestjs/common";
+import { Injectable, Optional } from "@nestjs/common";
 import { AccountSessionsService } from "@src/account/account_sessions/account_sessions.service";
 import { Cookie } from "api-server-toolkit";
-import { IRefreshTokenStore, IREFRESH_TOKEN_STORE } from "@src/token/store";
+import { DbRefreshStore } from "@src/token/store";
 
 @Injectable()
 export class LogoutAccountHandler {
   constructor(
     protected readonly accountSessionsService: AccountSessionsService,
-    @Inject(IREFRESH_TOKEN_STORE) @Optional()
-    protected readonly refreshStore?: IRefreshTokenStore
+    @Optional() protected readonly refreshStore?: DbRefreshStore
   ) {}
 
   async logout(request: any = null, response: any = null): Promise<boolean> {

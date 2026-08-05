@@ -13,7 +13,7 @@ export class RefreshTokenEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: "account_id", type: "bigint" })
+  @Column({ name: "account_id", type: "bigint", nullable: true })
   accountId: number;
 
   @Column({ name: "client_id", type: "varchar", length: 255, nullable: true })

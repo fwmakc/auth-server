@@ -1,22 +1,25 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, LessThan } from "typeorm";
+import { Repository } from "typeorm";
 import { createHash, randomUUID } from "crypto";
-import {
-  IRefreshTokenStore,
-  RefreshTokenPayload,
-  IssuedRefreshToken,
-} from "./refresh-token-store.interface";
 import { RefreshTokenEntity } from "./refresh-token.entity";
 
+export interface RefreshTokenPayload {
+  accountId: number;
+  clientId?: string;
+}
+
+export interface IssuedRefreshToken {
+  token: string;
+  expiresAt: Date;
+}
+
 @Injectable()
-export class DbRefreshStore extends IRefreshTokenStore {
+export class DbRefreshStore {
   constructor(
     @InjectRepository(RefreshTokenEntity)
     private readonly repo: Repository<RefreshTokenEntity>
-  ) {
-    super();
-  }
+  ) {}
 
   private hash(token: string): string {
     return createHash("sha256").update(token).digest("hex");

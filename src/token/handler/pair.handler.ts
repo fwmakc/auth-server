@@ -1,12 +1,12 @@
-import { Injectable, Inject } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { OneHandler } from "@src/token/handler/one.handler";
-import { IRefreshTokenStore, IREFRESH_TOKEN_STORE } from "@src/token/store";
+import { DbRefreshStore } from "@src/token/store";
 
 @Injectable()
 export class PairHandler {
   constructor(
     private readonly oneHandler: OneHandler,
-    @Inject(IREFRESH_TOKEN_STORE) private readonly refreshStore: IRefreshTokenStore
+    private readonly refreshStore: DbRefreshStore
   ) {}
 
   async pair(data): Promise<any> {

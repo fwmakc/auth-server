@@ -118,11 +118,8 @@ Vue frontend ──> auth-server (REST, JWT)
 
 ### Token Revocation (RFC 7009)
 
-> **Important:** Revocation requires `REFRESH_TOKEN_STORE=db` in `.env`.
-> In default (stateless) mode, all revocation endpoints and automatic
-> revocation (logout, deactivate, rotation) are **no-ops** — they return
-> `200 {success: true}` but don't actually revoke anything. A startup warning
-> is logged when DB mode is not enabled.
+Refresh tokens are stored in the `refresh_tokens` table (SHA-256 hashed, opaque
+strings `r_<uuid>`). All revocation is real — no no-ops.
 
 **Self-service — revoke your own refresh token:**
 
@@ -135,8 +132,7 @@ Content-Type: application/json
 
 - No authentication required (RFC 7009 — token is proof of possession)
 - Always returns `200 {success: true}` (even if token not found — no info leak)
-- Stateless mode: no-op (JWT can't be revoked)
-- DB mode (`REFRESH_TOKEN_STORE=db`): marks token as `revoked=true`
+- Marks refresh token as `revoked=true` in database
 
 **Superuser — revoke all tokens for an account:**
 
