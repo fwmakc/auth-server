@@ -3,6 +3,7 @@ import { TokenController } from "@src/token/token.controller";
 import { TokenService } from "@src/token/token.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
+import { TypeOrmModule } from "@nestjs/typeorm";
 import { getJwtConfig } from "@src/config/jwt.config";
 import { ClientsModule } from "@src/clients/clients.module";
 
@@ -21,6 +22,15 @@ import { RefreshTokenGrant } from "@src/token/grant/refresh_token.grant";
 import { AccountModule } from "@src/account/account.module";
 import { UsersModule } from "@src/db/users/users.module";
 
+import {
+  IREFRESH_TOKEN_STORE,
+  StatelessRefreshStore,
+  DbRefreshStore,
+  RefreshTokenEntity,
+} from "@src/token/store";
+
+const useDbStore = process.env.REFRESH_TOKEN_STORE === "db";
+
 @Module({
   controllers: [TokenController],
   imports: [
@@ -30,6 +40,9 @@ import { UsersModule } from "@src/db/users/users.module";
       inject: [ConfigService],
       useFactory: getJwtConfig,
     }),
+    ...(useDbStore
+      ? [TypeOrmModule.forFeature([RefreshTokenEntity])]
+      : []),
     forwardRef(() => ClientsModule),
     forwardRef(() => AccountModule),
     forwardRef(() => UsersModule),
@@ -49,7 +62,13 @@ import { UsersModule } from "@src/db/users/users.module";
     PrepareHandler,
     RefreshHandler,
     VerifyHandler,
+
+    useDbStore ? DbRefreshStore : StatelessRefreshStore,
+    {
+      provide: IREFRESH_TOKEN_STORE,
+      useExisting: useDbStore ? DbRefreshStore : StatelessRefreshStore,
+    },
   ],
-  exports: [TokenService, GrantsTokenService],
+  exports: [TokenService, GrantsTokenService, IREFRESH_TOKEN_STORE],
 })
 export class TokenModule {}

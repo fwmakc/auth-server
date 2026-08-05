@@ -1,12 +1,12 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, UnauthorizedException, Inject } from "@nestjs/common";
 import { PairHandler } from "@src/token/handler/pair.handler";
-import { VerifyHandler } from "@src/token/handler/verify.handler";
+import { IRefreshTokenStore, IREFRESH_TOKEN_STORE } from "@src/token/store";
 
 @Injectable()
 export class RefreshHandler {
   constructor(
     private readonly pairHandler: PairHandler,
-    private readonly verifyHandler: VerifyHandler
+    @Inject(IREFRESH_TOKEN_STORE) private readonly refreshStore: IRefreshTokenStore
   ) {}
 
   async refresh(refresh_token: string, callback = null): Promise<any> {
@@ -14,23 +14,23 @@ export class RefreshHandler {
       throw new UnauthorizedException("Please sign in!");
     }
 
-    const result = await this.verifyHandler.verify(refresh_token, "refresh");
+    const payload = await this.refreshStore.verify(refresh_token);
 
     if (callback) {
-      const matched = callback(result);
+      const matched = callback({
+        id: payload.accountId,
+        client_id: payload.clientId,
+      });
       if (!matched) {
         throw new UnauthorizedException("Refresh token is not valid!");
       }
     }
 
-    const data: any = {};
+    await this.refreshStore.revoke(refresh_token);
 
-    if (result.client_id) {
-      data.client_id = result.client_id;
-    }
-
-    if (result.id) {
-      data.id = result.id;
+    const data: any = { id: payload.accountId };
+    if (payload.clientId) {
+      data.client_id = payload.clientId;
     }
 
     return await this.pairHandler.pair(data);

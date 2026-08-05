@@ -1,31 +1,38 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Inject, Injectable, Optional, UnauthorizedException } from "@nestjs/common";
 import { compare } from "bcryptjs";
 import { AccountService } from "@src/account/account.service";
 import { AccountSessionsService } from "@src/account/account_sessions/account_sessions.service";
 import { Cookie } from "api-server-toolkit";
+import { IRefreshTokenStore, IREFRESH_TOKEN_STORE } from "@src/token/store";
 
 @Injectable()
 export class DeactivateAccountHandler {
   constructor(
     protected readonly accountService: AccountService,
-    protected readonly accountSessionsService: AccountSessionsService
+    protected readonly accountSessionsService: AccountSessionsService,
+    @Inject(IREFRESH_TOKEN_STORE) @Optional()
+    protected readonly refreshStore?: IRefreshTokenStore
   ) {}
 
   async deactivate(account: any, password: string, request: any, response: any): Promise<any> {
     const fullAccount = await this.accountService.findByUsername(account.username);
 
     if (!fullAccount) {
-      throw new UnauthorizedException("User not found");
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     const isValid = await compare(password, fullAccount.password);
     if (!isValid) {
-      throw new UnauthorizedException("Invalid password");
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     fullAccount.isDeleted = true;
     fullAccount.deletedAt = new Date();
     await fullAccount.save();
+
+    if (this.refreshStore) {
+      await this.refreshStore.revokeAll(fullAccount.id);
+    }
 
     try {
       await this.accountSessionsService.destroy(fullAccount, request);

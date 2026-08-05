@@ -1,0 +1,77 @@
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, LessThan } from "typeorm";
+import { createHash, randomUUID } from "crypto";
+import {
+  IRefreshTokenStore,
+  RefreshTokenPayload,
+  IssuedRefreshToken,
+} from "./refresh-token-store.interface";
+import { RefreshTokenEntity } from "./refresh-token.entity";
+
+@Injectable()
+export class DbRefreshStore extends IRefreshTokenStore {
+  constructor(
+    @InjectRepository(RefreshTokenEntity)
+    private readonly repo: Repository<RefreshTokenEntity>
+  ) {
+    super();
+  }
+
+  private hash(token: string): string {
+    return createHash("sha256").update(token).digest("hex");
+  }
+
+  async issue(payload: RefreshTokenPayload): Promise<IssuedRefreshToken> {
+    const rawToken = `r_${randomUUID()}`;
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    await this.repo.save({
+      accountId: payload.accountId,
+      clientId: payload.clientId || null,
+      tokenHash: this.hash(rawToken),
+      expiresAt,
+      revoked: false,
+    });
+
+    return { token: rawToken, expiresAt };
+  }
+
+  async verify(token: string): Promise<RefreshTokenPayload> {
+    const record = await this.repo.findOne({
+      where: {
+        tokenHash: this.hash(token),
+        revoked: false,
+      },
+    });
+
+    if (!record) {
+      throw new UnauthorizedException("Invalid refresh token");
+    }
+
+    if (record.expiresAt < new Date()) {
+      await this.repo.remove(record);
+      throw new UnauthorizedException("Refresh token expired");
+    }
+
+    return {
+      accountId: record.accountId,
+      clientId: record.clientId || undefined,
+    };
+  }
+
+  async revoke(token: string): Promise<void> {
+    await this.repo.update(
+      { tokenHash: this.hash(token) },
+      { revoked: true }
+    );
+  }
+
+  async revokeAll(accountId: number): Promise<void> {
+    await this.repo.update(
+      { accountId, revoked: false },
+      { revoked: true }
+    );
+  }
+}
