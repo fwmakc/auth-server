@@ -97,17 +97,22 @@ Vue frontend ──> auth-server (REST, JWT)
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | POST | `/token` | — | Token issuance (dispatches on `grant_type`) |
-| GET | `/account` | — | OAuth2 `/authorize` (code + implicit flow) |
+| GET | `/account` | — | OAuth2 `/authorize` (authorization_code flow only) |
 
 **Supported grant types:**
 
-| Grant | Behavior |
-|-------|----------|
-| `password` | Username/password authentication, issues access + refresh token pair |
-| `refresh_token` | Refresh access token (account or client) |
-| `authorization_code` | Exchange code for tokens |
-| `client_credentials` | Client authentication (client_id/secret) |
-| `key` | Passwordless login via hash key (custom, auto-creates account if missing) |
+| Grant | Behavior | Status |
+|-------|----------|--------|
+| `password` | Username/password → access + refresh token pair | **Deprecated** (first-party only) |
+| `refresh_token` | Refresh access token (account or client), rotation supported | Active |
+| `authorization_code` | Exchange signed code for tokens (HMAC-SHA256) | Active |
+| `client_credentials` | Client authentication (client_id/secret, bcrypt-hashed) | Active |
+| `key` | Passwordless login via hash key (auto-creates activated account) | Custom |
+
+> **Password grant (deprecated):** `grant_type=password` is intended for **first-party
+> clients only** (your own frontend/backend). Third-party applications must use the
+> `authorization_code` flow. This grant type is deprecated in OAuth 2.1. Rate-limited
+> at 10 requests/minute via `@nestjs/throttler`.
 
 ### OIDC / Well-Known
 
