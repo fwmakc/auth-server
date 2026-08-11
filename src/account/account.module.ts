@@ -24,8 +24,10 @@ import { MethodsAccountService } from "./service/methods.account.service";
 import { OpenAccountService } from "./service/open.account.service";
 
 import { AccountConfirmModule } from "./account_confirm/account_confirm.module";
+import { AccountRolesModule } from "./account_roles/account_roles.module";
 import { AccountSessionsModule } from "./account_sessions/account_sessions.module";
 import { AccountStrategiesModule } from "./account_strategies/account_strategies.module";
+import { RolesModule } from "./roles/roles.module";
 
 import { ClientsModule } from "@src/clients/clients.module";
 import { EventClientModule } from "api-server-toolkit";
@@ -43,8 +45,10 @@ import { UsersModule } from "@src/db/users/users.module";
   imports: [
     TypeOrmModule.forFeature([AccountEntity]),
     forwardRef(() => AccountConfirmModule),
+    forwardRef(() => AccountRolesModule),
     forwardRef(() => AccountSessionsModule),
     forwardRef(() => AccountStrategiesModule),
+    forwardRef(() => RolesModule),
     forwardRef(() => ClientsModule),
     forwardRef(() => TokenModule),
     forwardRef(() => UsersModule),

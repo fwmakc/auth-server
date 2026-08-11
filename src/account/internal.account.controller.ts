@@ -43,7 +43,10 @@ export class InternalAccountController {
       throw new NotFoundException();
     }
 
-    const account = await this.accountService.findOne({ id });
+    const account = await this.accountService.findOne({
+      id,
+      relations: [{ name: "accountRoles", relations: [{ name: "role" }] }],
+    });
     if (!account?.id) {
       throw new NotFoundException();
     }
@@ -53,6 +56,7 @@ export class InternalAccountController {
       username: account.username,
       isActivated: account.isActivated,
       isSuperuser: account.isSuperuser,
+      roles: account.roles,
     };
   }
 }

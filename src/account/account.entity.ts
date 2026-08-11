@@ -10,6 +10,7 @@ import {
 import { ClientsEntity } from "@src/clients/clients.entity";
 import { UsersEntity } from "@src/db/users/users.entity";
 import { AccountConfirmEntity } from "./account_confirm/account_confirm.entity";
+import { AccountRoleEntity } from "./account_roles/account_role.entity";
 import { AccountSessionsEntity } from "./account_sessions/account_sessions.entity";
 import { AccountStrategiesEntity } from "./account_strategies/account_strategies.entity";
 
@@ -66,4 +67,13 @@ export class AccountEntity extends BaseEntity {
     cascade: true,
   })
   users: UsersEntity;
+
+  @OneToMany(() => AccountRoleEntity, (ar) => ar.account, {
+    cascade: true,
+  })
+  accountRoles: AccountRoleEntity[];
+
+  get roles(): string[] {
+    return this.accountRoles?.map((ar) => ar.role?.name).filter(Boolean) || [];
+  }
 }
