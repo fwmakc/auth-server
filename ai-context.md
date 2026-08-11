@@ -1,7 +1,7 @@
 # AI Context — auth-server
 
 > Auto-generated. Run `npm run ai-context` to regenerate.
-> Generated: 2026-08-01T21:10:11.322Z
+> Generated: 2026-08-11T20:05:19.952Z
 
 ---
 
@@ -14,6 +14,15 @@ Base path: `/account`
 | Method | Path |
 |--------|------|
 | `GET` | `/account/self` |
+
+### AccountRoleAssignmentController [account-roles]
+
+Base path: `/account/:accountId/roles`
+
+| Method | Path |
+|--------|------|
+| `POST` | `/account/:accountId/roles` |
+| `DELETE` | `/account/:accountId/roles` |
 
 ### AccountSessionsController
 
@@ -106,6 +115,8 @@ Base path: `/token`
 | Method | Path |
 |--------|------|
 | `POST` | `/token//` |
+| `POST` | `/token/revoke` |
+| `DELETE` | `/token/revoke/:id` |
 
 ---
 
@@ -127,6 +138,12 @@ Base path: `/token`
 - `findById(id: number): Promise<AccountConfirmEntity>`
 - `findByCode(code: string, type = "code"): Promise<AccountConfirmEntity>`
 - `remove(id: number): Promise<boolean>`
+
+### AccountRolesService
+
+- `assign(accountId: number, dto: AccountRoleAssignmentDto): Promise<void>`
+- `removeByAccount(accountId: number): Promise<void>`
+- `findByAccount(accountId: number): Promise<AccountRoleEntity[]>`
 
 ### AccountSessionsService extends `CommonService`
 
@@ -182,6 +199,8 @@ Base path: `/token`
 
 ### OpenAccountService
 
+- `signCode(data: object): string`
+- `verifyCodeSignature(code: string): object`
 - `code(clientsDto: ClientsDto,
     id: number,
     state: string): Promise<string>`
@@ -207,18 +226,6 @@ Base path: `/token`
 - `findByHash(hash: string): Promise<UsersEntity>`
 - `linkToAuth(userId: number, authId: number): Promise<any>`
 
-### MailService
-
-- `attachments(files: FilesInterface[]): Promise<AttachmentsMailInterface[]>`
-- `all(files && files.length
-        ? files?.map(
-            async (file): Promise<AttachmentsMailInterface> => (`
-
-### RandomService
-
-- `keys(sets): name.replace(/\W+/giu, " ").split(" ")`
-- `randomOption(endings): ""`
-
 ### GrantsTokenService
 
 - `authorizationCode(grantsTokenDto: GrantsTokenDto): Promise<any>`
@@ -228,6 +235,8 @@ Base path: `/token`
     request,
     response): Promise<any>`
 - `refreshToken(grantsTokenDto: GrantsTokenDto): Promise<any>`
+- `revoke(token: string): Promise<any>`
+- `revokeAll(accountId: number): Promise<any>`
 
 ### TokenService
 
@@ -254,7 +263,7 @@ Base path: `/token`
 | `isSuperuser` | `boolean` |
 | `isDeleted` | `boolean` |
 
-Relations: `AccountSessionsEntity`, `AccountStrategiesEntity`, `AccountConfirmEntity`, `ClientsEntity`, `UsersEntity`
+Relations: `AccountSessionsEntity`, `AccountStrategiesEntity`, `AccountConfirmEntity`, `ClientsEntity`, `UsersEntity`, `AccountRoleEntity`
 
 
 ### AccountConfirmEntity
@@ -268,6 +277,18 @@ Relations: `AccountSessionsEntity`, `AccountStrategiesEntity`, `AccountConfirmEn
 | `type` | `string` |
 
 Relations: `AccountEntity`
+
+
+### AccountRoleEntity
+
+| Column | Type |
+|--------|------|
+| `id` | `number` |
+| `accountId` | `number` |
+| `roleId` | `number` |
+| `tenantScope` | `string` |
+
+Relations: `AccountEntity`, `RoleEntity`
 
 
 ### AccountSessionsEntity
@@ -302,6 +323,19 @@ Relations: `AccountEntity`
 | `refreshToken` | `string` |
 
 Relations: `AccountEntity`
+
+
+### RoleEntity
+
+| Column | Type |
+|--------|------|
+| `id` | `number` |
+| `createdAt` | `Date` |
+| `updatedAt` | `Date` |
+| `name` | `string` |
+| `description` | `string` |
+
+Relations: `AccountRoleEntity`
 
 
 ### ClientsEntity
@@ -359,6 +393,9 @@ Relations: `ClientsEntity`
 Relations: `AccountEntity`
 
 
+### RefreshTokenEntity (table: `refresh_tokens`)
+
+
 ---
 
 ## DTOs
@@ -387,6 +424,14 @@ Relations: `AccountEntity`
 | `updatedAt` | `Date` | yes |
 | `code` | `string` | no |
 | `type` | `string` | no |
+
+### AccountRoleAssignmentDto
+
+| Field | Type | Optional |
+|-------|------|----------|
+| `roleId` | `number` | no |
+| `tenant` | `string` | yes |
+| `roles` | `RoleAssignmentItem[]` | no |
 
 ### AccountSessionsDto
 
@@ -424,6 +469,13 @@ Relations: `AccountEntity`
 | `client_id` | `string` | no |
 | `redirect_uri` | `string` | no |
 | `state` | `string` | no |
+
+### RoleDto
+
+| Field | Type | Optional |
+|-------|------|----------|
+| `name` | `string` | yes |
+| `description` | `string` | yes |
 
 ### ClientsDto
 
@@ -470,17 +522,6 @@ Relations: `AccountEntity`
 | `address` | `string` | yes |
 | `timezone` | `string` | yes |
 | `gender` | `TypeGenders` | yes |
-
-### MailDto
-
-| Field | Type | Optional |
-|-------|------|----------|
-| `from` | `string` | yes |
-| `to` | `string` | no |
-| `subject` | `string` | yes |
-| `text` | `string` | yes |
-| `html` | `string` | yes |
-| `template` | `string` | yes |
 
 ### GrantsTokenDto
 
