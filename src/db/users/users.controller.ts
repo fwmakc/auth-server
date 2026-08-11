@@ -1,5 +1,5 @@
 import { Controller } from "@nestjs/common";
-import { EntityController } from "api-server-toolkit";
+import { AccessLevel, EntityController } from "api-server-toolkit";
 import { UsersDto } from "./users.dto";
 import { UsersEntity } from "./users.entity";
 import { UsersService } from "./users.service";
@@ -10,10 +10,10 @@ export class UsersController extends EntityController({
   dto: UsersDto,
   entity: UsersEntity,
   operations: {
-    read: "owner",
-    create: "owner",
-    update: "owner",
-    delete: "owner",
+    read: AccessLevel.OWNER,
+    create: AccessLevel.OWNER,
+    update: AccessLevel.OWNER,
+    delete: AccessLevel.OWNER,
   },
   relations: ["account"],
 })<UsersDto, UsersEntity, UsersService> {

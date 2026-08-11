@@ -1,5 +1,5 @@
 import { BaseEntity, Entity, ManyToOne, JoinColumn } from "typeorm";
-import { IdColumn, BigIntColumn } from "api-server-toolkit";
+import { IdColumn, BigIntColumn, VarcharColumn } from "api-server-toolkit";
 import { AccountEntity } from "../account.entity";
 import { RoleEntity } from "../roles/role.entity";
 
@@ -13,6 +13,9 @@ export class AccountRoleEntity extends BaseEntity {
 
   @BigIntColumn("role_id")
   roleId: number;
+
+  @VarcharColumn("tenant_scope")
+  tenantScope: string;
 
   @ManyToOne(() => AccountEntity, (account) => account.accountRoles, {
     onDelete: "CASCADE",

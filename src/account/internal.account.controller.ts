@@ -57,6 +57,7 @@ export class InternalAccountController {
       isActivated: account.isActivated,
       isSuperuser: account.isSuperuser,
       roles: account.roles,
+      roleEntries: account.roleEntries,
     };
   }
 }

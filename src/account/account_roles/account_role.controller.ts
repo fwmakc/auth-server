@@ -24,7 +24,7 @@ export class AccountRoleAssignmentController {
     @Param("accountId", ParseIntPipe) accountId: number,
     @Body() dto: AccountRoleAssignmentDto,
   ): Promise<void> {
-    await this.accountRolesService.assign(accountId, dto.roleIds);
+    await this.accountRolesService.assign(accountId, dto);
   }
 
   @Account()

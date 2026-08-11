@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { AccountRoleEntity } from "./account_role.entity";
 import { RoleEntity } from "../roles/role.entity";
+import { AccountRoleAssignmentDto } from "./account_role.dto";
 
 @Injectable()
 export class AccountRolesService {
@@ -13,11 +14,12 @@ export class AccountRolesService {
     private readonly roleRepository: Repository<RoleEntity>,
   ) {}
 
-  async assign(accountId: number, roleIds: number[]): Promise<void> {
+  async assign(accountId: number, dto: AccountRoleAssignmentDto): Promise<void> {
     await this.repository.delete({ accountId });
 
-    if (!roleIds.length) return;
+    if (!dto.roles.length) return;
 
+    const roleIds = dto.roles.map((r) => r.roleId);
     const roles = await this.roleRepository.findByIds(roleIds);
     if (roles.length !== roleIds.length) {
       const found = new Set(roles.map((r) => r.id));
@@ -25,11 +27,13 @@ export class AccountRolesService {
       throw new NotFoundException(`Roles not found: ${missing.join(", ")}`);
     }
 
-    const entities = roles.map((role) => {
+    const entities = dto.roles.map((item) => {
+      const role = roles.find((r) => r.id === item.roleId);
       const ar = new AccountRoleEntity();
       ar.accountId = accountId;
-      ar.roleId = role.id;
+      ar.roleId = item.roleId;
       ar.role = role;
+      ar.tenantScope = item.tenant || null;
       return ar;
     });
 

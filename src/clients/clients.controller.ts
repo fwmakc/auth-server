@@ -2,7 +2,7 @@ import { Controller, Get, NotFoundException, Query } from "@nestjs/common";
 import { ClientsService } from "@src/clients/clients.service";
 import { ClientsDto } from "@src/clients/clients.dto";
 import { Client, SelfClient } from "@src/clients/clients.decorator";
-import { EntityController } from "api-server-toolkit";
+import { AccessLevel, EntityController } from "api-server-toolkit";
 import { ClientsEntity } from "@src/clients/clients.entity";
 import { ApiExcludeEndpoint } from "@nestjs/swagger";
 
@@ -12,10 +12,10 @@ export class ClientsController extends EntityController({
   dto: ClientsDto,
   entity: ClientsEntity,
   operations: {
-    read: "owner",
-    create: "owner",
-    update: "owner",
-    delete: "owner",
+    read: AccessLevel.OWNER,
+    create: AccessLevel.OWNER,
+    update: AccessLevel.OWNER,
+    delete: AccessLevel.OWNER,
   },
   relations: ["account", "redirects"],
 })<ClientsDto, ClientsEntity, ClientsService> {

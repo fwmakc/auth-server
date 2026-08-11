@@ -1,7 +1,7 @@
 import { Controller, Get, NotFoundException } from "@nestjs/common";
 import { RelationsDto } from "api-server-toolkit";
 import { Data } from "api-server-toolkit";
-import { EntityController } from "api-server-toolkit";
+import { AccessLevel, EntityController } from "api-server-toolkit";
 import { AccountSessionsDto } from "./account_sessions.dto";
 import { AccountSessionsEntity } from "./account_sessions.entity";
 import { AccountSessionsService } from "./account_sessions.service";
@@ -12,10 +12,10 @@ export class AccountSessionsController extends EntityController({
   dto: AccountSessionsDto,
   entity: AccountSessionsEntity,
   operations: {
-    read: "owner",
-    create: "owner",
-    update: "owner",
-    delete: "owner",
+    read: AccessLevel.OWNER,
+    create: AccessLevel.OWNER,
+    update: AccessLevel.OWNER,
+    delete: AccessLevel.OWNER,
   },
   relations: ["account"],
 })<AccountSessionsDto, AccountSessionsEntity, AccountSessionsService> {

@@ -1,4 +1,4 @@
-import { EntityController } from "api-server-toolkit";
+import { AccessLevel, EntityController } from "api-server-toolkit";
 import { RoleDto } from "./role.dto";
 import { RoleEntity } from "./role.entity";
 import { RoleService } from "./role.service";
@@ -8,10 +8,10 @@ import { RoleService } from "./role.service";
   dto: RoleDto,
   entity: RoleEntity,
   operations: {
-    read: "public",
-    create: "superuser",
-    update: "superuser",
-    delete: "superuser",
+    read: AccessLevel.PUBLIC,
+    create: AccessLevel.SUPERUSER,
+    update: AccessLevel.SUPERUSER,
+    delete: AccessLevel.SUPERUSER,
   },
 })
 export class RolesController {
