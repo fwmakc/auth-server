@@ -1,17 +1,29 @@
+import { NestFactory } from "@nestjs/core";
+import { NestExpressApplication } from "@nestjs/platform-express";
 import { bootstrap } from "api-server-toolkit/bootstrap";
+import { Sentry, Helmet, Morgan, Cors, CookieParser, Passport, ValidationPipe, Log, Prefix, Swagger } from "api-server-toolkit/bootstrap/setup";
 import { AppModule } from "@src/app.module";
 
-bootstrap({
-  module: AppModule,
-  serviceName: "auth-server",
-  cors: true,
-  morgan: true,
-  transactional: true,
-  beforeListen: (app) => {
-    const cookieParser = require("cookie-parser");
-    const passport = require("passport");
+async function main() {
+  if (process.env.TRANSACTIONAL === "true") {
+    const { initializeTransactionalContext } = require("typeorm-transactional");
+    initializeTransactionalContext();
+  }
 
-    app.use(cookieParser());
-    app.use(passport.initialize());
-  },
-});
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  Sentry.setup(app);
+  Helmet.setup(app);
+  Cors.setup(app, true);
+  Morgan.setup(app);
+  CookieParser.setup(app);
+  Passport.setup(app);
+  ValidationPipe.setup(app);
+  Log.setup(app);
+  Prefix.setup(app);
+  Swagger.setup(app);
+
+  await bootstrap(app, { port: 3001 });
+}
+
+main();
