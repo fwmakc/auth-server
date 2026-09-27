@@ -2,9 +2,13 @@ import { Controller, Get, NotFoundException, Query } from "@nestjs/common";
 import { ClientsService } from "@src/clients/clients.service";
 import { ClientsDto } from "@src/clients/clients.dto";
 import { Client, SelfClient } from "@src/clients/clients.decorator";
-import { AccessLevel, EntityController } from "api-server-toolkit";
+import { AccessRule, EntityController } from "api-server-toolkit";
 import { ClientsEntity } from "@src/clients/clients.entity";
 import { ApiExcludeEndpoint } from "@nestjs/swagger";
+
+const OWNER: AccessRule[] = [
+  { who: ["authenticated"], scope: { owner: "account.id" } },
+];
 
 @Controller("clients")
 export class ClientsController extends EntityController({
@@ -12,10 +16,10 @@ export class ClientsController extends EntityController({
   dto: ClientsDto,
   entity: ClientsEntity,
   operations: {
-    read: AccessLevel.OWNER,
-    create: AccessLevel.OWNER,
-    update: AccessLevel.OWNER,
-    delete: AccessLevel.OWNER,
+    read: OWNER,
+    create: OWNER,
+    update: OWNER,
+    delete: OWNER,
   },
   relations: ["account", "redirects"],
 })<ClientsDto, ClientsEntity, ClientsService> {

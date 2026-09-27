@@ -5,6 +5,18 @@ import { AccountService } from "@src/account/account.service";
 import { AccountStrategiesService } from "@src/account/account_strategies/account_strategies.service";
 import { ConfigService } from "@nestjs/config";
 
+interface OAuthTokenResponse {
+  access_token?: string;
+  refresh_token?: string;
+}
+
+interface OAuthProfile {
+  id?: number;
+  username: string;
+  isActivated?: boolean;
+  users?: unknown;
+}
+
 @Injectable()
 export class OauthProvider {
   constructor(
@@ -21,43 +33,49 @@ export class OauthProvider {
     }
 
     const res = await this.getToken(code);
-    const user = res.access_token
+    const user = res?.access_token
       ? await this.getUser(res.access_token, res.refresh_token)
       : undefined;
     return {
       ...user,
-      accessToken: res.access_token,
-      refreshToken: res.refresh_token,
+      accessToken: res?.access_token,
+      refreshToken: res?.refresh_token,
     };
   }
 
-  async getToken(code: string) {
+  async getToken(code: string): Promise<OAuthTokenResponse | undefined> {
     const customAccountServer = this.configService.get("OAUTH_SERVER");
     const redirect_uri = this.configService.get("OAUTH_CLIENT_REDIRECT");
     const client_id = this.configService.get("OAUTH_CLIENT_ID");
 
     try {
-      const { data } = await httpPost(`${customAccountServer}/token`, {
-        grant_type: "authorization_code",
-        code,
-        client_id,
-        redirect_uri,
-      });
+      const { data } = await httpPost<OAuthTokenResponse>(
+        `${customAccountServer}/token`,
+        {
+          grant_type: "authorization_code",
+          code,
+          client_id,
+          redirect_uri,
+        }
+      );
       return data;
     } catch (e) {
       console.error(e);
     }
   }
 
-  async getUser(accessToken: string, refreshToken: string): Promise<any> {
+  async getUser(accessToken: string, refreshToken: string): Promise<OAuthProfile | undefined> {
     const customAccountServer = this.configService.get("OAUTH_SERVER");
 
     try {
-      const { data } = await httpGet(`${customAccountServer}/account/self`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const { data } = await httpGet<OAuthProfile>(
+        `${customAccountServer}/account/self`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
       return data;
     } catch (e) {
       console.error(e);

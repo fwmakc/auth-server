@@ -1,7 +1,7 @@
 # AI Context — auth-server
 
 > Auto-generated. Run `npm run ai-context` to regenerate.
-> Generated: 2026-08-12T00:13:23.884Z
+> Generated: 2026-09-27T15:25:18.431Z
 
 ---
 
@@ -86,6 +86,13 @@ Base path: `/account`
 |--------|------|
 | `GET` | `/account` |
 
+### RolesController
+
+Base path: `/roles`
+
+| Method | Path |
+|--------|------|
+
 ### ClientsController
 
 Base path: `/clients`
@@ -131,7 +138,7 @@ Base path: `/token`
     relations: Array<RelationsDto> = undefined): Promise<AccountEntity>`
 - `findByUsername(username: string): Promise<AccountEntity>`
 - `login(accountDto: AccountDto): Promise<AccountEntity>`
-- `hardDelete(id: number): Promise<void>`
+- `hardDelete(id: number): Promise<boolean>`
 
 ### AccountConfirmService
 

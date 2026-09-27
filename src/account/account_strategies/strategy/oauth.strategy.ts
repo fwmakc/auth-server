@@ -10,6 +10,13 @@ import { AccountStrategiesService } from "@src/account/account_strategies/accoun
 import { httpGet } from "api-server-toolkit";
 // import { Request } from 'express';
 
+interface OAuthProfile {
+  id?: number;
+  username: string;
+  isActivated?: boolean;
+  users?: unknown;
+}
+
 @Injectable()
 export class OauthStrategy extends PassportStrategy(Strategy, "oauth") {
   constructor(
@@ -38,7 +45,7 @@ export class OauthStrategy extends PassportStrategy(Strategy, "oauth") {
   async validate(accessToken: string, refreshToken: string) {
     const customAccountServer = this.configService.get("OAUTH_SERVER");
 
-    const { data: profile } = await httpGet(
+    const { data: profile } = await httpGet<OAuthProfile>(
       `${customAccountServer}/account/self`,
       {
         headers: {

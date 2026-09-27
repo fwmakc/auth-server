@@ -63,12 +63,13 @@ export class AccountService extends CommonService<AccountDto, AccountEntity> {
     return account;
   }
 
-  async hardDelete(id: number): Promise<void> {
+  async hardDelete(id: number): Promise<boolean> {
     await this.repository.manager.transaction(async (manager) => {
       await manager.query("DELETE FROM account_confirm WHERE account_id = $1", [id]);
       await manager.query("DELETE FROM clients WHERE account_id = $1", [id]);
       await manager.query("DELETE FROM users WHERE account_id = $1", [id]);
       await manager.query("DELETE FROM accounts WHERE id = $1", [id]);
     });
+    return true;
   }
 }

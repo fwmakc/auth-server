@@ -24,7 +24,7 @@ import { MethodsAccountService } from "./service/methods.account.service";
 import { OpenAccountService } from "./service/open.account.service";
 
 import { AccountConfirmModule } from "./account_confirm/account_confirm.module";
-import { AccountRolesModule } from "./account_roles/account_roles.module";
+import { AccountRolesModule } from "./account_roles/account_role.module";
 import { AccountSessionsModule } from "./account_sessions/account_sessions.module";
 import { AccountStrategiesModule } from "./account_strategies/account_strategies.module";
 import { RolesModule } from "./roles/roles.module";

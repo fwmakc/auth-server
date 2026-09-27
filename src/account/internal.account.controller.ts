@@ -45,7 +45,7 @@ export class InternalAccountController {
 
     const account = await this.accountService.findOne({
       id,
-      relations: [{ name: "accountRoles", relations: [{ name: "role" }] }],
+      relations: [{ name: "accountRoles.role" }],
     });
     if (!account?.id) {
       throw new NotFoundException();

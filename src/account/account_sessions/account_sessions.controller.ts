@@ -1,10 +1,14 @@
 import { Controller, Get, NotFoundException } from "@nestjs/common";
 import { RelationsDto } from "api-server-toolkit";
 import { Data } from "api-server-toolkit";
-import { AccessLevel, EntityController } from "api-server-toolkit";
+import { AccessRule, EntityController } from "api-server-toolkit";
 import { AccountSessionsDto } from "./account_sessions.dto";
 import { AccountSessionsEntity } from "./account_sessions.entity";
 import { AccountSessionsService } from "./account_sessions.service";
+
+const OWNER: AccessRule[] = [
+  { who: ["authenticated"], scope: { owner: "account.id" } },
+];
 
 @Controller("account/sessions")
 export class AccountSessionsController extends EntityController({
@@ -12,10 +16,10 @@ export class AccountSessionsController extends EntityController({
   dto: AccountSessionsDto,
   entity: AccountSessionsEntity,
   operations: {
-    read: AccessLevel.OWNER,
-    create: AccessLevel.OWNER,
-    update: AccessLevel.OWNER,
-    delete: AccessLevel.OWNER,
+    read: OWNER,
+    create: OWNER,
+    update: OWNER,
+    delete: OWNER,
   },
   relations: ["account"],
 })<AccountSessionsDto, AccountSessionsEntity, AccountSessionsService> {
