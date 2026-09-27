@@ -33,6 +33,7 @@ export class RefreshHandler {
       data.client_id = payload.clientId;
     }
 
-    return await this.pairHandler.pair(data);
+    // Ротация наследует семью: новый токен — та же chain-of-trust
+    return await this.pairHandler.pair(data, payload.familyId);
   }
 }

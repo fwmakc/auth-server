@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-09-28
+
+### Added
+- Refresh token reuse detection: `refresh_tokens.family_id` tracks the rotation chain. Presenting an already-revoked refresh token is treated as theft — the whole family is revoked immediately. Fresh logins start a new family; rotation inherits it.
+- Migration `RefreshTokenFamily1790570000000` — adds `family_id` (creates `refresh_tokens` too: the table was missing from `InitialSchema` and previously existed only via `DB_SYNCHRONIZE`).
+- `JWT_REFRESH_EXPIRES` is now honored by the refresh store (was documented but hardcoded to 30 days).
+
+### Changed
+- `DbRefreshStore.verify` distinguishes unknown tokens from revoked ones (`Invalid` vs `Refresh token reuse detected`).
+- Toolkit v0.17.0 `Cors.setup` allowlist semantics (`CORS_ORIGINS` env).
+
 ## [0.5.0] - 2026-08-03
 
 Version reset to pre-release. The auth server is functional (41 tests, JWT/JWKS, SSO providers, account lifecycle) but the overall stack is not yet production-hardened. Pinned to `api-server-toolkit#v0.9.0`.

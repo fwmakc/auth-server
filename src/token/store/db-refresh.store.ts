@@ -1,17 +1,21 @@
 import { Injectable, UnauthorizedException, Logger, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ConfigService } from "@nestjs/config";
 import { Repository, LessThan } from "typeorm";
+import * as moment from "moment";
 import { createHash, randomUUID } from "crypto";
 import { RefreshTokenEntity } from "./refresh-token.entity";
 
 export interface RefreshTokenPayload {
   accountId: number;
   clientId?: string;
+  familyId?: string;
 }
 
 export interface IssuedRefreshToken {
   token: string;
   expiresAt: Date;
+  familyId: string;
 }
 
 @Injectable()
@@ -22,7 +26,8 @@ export class DbRefreshStore implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     @InjectRepository(RefreshTokenEntity)
-    private readonly repo: Repository<RefreshTokenEntity>
+    private readonly repo: Repository<RefreshTokenEntity>,
+    private readonly config: ConfigService
   ) {}
 
   onModuleInit() {
@@ -58,32 +63,55 @@ export class DbRefreshStore implements OnModuleInit, OnModuleDestroy {
     return createHash("sha256").update(token).digest("hex");
   }
 
-  async issue(payload: RefreshTokenPayload): Promise<IssuedRefreshToken> {
+  /** TTL из JWT_REFRESH_EXPIRES (формат как у JWT_ACCESS_EXPIRES, напр. "30d"). Дефолт — 30 дней. */
+  private refreshTtl(): { expiresAt: Date } {
+    const raw = this.config.get<string>("JWT_REFRESH_EXPIRES") || "30d";
+    const parts: Record<string, number> = {};
+    raw.match(/\d+[A-Za-z]*/giu)?.forEach((i) => {
+      const match = [i?.match(/\d+/giu)?.[0], i?.match(/[A-Za-z]+/giu)?.[0]];
+      parts[match[1] || "s"] = Number(match[0]) || 0;
+    });
+    const ms = moment.duration(parts).asMilliseconds() || 30 * 24 * 3600 * 1000;
+    return { expiresAt: new Date(Date.now() + ms) };
+  }
+
+  async issue(
+    payload: RefreshTokenPayload,
+    familyId?: string
+  ): Promise<IssuedRefreshToken> {
     const rawToken = `r_${randomUUID()}`;
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30);
+    const family = familyId || randomUUID();
+    const { expiresAt } = this.refreshTtl();
 
     await this.repo.save({
       accountId: payload.accountId,
       clientId: payload.clientId || null,
       tokenHash: this.hash(rawToken),
+      familyId: family,
       expiresAt,
       revoked: false,
     });
 
-    return { token: rawToken, expiresAt };
+    return { token: rawToken, expiresAt, familyId: family };
   }
 
   async verify(token: string): Promise<RefreshTokenPayload> {
     const record = await this.repo.findOne({
-      where: {
-        tokenHash: this.hash(token),
-        revoked: false,
-      },
+      where: { tokenHash: this.hash(token) },
     });
 
     if (!record) {
       throw new UnauthorizedException("Invalid refresh token");
+    }
+
+    // Повторное использование отозванного токена — признак кражи:
+    // инвалидируем всю семью (rotated-предков уже отозвали, живых бьём).
+    if (record.revoked) {
+      await this.repo.update(
+        { familyId: record.familyId, revoked: false },
+        { revoked: true }
+      );
+      throw new UnauthorizedException("Refresh token reuse detected");
     }
 
     if (record.expiresAt < new Date()) {
@@ -94,6 +122,7 @@ export class DbRefreshStore implements OnModuleInit, OnModuleDestroy {
     return {
       accountId: record.accountId,
       clientId: record.clientId || undefined,
+      familyId: record.familyId || undefined,
     };
   }
 

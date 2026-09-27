@@ -9,6 +9,7 @@ import {
 @Entity("refresh_tokens")
 @Index("idx_refresh_tokens_account", ["accountId"])
 @Index("idx_refresh_tokens_hash", ["tokenHash"])
+@Index("idx_refresh_tokens_family", ["familyId"])
 export class RefreshTokenEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -21,6 +22,13 @@ export class RefreshTokenEntity {
 
   @Column({ name: "token_hash", type: "varchar", length: 64 })
   tokenHash: string;
+
+  /**
+   * Семья токенов: свежий логин создаёт новую семью, ротация наследует её.
+   * Переиспользование отозванного токена инвалидирует всю семью.
+   */
+  @Column({ name: "family_id", type: "varchar", length: 64, nullable: true })
+  familyId: string | null;
 
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date;

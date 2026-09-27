@@ -9,7 +9,7 @@ export class PairHandler {
     private readonly refreshStore: DbRefreshStore
   ) {}
 
-  async pair(data): Promise<any> {
+  async pair(data, familyId?: string): Promise<any> {
     const accessTokenData = await this.oneHandler.one(
       {
         ...data,
@@ -18,10 +18,14 @@ export class PairHandler {
       "JWT_ACCESS_EXPIRES"
     );
 
-    const refreshToken = await this.refreshStore.issue({
-      accountId: data.id,
-      clientId: data.client_id,
-    });
+    // familyId передаётся только при ротации — свежий логин начинает новую семью
+    const refreshToken = await this.refreshStore.issue(
+      {
+        accountId: data.id,
+        clientId: data.client_id,
+      },
+      familyId
+    );
 
     return {
       access_token: accessTokenData.token,
