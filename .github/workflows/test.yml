@@ -77,6 +77,7 @@ jobs:
       # the same thing DB_MIGRATIONS_RUN=true does on deploy.
       - name: Run migrations on a clean database
         env:
+          DB_TYPE: postgres
           DB_HOST: localhost
           DB_PORT: 5432
           DB_NAME: migration_check
