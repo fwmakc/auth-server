@@ -8,6 +8,7 @@ import { DataSource } from "typeorm";
 import { addTransactionalDataSource } from "typeorm-transactional";
 import { getDbConfig } from "@config/db.config";
 import { HealthModule } from "api-server-toolkit/health";
+import { MetricsModule } from "api-server-toolkit/metrics";
 import AppImports from "./app.imports";
 
 let transactionalDataSource: DataSource | undefined;
@@ -34,6 +35,7 @@ let transactionalDataSource: DataSource | undefined;
     }),
     ...AppImports,
     HealthModule.forRoot("auth-server"),
+    MetricsModule.forRoot({ service: "auth-server" }),
   ],
   providers: [
     {
