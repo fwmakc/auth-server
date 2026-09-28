@@ -22,7 +22,6 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
-COPY auth-server/views/ ./views/
 
 ENV NODE_ENV=production
 ENV ROOT_PATH=.
