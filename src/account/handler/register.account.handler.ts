@@ -5,6 +5,7 @@ import { AccountEntity } from "@src/account/account.entity";
 import { AccountService } from "@src/account/account.service";
 import { AccountConfirmService } from "@src/account/account_confirm/account_confirm.service";
 import { HashAccountHandler } from "@src/account/handler/hash.account.handler";
+import { PasswordPolicyService } from "@src/account/service/password.policy.service";
 
 @Injectable()
 export class RegisterAccountHandler {
@@ -12,7 +13,8 @@ export class RegisterAccountHandler {
     protected readonly accountService: AccountService,
     protected readonly accountConfirmService: AccountConfirmService,
     protected readonly configService: ConfigService,
-    protected readonly hashAuthHandler: HashAccountHandler
+    protected readonly hashAuthHandler: HashAccountHandler,
+    protected readonly passwordPolicyService: PasswordPolicyService
   ) {}
 
   async authCreate(accountDto: AccountDto): Promise<AccountEntity> {
@@ -27,6 +29,7 @@ export class RegisterAccountHandler {
       }
       return authExists;
     }
+    this.passwordPolicyService.assertValid(accountDto.password);
     accountDto.password = await this.hashAuthHandler.generate(
       accountDto.password
     );

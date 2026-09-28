@@ -22,6 +22,7 @@ import { ResetAccountHandler } from "./handler/reset.account.handler";
 import { FormsAccountService } from "./service/forms.account.service";
 import { MethodsAccountService } from "./service/methods.account.service";
 import { OpenAccountService } from "./service/open.account.service";
+import { PasswordPolicyService } from "./service/password.policy.service";
 
 import { AccountConfirmModule } from "./account_confirm/account_confirm.module";
 import { AccountRolesModule } from "./account_roles/account_role.module";
@@ -61,6 +62,7 @@ import { UsersModule } from "@src/db/users/users.module";
     FormsAccountService,
     MethodsAccountService,
     OpenAccountService,
+    PasswordPolicyService,
 
     ChangeAccountHandler,
     ConfirmAccountHandler,

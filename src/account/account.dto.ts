@@ -1,4 +1,9 @@
-import { IsEmail, IsString, MinLength } from "class-validator";
+import {
+  IsBoolean,
+  IsEmail,
+  IsOptional,
+  IsString,
+} from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { DtoColumn, DtoCreatedColumn, DtoUpdatedColumn } from "api-server-toolkit";
 import { CommonDto } from "api-server-toolkit";
@@ -21,19 +26,29 @@ export class AccountDto extends CommonDto {
   })
   username?: string;
 
-  @MinLength(6, {
-    message: "Password cannot be less than 6 symbols!",
-  })
+  // Enforced by PasswordPolicyService (PASSWORD_* env), not by a static
+  // decorator — env is the single source of truth for the policy
   @IsString()
   @DtoColumn("Пароль, заданный пользователем")
   password?: string;
 
+  // Read by register/reset controllers via @Body("subject") for the mail
+  // template; must be declared or the strict ValidationPipe rejects it
+  @IsOptional()
+  @IsString()
+  @DtoColumn("Тема письма для кода подтверждения/сброса пароля")
+  subject?: string;
+
+  @IsOptional()
+  @IsBoolean()
   @DtoColumn(
     "Флаг, который показывает, является ли учетная запись пользователя активированной. Например, подтвержденной по email.",
     { default: false }
   )
   isActivated?: boolean;
 
+  @IsOptional()
+  @IsBoolean()
   @DtoColumn(
     "Флаг, который показывает, назначены ли учетной записи пользователя права суперпользователя (администратора).",
     { required: false }

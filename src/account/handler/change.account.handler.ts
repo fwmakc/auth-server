@@ -7,13 +7,15 @@ import { AccountDto } from "@src/account/account.dto";
 import { AccountConfirmService } from "@src/account/account_confirm/account_confirm.service";
 import { AccountService } from "@src/account/account.service";
 import { HashAccountHandler } from "@src/account/handler/hash.account.handler";
+import { PasswordPolicyService } from "@src/account/service/password.policy.service";
 
 @Injectable()
 export class ChangeAccountHandler {
   constructor(
     protected readonly accountService: AccountService,
     protected readonly accountConfirmService: AccountConfirmService,
-    protected readonly hashAuthHandler: HashAccountHandler
+    protected readonly hashAuthHandler: HashAccountHandler,
+    protected readonly passwordPolicyService: PasswordPolicyService
   ) {}
 
   async change(accountDto: AccountDto, code: string): Promise<boolean> {
@@ -25,6 +27,7 @@ export class ChangeAccountHandler {
     if (!account || account.username !== accountDto.username) {
       throw new UnauthorizedException("User not found");
     }
+    this.passwordPolicyService.assertValid(accountDto.password);
     const password = await this.hashAuthHandler.generate(accountDto.password);
     await this.accountService.update(account.id, {
       password,
