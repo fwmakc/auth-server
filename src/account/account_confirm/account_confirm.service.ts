@@ -22,10 +22,10 @@ export class AccountConfirmService {
 
   async findByCode(code: string, type = "code"): Promise<AccountConfirmEntity> {
     const where: FindOptionsWhere<any> = { code, type };
-    const now = new Date();
-    const maxAge = type === "reset" ? 1 : 24;
-    now.setHours(now.getHours() - maxAge);
-    where.createdAt = MoreThan(now);
+    // createdAt is a naive UTC timestamp; compute the cutoff from Date.now()
+    // so local-timezone setHours() can't shrink (or void) the window
+    const maxAgeHours = type === "reset" ? 1 : 24;
+    where.createdAt = MoreThan(new Date(Date.now() - maxAgeHours * 3600 * 1000));
     return await this.repository.findOne({
       where,
       relations: ["account"],
