@@ -40,7 +40,7 @@ export class MethodsAccountService {
       return { success: false, message: "Invalid confirm code" };
     }
     this.eventClient.publish("user.confirmed", {
-      userId: account.id,
+      userId: Number(account.id),
       username: account.username,
       email: account.username,
     });
@@ -68,7 +68,7 @@ export class MethodsAccountService {
     if (!account.isActivated) {
       const confirmUrl = await this.registerAuthHandler.sendMail(account);
       this.eventClient.publish("user.registered", {
-        userId: account.id,
+        userId: Number(account.id),
         username: account.username,
         email: account.username,
         subject,
@@ -76,7 +76,7 @@ export class MethodsAccountService {
     });
     } else {
       this.eventClient.publish("user.registered", {
-        userId: account.id,
+        userId: Number(account.id),
         username: account.username,
         email: account.username,
     });
@@ -107,7 +107,7 @@ export class MethodsAccountService {
       res
     );
     this.eventClient.publish("user.deactivated", {
-      userId: account.id,
+      userId: Number(account.id),
       username: account.username,
       email: account.username,
     });
@@ -117,7 +117,7 @@ export class MethodsAccountService {
   async delete(targetUserId: number, req, res): Promise<any> {
     const account = await this.deleteAuthHandler.delete(targetUserId, req);
     this.eventClient.publish("user.deleted", {
-      userId: account.id,
+      userId: Number(account.id),
       username: account.username,
       email: account.username,
     });
