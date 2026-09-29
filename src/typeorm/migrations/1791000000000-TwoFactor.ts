@@ -15,7 +15,7 @@ export class TwoFactor1791000000000 implements MigrationInterface {
         `CREATE UNIQUE INDEX "idx_account_two_factor_account" ON "account_two_factor" ("account_id") `,
       );
       await queryRunner.query(
-        `ALTER TABLE "account_two_factor" ADD CONSTRAINT "FK_account_two_factor_account" FOREIGN KEY ("account_id") REFERENCES "accounts"("id") ON DELETE CASCADE ON UPDATE CASCADE`,
+        `ALTER TABLE "account_two_factor" ADD CONSTRAINT "FK_a3356b84c252bca126eb28ac078" FOREIGN KEY ("account_id") REFERENCES "accounts"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
       );
     }
   }

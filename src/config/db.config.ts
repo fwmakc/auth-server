@@ -16,12 +16,13 @@ export const getDbConfig = async (
   password: config.get<string>("DB_PASSWORD"),
   port: config.get<number>("DB_PORT"),
 
-  synchronize: config.get<string>("DB_SYNCHRONIZE") === "true",
+  // Schema is owned by migrations only (src/typeorm/migrations) — pending
+  // migrations are applied on every boot; never enable synchronize.
+  migrationsRun: true,
   autoLoadEntities: true,
   logging: config.get<string>("DB_LOG") === "true",
 
   entities: [join(__dirname, "../**/*.entity{.ts,.js}")],
   migrations: [join(__dirname, "../typeorm/migrations/*{.ts,.js}")],
   migrationsTableName: "migrations_typeorm",
-  migrationsRun: config.get<string>("DB_MIGRATIONS_RUN", "false") === "true",
 });

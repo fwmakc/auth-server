@@ -1,4 +1,10 @@
-import { BaseEntity, Entity, JoinColumn, ManyToOne } from "typeorm";
+import {
+  BaseEntity,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+} from "typeorm";
 import {
   BooleanColumn,
   CreatedColumn,
@@ -12,11 +18,14 @@ import {
 import { AccountEntity } from "../account.entity";
 
 @Entity({ name: "account_two_factor" })
+// One 2FA record per account, enforced at the DB level (matches the
+// unique index the TwoFactor migration creates)
+@Index("idx_account_two_factor_account", ["account"], { unique: true })
 export class AccountTwoFactorEntity extends BaseEntity {
   @IdColumn()
   id: number;
 
-  @ManyToOne(() => AccountEntity)
+  @ManyToOne(() => AccountEntity, { onDelete: "CASCADE" })
   @JoinColumn({ name: "account_id", referencedColumnName: "id" })
   account: AccountEntity;
 

@@ -62,7 +62,6 @@ function setTestEnv() {
   process.env.DB_NAME = "auth_server_test";
   process.env.DB_USER = "root";
   process.env.DB_PASSWORD = "1234";
-  process.env.DB_SYNCHRONIZE = "true";
   process.env.DB_LOG = "false";
   process.env.JWT_ACCESS_EXPIRES = "15m";
   process.env.JWT_REFRESH_EXPIRES = "30d";

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-09-29
+### Changed
+- Database schema is now owned exclusively by TypeORM migrations. DB_SYNCHRONIZE is removed: pending migrations are applied on every boot (hardcoded migrationsRun: true), so the first boot on an empty database initializes the schema. Test env no longer sets the dead variable.
+### Fixed
+- src/config/typeorm.config.ts no longer self-initializes the DataSource on import — it raced with the CLI initialization and made migration commands flaky.
+- New `AccountRoles` migration: `roles` and `account_roles` tables (introduced with the Access model) had no migration — a database built from migrations alone was missing them. CI now also verifies entities have no drift against the migration chain.
+- `account_two_factor`: declared the unique account index and `ON DELETE CASCADE` in the entity (previously only in the hand-written migration) and aligned the FK constraint name.
+- `refresh_tokens` migration: `id` is SERIAL (matching the entity's `@PrimaryGeneratedColumn`) with the metadata PK constraint name.
+
 ## [0.7.1] - 2026-09-28
 ### Changed
 - Node.js runtime bumped 22 → 24 LTS: Docker images `node:24-alpine`, CI `node-version: 24`.

@@ -8,7 +8,7 @@ export class RefreshTokenFamily1790570000000 implements MigrationInterface {
     // (refresh_tokens отсутствует в InitialSchema и создавался synchronize'м).
     if (!(await queryRunner.hasTable("refresh_tokens"))) {
       await queryRunner.query(
-        `CREATE TABLE "refresh_tokens" ("id" BIGSERIAL NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "account_id" bigint, "client_id" character varying(255), "token_hash" character varying(64) NOT NULL, "expires_at" TIMESTAMP NOT NULL, "revoked" boolean NOT NULL DEFAULT false, "family_id" character varying(64), CONSTRAINT "PK_refresh_tokens" PRIMARY KEY ("id"))`,
+        `CREATE TABLE "refresh_tokens" ("id" SERIAL NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "account_id" bigint, "client_id" character varying(255), "token_hash" character varying(64) NOT NULL, "expires_at" TIMESTAMP NOT NULL, "revoked" boolean NOT NULL DEFAULT false, "family_id" character varying(64), CONSTRAINT "PK_7d8bee0204106019488c4c50ffa" PRIMARY KEY ("id"))`,
       );
       await queryRunner.query(
         `CREATE INDEX "idx_refresh_tokens_account" ON "refresh_tokens" ("account_id")`,
