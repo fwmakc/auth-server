@@ -5,11 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.4] - 2026-09-29
+### Fixed
+- `/health` is no longer rate limited: the global ThrottlerGuard counted docker/nginx health probes, a burst of 429s marked the container unhealthy and cascaded into restart flaps. `AppThrottlerGuard` skips exactly `/health`; all other routes keep their limits.
+
+## [0.8.3] - 2026-09-29
 ### Changed
 - Toolkit pinned to v0.20.2 (bootstrap binds 0.0.0.0 by default).
 
-## [0.8.3] - 2026-09-29
-0.8.2] - 2026-09-29
+## [0.8.2] - 2026-09-29
+] - 2026-09-29
 ### Fixed
 - Boot failed in production with "No storage driver defined … call initializeTransactionalContext()": the call was gated behind an undocumented TRANSACTIONAL env var while app.module.ts unconditionally wraps the DataSource with addTransactionalDataSource. Boot migrations (migrationsRun) exposed the mismatch. The context is now always initialized before TypeORM starts.
 

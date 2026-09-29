@@ -2,13 +2,14 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { Module } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
+import { ThrottlerModule } from "@nestjs/throttler";
 import { SentryGlobalFilter, SentryModule } from "@sentry/nestjs/setup";
 import { DataSource } from "typeorm";
 import { addTransactionalDataSource } from "typeorm-transactional";
 import { getDbConfig } from "@config/db.config";
 import { HealthModule } from "api-server-toolkit/health";
 import { MetricsModule } from "api-server-toolkit/metrics";
+import { AppThrottlerGuard } from "./app.throttler";
 import AppImports from "./app.imports";
 
 let transactionalDataSource: DataSource | undefined;
@@ -46,7 +47,7 @@ let transactionalDataSource: DataSource | undefined;
     },
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: AppThrottlerGuard,
     },
   ],
 })
