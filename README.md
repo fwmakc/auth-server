@@ -277,6 +277,20 @@ See `.env.example`. Key variables:
 ### JWT / RS256 Keys
 - `JWT_PRIVATE_KEY_PATH`, `JWT_PUBLIC_KEY_PATH` (persistent keys)
 - `JWT_ACCESS_EXPIRES`, `JWT_REFRESH_EXPIRES`, `JWT_CLIENTS_EXPIRES`, `JWT_EXPIRES`
+- `JWT_MFA_EXPIRES` (default: 5m — challenge token between password check and 2FA verification)
+
+### Password Policy
+- `PASSWORD_MIN_LENGTH` (default: 6), `PASSWORD_MAX_LENGTH` (default: 72 — bcrypt byte limit)
+- `PASSWORD_REQUIRE_LOWER`, `PASSWORD_REQUIRE_UPPER`, `PASSWORD_REQUIRE_DIGITS`, `PASSWORD_REQUIRE_SYMBOLS`
+- A variable set to a truthy value (`true`/`1`/`yes`/`on`) turns the rule on; defaults reproduce the legacy behavior (min 6, no complexity). Enforced at register and change/:code.
+
+### Two-Factor Authentication
+- `TWO_FACTOR_ENABLED` (default: false — master switch; off = no login is ever challenged)
+- `TWO_FACTOR_ISSUER` (name shown in the TOTP app)
+- Methods: `totp` (otplib, otpauth URI) and `email` (one-time code via the event bus, template `code` in message-server)
+- Flow: `POST /account/methods/login` → `{twoFactorRequired, mfa_token}` → `POST /account/methods/2fa/verify {mfa_token, code}` → tokens
+- Management: `GET status`, `POST setup`, `POST setup/confirm` (returns 10 recovery codes once), `POST disable` (requires password)
+- Brute force: 5 failed verifications → 5-minute lock; route throttled 5/min
 
 ### Sessions
 - `SESSION_SECRET`, `SESSION_EXPIRES`

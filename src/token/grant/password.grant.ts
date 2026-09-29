@@ -1,5 +1,6 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
+import { Inject, Injectable, BadRequestException, forwardRef } from "@nestjs/common";
 import { AccountService } from "@src/account/account.service";
+import { TwoFactorAccountService } from "@src/account/account_two_factor/two_factor.account.service";
 import { GrantsTokenDto } from "@src/token/dto/grants.token.dto";
 import { TokenService } from "@src/token/token.service";
 import { Cookie } from "api-server-toolkit";
@@ -8,7 +9,9 @@ import { Cookie } from "api-server-toolkit";
 export class PasswordGrant {
   constructor(
     private readonly accountService: AccountService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    @Inject(forwardRef(() => TwoFactorAccountService))
+    private readonly twoFactorAccountService: TwoFactorAccountService
   ) {}
 
   async password(
@@ -30,6 +33,13 @@ export class PasswordGrant {
     }
     const { username, password } = grantsTokenDto;
     const account = await this.accountService.login({ username, password });
+
+    // 2FA: no tokens, no id cookie until the second factor is verified
+    const challenge = await this.twoFactorAccountService.challenge(account);
+    if (challenge) {
+      return challenge;
+    }
+
     const token = await this.tokenService.pair({ id: account.id });
     if (!token) {
       throw new BadRequestException(

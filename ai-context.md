@@ -1,7 +1,7 @@
 # AI Context — auth-server
 
 > Auto-generated. Run `npm run ai-context` to regenerate.
-> Generated: 2026-09-27T15:25:18.431Z
+> Generated: 2026-09-29T00:12:25.484Z
 
 ---
 
@@ -49,6 +49,18 @@ Base path: `/account/strategies`
 | `GET` | `/account/strategies/2035/login` |
 | `GET` | `/account/strategies/2035/redirect` |
 
+### TwoFactorAccountController [Двухфакторная аутентификация]
+
+Base path: `/account/methods/2fa`
+
+| Method | Path |
+|--------|------|
+| `GET` | `/account/methods/2fa/status` |
+| `POST` | `/account/methods/2fa/setup` |
+| `POST` | `/account/methods/2fa/setup/confirm` |
+| `POST` | `/account/methods/2fa/disable` |
+| `POST` | `/account/methods/2fa/verify` |
+
 ### FormsAccountController [Авторизация через формы]
 
 Base path: `/account`
@@ -92,6 +104,17 @@ Base path: `/roles`
 
 | Method | Path |
 |--------|------|
+| `GET` | `/roles/find` |
+| `GET` | `/roles/find/first` |
+| `GET` | `/roles/find/many/:ids` |
+| `GET` | `/roles/find/:id` |
+| `GET` | `/roles/count` |
+| `GET` | `/roles/self` |
+| `POST` | `/roles/create` |
+| `PATCH` | `/roles/update/:id` |
+| `POST` | `/roles/position/sort` |
+| `POST` | `/roles/position/move/:id` |
+| `DELETE` | `/roles/remove/:id` |
 
 ### ClientsController
 
@@ -108,6 +131,17 @@ Base path: `/users`
 
 | Method | Path |
 |--------|------|
+| `GET` | `/users/find` |
+| `GET` | `/users/find/first` |
+| `GET` | `/users/find/many/:ids` |
+| `GET` | `/users/find/:id` |
+| `GET` | `/users/count` |
+| `GET` | `/users/self` |
+| `POST` | `/users/create` |
+| `PATCH` | `/users/update/:id` |
+| `POST` | `/users/position/sort` |
+| `POST` | `/users/position/move/:id` |
+| `DELETE` | `/users/remove/:id` |
 
 ### UserinfoController [OIDC]
 
@@ -174,6 +208,32 @@ Base path: `/token`
     relations: Array<RelationsDto> = undefined): Promise<AccountStrategiesEntity>`
 - `removeBy(authStrategiesDto: AccountStrategiesDto): Promise<boolean>`
 
+### TwoFactorAccountService
+
+- `enabled(): boolean`
+- `find(accountId: number): Promise<AccountTwoFactorEntity | null>`
+- `status(account: AccountEntity): Promise<`
+- `challenge(account: AccountEntity): Promise<`
+- `setup(account: AccountEntity,
+    method: TwoFactorMethod): Promise<`
+- `confirmSetup(account: AccountEntity,
+    code: string): Promise<`
+- `disable(account: AccountEntity, password: string): Promise<boolean>`
+- `verify(mfaToken: string, code: string, request?: any, response?: any, state?: any): Promise<any>`
+- `checkTotp(row: AccountTwoFactorEntity,
+    code: string): Promise<boolean>`
+- `sendCode(account: AccountEntity): Promise<void>`
+- `upsertPending(accountId: number,
+    method: TwoFactorMethod,
+    secret: { encrypted: string; iv: string } | null): Promise<AccountTwoFactorEntity>`
+- `encryptSecret(secret: string): Promise<`
+- `decryptSecret(secret: { encrypted: string; iv: string } | null | undefined): Promise<string | null>`
+- `generateRecoveryCodes(): Promise<`
+- `consumeRecoveryCode(row: AccountTwoFactorEntity,
+    code: string): Promise<boolean>`
+- `registerFailure(row: AccountTwoFactorEntity): Promise<void>`
+- `randomBlock(): string`
+
 ### FormsAccountService
 
 - `change(accountDto: AccountDto, code: string, req, res): Promise<any>`
@@ -219,6 +279,13 @@ Base path: `/token`
     id: number): Promise<ClientsEntity>`
 - `codeVerify(code: string, clientsDto: ClientsDto): Promise<number>`
 
+### PasswordPolicyService
+
+- `enabled(name: string): boolean`
+- `number(name: string, fallback: number): number`
+- `validate(password: string): string[]`
+- `assertValid(password: string): void`
+
 ### ClientsService extends `CommonService`
 
 - `create(clientsDto: ClientsDto,
@@ -247,7 +314,7 @@ Base path: `/token`
 
 ### TokenService
 
-- `one(data, configKey): Promise<any>`
+- `one(data, configKey, defaultExpires = ""): Promise<any>`
 - `pair(data): Promise<any>`
 - `prepare(token: TokenDto, state: any): Promise<any>`
 - `refresh(refresh_token: string, callback = null): Promise<any>`
@@ -328,6 +395,21 @@ Relations: `AccountEntity`
 | `json` | `string` |
 | `accessToken` | `string` |
 | `refreshToken` | `string` |
+
+Relations: `AccountEntity`
+
+
+### AccountTwoFactorEntity
+
+| Column | Type |
+|--------|------|
+| `id` | `number` |
+| `createdAt` | `Date` |
+| `updatedAt` | `Date` |
+| `enabled` | `boolean` |
+| `recoveryCodes` | `string[]` |
+| `failedAttempts` | `number` |
+| `lockedUntil` | `Date` |
 
 Relations: `AccountEntity`
 
@@ -415,6 +497,7 @@ Relations: `AccountEntity`
 | `updatedAt` | `Date` | yes |
 | `username` | `string` | yes |
 | `password` | `string` | yes |
+| `subject` | `string` | yes |
 | `isActivated` | `boolean` | yes |
 | `isSuperuser` | `boolean` | yes |
 | `sessions` | `AccountSessionsDto[]` | yes |
@@ -467,6 +550,16 @@ Relations: `AccountEntity`
 | `accessToken` | `string` | yes |
 | `refreshToken` | `string` | yes |
 | `account` | `AccountDto` | yes |
+
+### TwoFactorSetupDto
+
+| Field | Type | Optional |
+|-------|------|----------|
+| `code` | `string` | no |
+| `password` | `string` | no |
+| `mfa_token` | `string` | no |
+| `code` | `string` | no |
+| `state` | `string` | yes |
 
 ### OpenAccountDto
 

@@ -20,6 +20,7 @@ import { KeyGrant } from "@src/token/grant/key.grant";
 import { PasswordGrant } from "@src/token/grant/password.grant";
 import { RefreshTokenGrant } from "@src/token/grant/refresh_token.grant";
 import { AccountModule } from "@src/account/account.module";
+import { TwoFactorModule } from "@src/account/account_two_factor/two_factor.account.module";
 import { UsersModule } from "@src/db/users/users.module";
 
 import { DbRefreshStore, RefreshTokenEntity } from "@src/token/store";
@@ -36,6 +37,7 @@ import { DbRefreshStore, RefreshTokenEntity } from "@src/token/store";
     TypeOrmModule.forFeature([RefreshTokenEntity]),
     forwardRef(() => ClientsModule),
     forwardRef(() => AccountModule),
+    forwardRef(() => TwoFactorModule),
     forwardRef(() => UsersModule),
   ],
   providers: [

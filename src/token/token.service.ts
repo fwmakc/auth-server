@@ -17,8 +17,8 @@ export class TokenService {
     private readonly verifyHandler: VerifyHandler
   ) {}
 
-  async one(data, configKey): Promise<any> {
-    return await this.oneHandler.one(data, configKey);
+  async one(data, configKey, defaultExpires = ""): Promise<any> {
+    return await this.oneHandler.one(data, configKey, defaultExpires);
   }
 
   async pair(data): Promise<any> {

@@ -23,9 +23,11 @@ export class AccountConfirmService {
   async findByCode(code: string, type = "code"): Promise<AccountConfirmEntity> {
     const where: FindOptionsWhere<any> = { code, type };
     // createdAt is a naive UTC timestamp; compute the cutoff from Date.now()
-    // so local-timezone setHours() can't shrink (or void) the window
-    const maxAgeHours = type === "reset" ? 1 : 24;
-    where.createdAt = MoreThan(new Date(Date.now() - maxAgeHours * 3600 * 1000));
+    // so local-timezone setHours() can't shrink (or void) the window.
+    // reset codes live 1 hour, 2FA login codes 5 minutes, confirm codes 24 hours
+    const maxAgeMs =
+      type === "reset" ? 3600_000 : type === "2fa" ? 5 * 60_000 : 24 * 3600_000;
+    where.createdAt = MoreThan(new Date(Date.now() - maxAgeMs));
     return await this.repository.findOne({
       where,
       relations: ["account"],
@@ -67,6 +69,13 @@ export class AccountConfirmService {
       type,
       code,
     };
+    // stale codes of the same type must not stay valid side by side
+    await this.repository.delete({
+      account: {
+        id: account.id,
+      },
+      type,
+    });
     const created = await this.repository.save(entrie);
     return await this.findById(created.id);
   }
