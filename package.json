@@ -1,6 +1,6 @@
 {
   "name": "auth-server",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "OAuth2 authorization server — registration, login, JWT issuance, social login",
   "license": "MIT",
   "private": true,
