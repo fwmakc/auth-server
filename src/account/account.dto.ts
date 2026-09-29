@@ -1,11 +1,10 @@
-import {
-  IsBoolean,
-  IsEmail,
-  IsOptional,
-  IsString,
-} from "class-validator";
+import { IsBoolean, IsEmail, IsOptional, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { DtoColumn, DtoCreatedColumn, DtoUpdatedColumn } from "api-server-toolkit";
+import {
+  DtoColumn,
+  DtoCreatedColumn,
+  DtoUpdatedColumn,
+} from "api-server-toolkit";
 import { CommonDto } from "api-server-toolkit";
 import { AccountSessionsDto } from "./account_sessions/account_sessions.dto";
 import { AccountStrategiesDto } from "./account_strategies/account_strategies.dto";
@@ -43,7 +42,7 @@ export class AccountDto extends CommonDto {
   @IsBoolean()
   @DtoColumn(
     "Флаг, который показывает, является ли учетная запись пользователя активированной. Например, подтвержденной по email.",
-    { default: false }
+    { default: false },
   )
   isActivated?: boolean;
 
@@ -51,7 +50,7 @@ export class AccountDto extends CommonDto {
   @IsBoolean()
   @DtoColumn(
     "Флаг, который показывает, назначены ли учетной записи пользователя права суперпользователя (администратора).",
-    { required: false }
+    { required: false },
   )
   isSuperuser?: boolean;
 

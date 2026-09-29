@@ -3,15 +3,10 @@ import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { join } from "path";
 
 type DatabaseTypes =
-  | "mysql"
-  | "postgres"
-  | "sqlite"
-  | "mssql"
-  | "oracle"
-  | "mongodb";
+  "mysql" | "postgres" | "sqlite" | "mssql" | "oracle" | "mongodb";
 
 export const getDbConfig = async (
-  config: ConfigService
+  config: ConfigService,
 ): Promise<TypeOrmModuleOptions> => ({
   type: config.get<DatabaseTypes>("DB_TYPE"),
   host: config.get<string>("DB_HOST"),

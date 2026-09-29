@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { OpenAccountDto } from "@src/account/dto/open.account.dto";
 import { ClientsDto } from "@src/clients/clients.dto";
 import { ClientsEntity } from "@src/clients/clients.entity";
@@ -15,7 +15,7 @@ export class OpenAccountService {
   constructor(
     private readonly clientsService: ClientsService,
     private readonly tokenService: TokenService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {
     this.hmacSecret =
       this.configService.get<string>("CODE_HMAC_SECRET") ||
@@ -24,9 +24,9 @@ export class OpenAccountService {
     if (!this.hmacSecret) {
       this.logger.warn(
         "CODE_HMAC_SECRET / AES_SECRET not set — using ephemeral random key. " +
-        "Authorization codes will not survive restart. Set a secret in production."
+          "Authorization codes will not survive restart. Set a secret in production.",
       );
-      this.hmacSecret = require("crypto").randomBytes(32).toString("hex");
+      this.hmacSecret = randomBytes(32).toString("hex");
     }
   }
 
@@ -61,14 +61,14 @@ export class OpenAccountService {
   async code(
     clientsDto: ClientsDto,
     id: number,
-    state: string
+    state: string,
   ): Promise<string> {
     const updated = await this.codeGenerate({ ...clientsDto }, id);
     const [{ uri }] = clientsDto.redirects;
     if (!updated) {
       throw new BadRequestException(
         "Client authentication failed. Unknown client [code.open.account.service]",
-        "invalid_client"
+        "invalid_client",
       );
     }
     return `${uri}?code=${updated.code}&client_id=${updated.client_id}${
@@ -79,7 +79,7 @@ export class OpenAccountService {
   async token(
     clientsDto: ClientsDto,
     id: number,
-    state: string
+    state: string,
   ): Promise<string> {
     const [{ uri }] = clientsDto.redirects;
     delete (clientsDto as any).account;
@@ -88,7 +88,7 @@ export class OpenAccountService {
     if (!token) {
       throw new BadRequestException(
         "Client authentication failed. Unknown client [token.open.account.service]",
-        "invalid_client"
+        "invalid_client",
       );
     }
     return `${uri}?token_type=Bearer&expires_in=${token.expires_in}${
@@ -101,7 +101,7 @@ export class OpenAccountService {
     if (response_type !== "code") {
       throw new BadRequestException(
         "Specified type of response_type field is not supported in this request. Use 'code'.",
-        "invalid_request"
+        "invalid_request",
       );
     }
     const result = await this.clientsService.clientsGetWhere(
@@ -111,12 +111,12 @@ export class OpenAccountService {
           uri: redirect_uri,
         },
       },
-      [{ name: "account" }, { name: "redirects" }]
+      [{ name: "account" }, { name: "redirects" }],
     );
     if (!result || !result.redirects.length) {
       throw new BadRequestException(
         "Client authentication failed. Unknown client [verify.open.account.service]",
-        "invalid_client"
+        "invalid_client",
       );
     }
     return result;
@@ -124,7 +124,7 @@ export class OpenAccountService {
 
   async codeGenerate(
     clientsDto: ClientsDto,
-    id: number
+    id: number,
   ): Promise<ClientsEntity> {
     const data = {
       timestamp: Date.now(),
@@ -141,7 +141,7 @@ export class OpenAccountService {
       clientsDto.id,
       clientsDto,
       null,
-      null
+      null,
     );
   }
 
@@ -153,14 +153,14 @@ export class OpenAccountService {
     const redirectUriMatched = clientsDto.redirect_uri === redirect_uri;
     const timestampNow = new Date();
     const timestampValid = timestampNow.setMinutes(
-      timestampNow.getMinutes() - 10
+      timestampNow.getMinutes() - 10,
     );
     const timestampMatched = timestampValid <= Number(timestamp);
 
     if (!clientIdMatched || !redirectUriMatched || !timestampMatched) {
       throw new BadRequestException(
         "Authorization code is invalid in verify process",
-        "invalid_request"
+        "invalid_request",
       );
     }
     return id;

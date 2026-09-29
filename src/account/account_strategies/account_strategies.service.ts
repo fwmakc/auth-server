@@ -18,14 +18,14 @@ export class AccountStrategiesService extends CommonService<
 > {
   constructor(
     @InjectRepository(AccountStrategiesEntity)
-    protected readonly repository: Repository<AccountStrategiesEntity>
+    protected readonly repository: Repository<AccountStrategiesEntity>,
   ) {
     super();
   }
 
   async find(
     find: FindDto,
-    bind: BindDto = { allow: true }
+    bind: BindDto = { allow: true },
   ): Promise<AccountStrategiesEntity[]> {
     const result = await super.find(find, bind);
     return await this.decodeEntries(result);
@@ -33,7 +33,7 @@ export class AccountStrategiesService extends CommonService<
 
   async findFirst(
     find: FindDto,
-    bind: BindDto = { allow: true }
+    bind: BindDto = { allow: true },
   ): Promise<AccountStrategiesEntity> {
     const result = await super.findFirst(find, bind);
     return await this.decodeTokens(result);
@@ -41,7 +41,7 @@ export class AccountStrategiesService extends CommonService<
 
   async findMany(
     find: FindManyDto,
-    bind: BindDto = { allow: true }
+    bind: BindDto = { allow: true },
   ): Promise<AccountStrategiesEntity[]> {
     const result = await super.findMany(find, bind);
     return await this.decodeEntries(result);
@@ -49,14 +49,14 @@ export class AccountStrategiesService extends CommonService<
 
   async findOne(
     find: FindOneDto,
-    bind: BindDto = { allow: true }
+    bind: BindDto = { allow: true },
   ): Promise<AccountStrategiesEntity> {
     const result = await super.findOne(find, bind);
     return await this.decodeTokens(result);
   }
 
   async encodeTokens(
-    authStrategiesDto: AccountStrategiesDto
+    authStrategiesDto: AccountStrategiesDto,
   ): Promise<AccountStrategiesDto> {
     if (authStrategiesDto?.accessToken) {
       const accessToken = await encrypt(authStrategiesDto.accessToken);
@@ -70,7 +70,7 @@ export class AccountStrategiesService extends CommonService<
   }
 
   async decodeTokens(
-    authStrategiesDto: AccountStrategiesEntity
+    authStrategiesDto: AccountStrategiesEntity,
   ): Promise<AccountStrategiesEntity> {
     if (authStrategiesDto?.accessToken) {
       try {
@@ -88,7 +88,7 @@ export class AccountStrategiesService extends CommonService<
   }
 
   async decodeEntries(
-    authStrategiesDto: Array<AccountStrategiesEntity>
+    authStrategiesDto: Array<AccountStrategiesEntity>,
   ): Promise<AccountStrategiesEntity[]> {
     return await Promise.all(
       authStrategiesDto.map((item) => this.decodeTokens(item)),
@@ -97,7 +97,7 @@ export class AccountStrategiesService extends CommonService<
 
   async updateBy(
     authStrategiesDto: AccountStrategiesDto,
-    relations: Array<RelationsDto> = undefined
+    relations: Array<RelationsDto> = undefined,
   ): Promise<AccountStrategiesEntity> {
     authStrategiesDto = await this.encodeTokens(authStrategiesDto);
     const strategy = await this.findFirst({

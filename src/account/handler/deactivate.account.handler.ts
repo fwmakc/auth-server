@@ -10,11 +10,18 @@ export class DeactivateAccountHandler {
   constructor(
     protected readonly accountService: AccountService,
     protected readonly accountSessionsService: AccountSessionsService,
-    @Optional() protected readonly refreshStore?: DbRefreshStore
+    @Optional() protected readonly refreshStore?: DbRefreshStore,
   ) {}
 
-  async deactivate(account: any, password: string, request: any, response: any): Promise<any> {
-    const fullAccount = await this.accountService.findByUsername(account.username);
+  async deactivate(
+    account: any,
+    password: string,
+    request: any,
+    response: any,
+  ): Promise<any> {
+    const fullAccount = await this.accountService.findByUsername(
+      account.username,
+    );
 
     if (!fullAccount) {
       throw new UnauthorizedException("Invalid credentials");

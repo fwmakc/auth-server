@@ -1,4 +1,9 @@
-import { Inject, Injectable, BadRequestException, forwardRef } from "@nestjs/common";
+import {
+  Inject,
+  Injectable,
+  BadRequestException,
+  forwardRef,
+} from "@nestjs/common";
 import { AccountService } from "@src/account/account.service";
 import { TwoFactorAccountService } from "@src/account/account_two_factor/two_factor.account.service";
 import { GrantsTokenDto } from "@src/token/dto/grants.token.dto";
@@ -11,24 +16,24 @@ export class PasswordGrant {
     private readonly accountService: AccountService,
     private readonly tokenService: TokenService,
     @Inject(forwardRef(() => TwoFactorAccountService))
-    private readonly twoFactorAccountService: TwoFactorAccountService
+    private readonly twoFactorAccountService: TwoFactorAccountService,
   ) {}
 
   async password(
     grantsTokenDto: GrantsTokenDto,
     request,
-    response
+    response,
   ): Promise<any> {
     if (grantsTokenDto.grant_type !== "password") {
       throw new BadRequestException(
         "Specified type of grant_type field is not supported in this request",
-        "unsupported_grant_type"
+        "unsupported_grant_type",
       );
     }
     if (!grantsTokenDto.username || !grantsTokenDto.password) {
       throw new BadRequestException(
         "Not specified username or password in this request",
-        "invalid_grant"
+        "invalid_grant",
       );
     }
     const { username, password } = grantsTokenDto;
@@ -44,7 +49,7 @@ export class PasswordGrant {
     if (!token) {
       throw new BadRequestException(
         "User authentication failed. Unknown user",
-        "invalid_user"
+        "invalid_user",
       );
     }
     // if (request) {

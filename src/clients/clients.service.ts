@@ -17,7 +17,7 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
     @InjectRepository(ClientsEntity)
     protected readonly repository: Repository<ClientsEntity>,
     protected readonly clientsRedirectsService: ClientsRedirectsService,
-    protected readonly tokenService: TokenService
+    protected readonly tokenService: TokenService,
   ) {
     super();
   }
@@ -25,7 +25,7 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
   async create(
     clientsDto: ClientsDto,
     relations: Array<RelationsDto> = undefined,
-    bind: BindDto
+    bind: BindDto,
   ): Promise<ClientsEntity> {
     if (clientsDto.client_password) {
       const salt = await genSalt(10);
@@ -49,7 +49,7 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
     if (!client) {
       throw new BadRequestException(
         "Client is unknown, not registered, or parameters are set incorrectly",
-        { cause: new Error(), description: "invalid_client" }
+        { cause: new Error(), description: "invalid_client" },
       );
     }
     if (clientsDto.redirect_uri) {
@@ -60,16 +60,19 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
           },
           uri: clientsDto.redirect_uri,
         },
-        [{ name: "client" }]
+        [{ name: "client" }],
       );
     }
     const clientSecretData = await this.tokenService.one(
       {
         client_id: client.client_id,
       },
-      "JWT_CLIENTS_EXPIRES"
+      "JWT_CLIENTS_EXPIRES",
     );
-    client.client_secret = await hash(clientSecretData.token, await genSalt(10));
+    client.client_secret = await hash(
+      clientSecretData.token,
+      await genSalt(10),
+    );
     const updated = await this.update(client.id, client, relations, bind);
     return updated ? client : null;
   }
@@ -89,13 +92,13 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
     if (!client) {
       throw new BadRequestException(
         "Client is unknown, not registered, or parameters are set incorrectly",
-        { cause: new Error(), description: "invalid_client" }
+        { cause: new Error(), description: "invalid_client" },
       );
     }
     if (!client.client_id || !client.client_secret) {
       throw new BadRequestException(
         "Client is not authorized or has the rights to this request",
-        { cause: new Error(), description: "unauthorized_client" }
+        { cause: new Error(), description: "unauthorized_client" },
       );
     }
 
@@ -103,7 +106,7 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
     if (!isMatch) {
       throw new BadRequestException(
         "Client is unknown, not registered, or parameters are set incorrectly",
-        { cause: new Error(), description: "invalid_client" }
+        { cause: new Error(), description: "invalid_client" },
       );
     }
     return client;
@@ -111,7 +114,7 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
 
   async clientsGetWhere(
     where: object,
-    relations: Array<RelationsDto> = undefined
+    relations: Array<RelationsDto> = undefined,
   ): Promise<ClientsEntity> {
     return await this.repository.findOne({
       relations: relations?.map((i) => i.name),

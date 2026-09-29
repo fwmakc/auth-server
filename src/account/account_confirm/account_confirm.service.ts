@@ -9,7 +9,7 @@ import { AccountConfirmEntity } from "./account_confirm.entity";
 export class AccountConfirmService {
   constructor(
     @InjectRepository(AccountConfirmEntity)
-    protected readonly repository: Repository<AccountConfirmEntity>
+    protected readonly repository: Repository<AccountConfirmEntity>,
   ) {}
 
   async findById(id: number): Promise<AccountConfirmEntity> {

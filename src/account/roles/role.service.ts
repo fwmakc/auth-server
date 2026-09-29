@@ -10,7 +10,7 @@ import { RoleEntity } from "./role.entity";
 export class RoleService extends CommonService<RoleDto, RoleEntity> {
   constructor(
     @InjectRepository(RoleEntity)
-    protected readonly repository: Repository<RoleEntity>
+    protected readonly repository: Repository<RoleEntity>,
   ) {
     super();
   }

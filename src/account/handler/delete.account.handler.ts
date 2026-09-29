@@ -1,11 +1,13 @@
-import { Injectable, ForbiddenException, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from "@nestjs/common";
 import { AccountService } from "@src/account/account.service";
 
 @Injectable()
 export class DeleteAccountHandler {
-  constructor(
-    protected readonly accountService: AccountService
-  ) {}
+  constructor(protected readonly accountService: AccountService) {}
 
   async delete(targetUserId: number, request: any): Promise<any> {
     if (!request?.user?.isSuperuser) {

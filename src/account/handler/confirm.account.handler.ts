@@ -6,7 +6,7 @@ import { AccountService } from "@src/account/account.service";
 export class ConfirmAccountHandler {
   constructor(
     protected readonly accountService: AccountService,
-    protected readonly accountConfirmService: AccountConfirmService
+    protected readonly accountConfirmService: AccountConfirmService,
   ) {}
 
   async confirm(code: string): Promise<any> {

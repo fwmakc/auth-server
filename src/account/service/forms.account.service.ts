@@ -8,7 +8,7 @@ import { MethodsAccountService } from "./methods.account.service";
 export class FormsAccountService {
   constructor(
     private readonly configService: ConfigService,
-    protected readonly methodsAccountService: MethodsAccountService
+    protected readonly methodsAccountService: MethodsAccountService,
   ) {}
 
   async change(accountDto: AccountDto, code: string, req, res): Promise<any> {
@@ -16,7 +16,7 @@ export class FormsAccountService {
       accountDto,
       code,
       req,
-      res
+      res,
     );
     if (!result?.success) {
       const errorPrepared = await this.prepareRedirectError(result);
@@ -42,12 +42,12 @@ export class FormsAccountService {
     grantsTokenDto: GrantsTokenDto,
     response_type: string,
     req,
-    res
+    res,
   ): Promise<any> {
     const result = await this.methodsAccountService.login(
       grantsTokenDto,
       req,
-      res
+      res,
     );
     if (!result?.success) {
       const errorPrepared = await this.prepareRedirectError(result);
@@ -79,13 +79,13 @@ export class FormsAccountService {
     accountDto: AccountDto,
     subject: string,
     req,
-    res
+    res,
   ): Promise<any> {
     const result = await this.methodsAccountService.register(
       accountDto,
       subject,
       req,
-      res
+      res,
     );
     if (!result?.success) {
       const errorPrepared = await this.prepareRedirectError(result);
@@ -101,7 +101,7 @@ export class FormsAccountService {
       accountDto,
       subject,
       req,
-      res
+      res,
     );
     if (!result?.success) {
       const errorPrepared = await this.prepareRedirectError(result);

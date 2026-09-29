@@ -26,9 +26,7 @@ describe("Access Control — guards, internal API, logout", () => {
   // ═══════════════════════════════════════════════════════════
   describe("GET /account/self", () => {
     it("without token → 401", async () => {
-      await request(app.getHttpServer())
-        .get("/account/self")
-        .expect(401);
+      await request(app.getHttpServer()).get("/account/self").expect(401);
     });
 
     it("with valid token → 200, returns account", async () => {
@@ -51,7 +49,10 @@ describe("Access Control — guards, internal API, logout", () => {
     it("with expired/invalid signature token → 401", async () => {
       await request(app.getHttpServer())
         .get("/account/self")
-        .set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.invalid")
+        .set(
+          "Authorization",
+          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.invalid",
+        )
         .expect(401);
     });
   });

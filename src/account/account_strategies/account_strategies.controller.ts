@@ -36,7 +36,7 @@ export class AccountStrategiesController {
     private readonly leaderProvider: LeaderProvider,
     private readonly untiProvider: UntiProvider,
     private readonly oauthProvider: OauthProvider,
-    private readonly openAccountService: OpenAccountService
+    private readonly openAccountService: OpenAccountService,
   ) {}
 
   @Account()
@@ -88,7 +88,7 @@ export class AccountStrategiesController {
       const url = await this.openAccountService.code(
         client,
         account.id,
-        openAccountDto.state
+        openAccountDto.state,
       );
       return await res.redirect(url);
     }
@@ -118,7 +118,7 @@ export class AccountStrategiesController {
       const url = await this.openAccountService.code(
         client,
         account.id,
-        openAccountDto.state
+        openAccountDto.state,
       );
       return await res.redirect(url);
     }
@@ -152,7 +152,7 @@ export class AccountStrategiesController {
       const url = await this.openAccountService.code(
         client,
         account.id,
-        openAccountDto.state
+        openAccountDto.state,
       );
       return await res.redirect(url);
     }
@@ -187,7 +187,7 @@ export class AccountStrategiesController {
       const url = await this.openAccountService.code(
         client,
         account.id,
-        openAccountDto.state
+        openAccountDto.state,
       );
       return await res.redirect(url);
     }

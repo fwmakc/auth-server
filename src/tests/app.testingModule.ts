@@ -5,7 +5,10 @@ import { ConfigModule } from "@nestjs/config";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { DataSource } from "typeorm";
-import { addTransactionalDataSource, initializeTransactionalContext } from "typeorm-transactional";
+import {
+  addTransactionalDataSource,
+  initializeTransactionalContext,
+} from "typeorm-transactional";
 import * as cookieParser from "cookie-parser";
 import { getKeySet } from "@src/jwks/keys";
 
@@ -238,6 +241,6 @@ export const seedDatabase = async (moduleRef: TestingModule) => {
     redirectsRepo.create({
       client,
       uri: "http://localhost/callback",
-    })
+    }),
   );
 };

@@ -6,7 +6,7 @@ import { DbRefreshStore } from "@src/token/store";
 export class PairHandler {
   constructor(
     private readonly oneHandler: OneHandler,
-    private readonly refreshStore: DbRefreshStore
+    private readonly refreshStore: DbRefreshStore,
   ) {}
 
   async pair(data, familyId?: string): Promise<any> {
@@ -15,7 +15,7 @@ export class PairHandler {
         ...data,
         type: "access",
       },
-      "JWT_ACCESS_EXPIRES"
+      "JWT_ACCESS_EXPIRES",
     );
 
     // familyId передаётся только при ротации — свежий логин начинает новую семью
@@ -24,7 +24,7 @@ export class PairHandler {
         accountId: data.id,
         clientId: data.client_id,
       },
-      familyId
+      familyId,
     );
 
     return {

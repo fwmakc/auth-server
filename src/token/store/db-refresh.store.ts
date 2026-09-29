@@ -1,4 +1,10 @@
-import { Injectable, UnauthorizedException, Logger, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
+import {
+  Injectable,
+  UnauthorizedException,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
 import { Repository, LessThan } from "typeorm";
@@ -27,7 +33,7 @@ export class DbRefreshStore implements OnModuleInit, OnModuleDestroy {
   constructor(
     @InjectRepository(RefreshTokenEntity)
     private readonly repo: Repository<RefreshTokenEntity>,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
   ) {}
 
   onModuleInit() {
@@ -52,7 +58,9 @@ export class DbRefreshStore implements OnModuleInit, OnModuleDestroy {
         expiresAt: LessThan(new Date()),
       });
       if (result.affected > 0) {
-        this.logger.log(`Cleanup: deleted ${result.affected} expired refresh tokens`);
+        this.logger.log(
+          `Cleanup: deleted ${result.affected} expired refresh tokens`,
+        );
       }
     } catch (err) {
       this.logger.error(`Cleanup failed: ${err.message}`);
@@ -77,7 +85,7 @@ export class DbRefreshStore implements OnModuleInit, OnModuleDestroy {
 
   async issue(
     payload: RefreshTokenPayload,
-    familyId?: string
+    familyId?: string,
   ): Promise<IssuedRefreshToken> {
     const rawToken = `r_${randomUUID()}`;
     const family = familyId || randomUUID();
@@ -109,7 +117,7 @@ export class DbRefreshStore implements OnModuleInit, OnModuleDestroy {
     if (record.revoked) {
       await this.repo.update(
         { familyId: record.familyId, revoked: false },
-        { revoked: true }
+        { revoked: true },
       );
       throw new UnauthorizedException("Refresh token reuse detected");
     }
@@ -127,16 +135,10 @@ export class DbRefreshStore implements OnModuleInit, OnModuleDestroy {
   }
 
   async revoke(token: string): Promise<void> {
-    await this.repo.update(
-      { tokenHash: this.hash(token) },
-      { revoked: true }
-    );
+    await this.repo.update({ tokenHash: this.hash(token) }, { revoked: true });
   }
 
   async revokeAll(accountId: number): Promise<void> {
-    await this.repo.update(
-      { accountId, revoked: false },
-      { revoked: true }
-    );
+    await this.repo.update({ accountId, revoked: false }, { revoked: true });
   }
 }

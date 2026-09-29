@@ -7,7 +7,7 @@ import { DbRefreshStore } from "@src/token/store";
 export class LogoutAccountHandler {
   constructor(
     protected readonly accountSessionsService: AccountSessionsService,
-    @Optional() protected readonly refreshStore?: DbRefreshStore
+    @Optional() protected readonly refreshStore?: DbRefreshStore,
   ) {}
 
   async logout(request: any = null, response: any = null): Promise<boolean> {

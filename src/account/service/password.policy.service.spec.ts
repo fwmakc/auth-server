@@ -92,7 +92,7 @@ describe("PasswordPolicyService", () => {
         expect(service.validate(badPassword)).toEqual([]);
         env[key] = "0";
         expect(service.validate(badPassword)).toEqual([]);
-      }
+      },
     );
 
     it("collects all violations in one pass", () => {

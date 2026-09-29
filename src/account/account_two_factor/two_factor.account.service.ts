@@ -37,13 +37,13 @@ export class TwoFactorAccountService {
     protected readonly accountConfirmService: AccountConfirmService,
     @Inject(forwardRef(() => TokenService))
     protected readonly tokenService: TokenService,
-    @Inject(IEventClient) protected readonly eventClient: IEventClient
+    @Inject(IEventClient) protected readonly eventClient: IEventClient,
   ) {}
 
   /** Master switch: without it no login is ever challenged. */
   enabled(): boolean {
     return ["true", "1", "yes", "on"].includes(
-      String(this.configService.get("TWO_FACTOR_ENABLED")).toLowerCase()
+      String(this.configService.get("TWO_FACTOR_ENABLED")).toLowerCase(),
     );
   }
 
@@ -86,7 +86,7 @@ export class TwoFactorAccountService {
     const mfa = await this.tokenService.one(
       { id: account.id, type: "mfa" },
       "JWT_MFA_EXPIRES",
-      "5m"
+      "5m",
     );
     return {
       twoFactorRequired: true,
@@ -98,12 +98,12 @@ export class TwoFactorAccountService {
   /** First step: register a pending (not yet enabled) configuration. */
   async setup(
     account: AccountEntity,
-    method: TwoFactorMethod
+    method: TwoFactorMethod,
   ): Promise<{ otpauth?: string; sent?: boolean }> {
     const existing = await this.find(account.id);
     if (existing?.enabled) {
       throw new BadRequestException(
-        "Two-factor authentication is already enabled; disable it first"
+        "Two-factor authentication is already enabled; disable it first",
       );
     }
 
@@ -116,7 +116,7 @@ export class TwoFactorAccountService {
         otpauth: authenticator.keyuri(
           account.username,
           this.configService.get("TWO_FACTOR_ISSUER") || "Auth",
-          secret
+          secret,
         ),
       };
     }
@@ -129,7 +129,7 @@ export class TwoFactorAccountService {
   /** Second step: verify the first code and activate. */
   async confirmSetup(
     account: AccountEntity,
-    code: string
+    code: string,
   ): Promise<{ recoveryCodes: string[] }> {
     const row = await this.find(account.id);
     if (!row || row.enabled) {
@@ -171,7 +171,13 @@ export class TwoFactorAccountService {
   /**
    * Second login step: exchange a short-lived mfa_token + code for tokens.
    */
-  async verify(mfaToken: string, code: string, request?: any, response?: any, state?: any): Promise<any> {
+  async verify(
+    mfaToken: string,
+    code: string,
+    request?: any,
+    response?: any,
+    state?: any,
+  ): Promise<any> {
     const payload = await this.tokenService.verify(mfaToken, "mfa");
     const account = await this.accountService.findOne({ id: payload.id });
     if (!account?.id) {
@@ -179,11 +185,13 @@ export class TwoFactorAccountService {
     }
     const row = await this.find(account.id);
     if (!row?.enabled) {
-      throw new UnauthorizedException("Two-factor authentication is not enabled");
+      throw new UnauthorizedException(
+        "Two-factor authentication is not enabled",
+      );
     }
     if (row.lockedUntil && row.lockedUntil > new Date()) {
       throw new UnauthorizedException(
-        "Too many failed attempts; try again later"
+        "Too many failed attempts; try again later",
       );
     }
 
@@ -213,7 +221,7 @@ export class TwoFactorAccountService {
 
   private async checkTotp(
     row: AccountTwoFactorEntity,
-    code: string
+    code: string,
   ): Promise<boolean> {
     const secret = await this.decryptSecret(row.secret);
     if (!secret) {
@@ -235,10 +243,11 @@ export class TwoFactorAccountService {
   private async upsertPending(
     accountId: number,
     method: TwoFactorMethod,
-    secret: { encrypted: string; iv: string } | null
+    secret: { encrypted: string; iv: string } | null,
   ): Promise<AccountTwoFactorEntity> {
     const existing = await this.find(accountId);
-    const row = existing || this.repository.create({ account: { id: accountId } });
+    const row =
+      existing || this.repository.create({ account: { id: accountId } });
     row.method = method;
     row.secret = secret;
     row.enabled = false;
@@ -249,13 +258,13 @@ export class TwoFactorAccountService {
   }
 
   private async encryptSecret(
-    secret: string
+    secret: string,
   ): Promise<{ encrypted: string; iv: string }> {
     return (await encrypt(secret)) as { encrypted: string; iv: string };
   }
 
   private async decryptSecret(
-    secret: { encrypted: string; iv: string } | null | undefined
+    secret: { encrypted: string; iv: string } | null | undefined,
   ): Promise<string | null> {
     if (!secret?.encrypted || !secret?.iv) {
       return null;
@@ -279,7 +288,7 @@ export class TwoFactorAccountService {
 
   private async consumeRecoveryCode(
     row: AccountTwoFactorEntity,
-    code: string
+    code: string,
   ): Promise<boolean> {
     const codes = row.recoveryCodes || [];
     for (let i = 0; i < codes.length; i++) {

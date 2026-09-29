@@ -36,7 +36,7 @@ export class FormsAccountController {
     @Body() accountDto: AccountDto,
     @Param("code") code: string,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     return await this.formsAccountService.change(accountDto, code, req, res);
   }
@@ -56,7 +56,7 @@ export class FormsAccountController {
   async confirm(
     @Param("code") code: string,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     return await this.formsAccountService.confirm(code, req, res);
   }
@@ -79,13 +79,13 @@ export class FormsAccountController {
     @Body() grantsTokenDto: GrantsTokenDto,
     @Body("response_type") response_type: string,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     return await this.formsAccountService.login(
       grantsTokenDto,
       response_type,
       req,
-      res
+      res,
     );
   }
 
@@ -117,13 +117,13 @@ export class FormsAccountController {
     @Body() accountDto: AccountDto,
     @Body("subject") subject: string,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     return await this.formsAccountService.register(
       accountDto,
       subject,
       req,
-      res
+      res,
     );
   }
 
@@ -145,7 +145,7 @@ export class FormsAccountController {
     @Body() accountDto: AccountDto,
     @Body("subject") subject: string,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     return await this.formsAccountService.reset(accountDto, subject, req, res);
   }

@@ -1,5 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { DtoColumn, DtoCreatedColumn, DtoUpdatedColumn } from "api-server-toolkit";
+import {
+  DtoColumn,
+  DtoCreatedColumn,
+  DtoUpdatedColumn,
+} from "api-server-toolkit";
 import { CommonDto } from "api-server-toolkit";
 import { AccountDto } from "../account.dto";
 
@@ -11,7 +15,7 @@ export class AccountStrategiesDto extends CommonDto {
   updatedAt?: Date;
 
   @DtoColumn(
-    "Название стратегии OAuth 2.0, реализованной через библиотеку passport.js"
+    "Название стратегии OAuth 2.0, реализованной через библиотеку passport.js",
   )
   name?: string;
 

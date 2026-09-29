@@ -78,11 +78,13 @@ export class AccountEntity extends BaseEntity {
   }
 
   get roleEntries(): Array<{ role: string; tenant?: string }> {
-    return this.accountRoles
-      ?.filter((ar) => ar.role?.name)
-      .map((ar) => ({
-        role: ar.role.name,
-        ...(ar.tenantScope ? { tenant: ar.tenantScope } : {}),
-      })) || [];
+    return (
+      this.accountRoles
+        ?.filter((ar) => ar.role?.name)
+        .map((ar) => ({
+          role: ar.role.name,
+          ...(ar.tenantScope ? { tenant: ar.tenantScope } : {}),
+        })) || []
+    );
   }
 }

@@ -7,14 +7,14 @@ import { JwtService } from "@nestjs/jwt";
 export class OneHandler {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {}
 
   async one(data, configKey, defaultExpires = ""): Promise<any> {
     const expires = this.configService.get(configKey) || defaultExpires;
     const token = await this.jwtService.signAsync(
       data,
-      expires ? { expiresIn: expires } : {}
+      expires ? { expiresIn: expires } : {},
     );
 
     const date = {};

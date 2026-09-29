@@ -14,7 +14,7 @@ export class TokenService {
     private readonly pairHandler: PairHandler,
     private readonly prepareHandler: PrepareHandler,
     private readonly refreshHandler: RefreshHandler,
-    private readonly verifyHandler: VerifyHandler
+    private readonly verifyHandler: VerifyHandler,
   ) {}
 
   async one(data, configKey, defaultExpires = ""): Promise<any> {

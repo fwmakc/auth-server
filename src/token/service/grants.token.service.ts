@@ -16,7 +16,7 @@ export class GrantsTokenService {
     private readonly keyGrant: KeyGrant,
     private readonly passwordGrant: PasswordGrant,
     private readonly refreshTokenGrant: RefreshTokenGrant,
-    private readonly refreshStore: DbRefreshStore
+    private readonly refreshStore: DbRefreshStore,
   ) {}
 
   async authorizationCode(grantsTokenDto: GrantsTokenDto): Promise<any> {
@@ -34,7 +34,7 @@ export class GrantsTokenService {
   async password(
     grantsTokenDto: GrantsTokenDto,
     request,
-    response
+    response,
   ): Promise<any> {
     return await this.passwordGrant.password(grantsTokenDto, request, response);
   }

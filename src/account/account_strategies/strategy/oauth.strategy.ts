@@ -22,7 +22,7 @@ export class OauthStrategy extends PassportStrategy(Strategy, "oauth") {
   constructor(
     private readonly configService: ConfigService,
     private readonly accountService: AccountService,
-    private readonly accountStrategiesService: AccountStrategiesService // private readonly oauthProvider: OauthProvider,
+    private readonly accountStrategiesService: AccountStrategiesService, // private readonly oauthProvider: OauthProvider,
   ) {
     const clientID = configService.get("OAUTH_CLIENT_ID");
     const clientSecret = configService.get("OAUTH_CLIENT_SECRET");
@@ -51,7 +51,7 @@ export class OauthStrategy extends PassportStrategy(Strategy, "oauth") {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
 
     const account = await this.accountService.findByUsername(profile.username);
@@ -71,8 +71,8 @@ export class OauthStrategy extends PassportStrategy(Strategy, "oauth") {
               profile.id,
               profile.users,
               accessToken,
-              refreshToken
-            )
+              refreshToken,
+            ),
         );
     }
 
@@ -85,8 +85,8 @@ export class OauthStrategy extends PassportStrategy(Strategy, "oauth") {
             profile.id,
             profile.users,
             accessToken,
-            refreshToken
-          )
+            refreshToken,
+          ),
       );
   }
 
@@ -95,7 +95,7 @@ export class OauthStrategy extends PassportStrategy(Strategy, "oauth") {
     uid,
     profile,
     accessToken,
-    refreshToken
+    refreshToken,
   ): Promise<AccountDto> {
     await this.accountStrategiesService.updateBy({
       account: { id: account.id },

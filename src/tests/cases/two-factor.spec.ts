@@ -15,7 +15,9 @@ describe("Two-factor authentication", () => {
   const server = () => app.getHttpServer();
 
   const login = (username: string, password: string) =>
-    request(server()).post("/account/methods/login").send({ username, password });
+    request(server())
+      .post("/account/methods/login")
+      .send({ username, password });
 
   async function latestCode(): Promise<string> {
     const record = await dataSource
@@ -72,7 +74,7 @@ describe("Two-factor authentication", () => {
       expect(code).toMatch(/^\d{6}$/);
       expect(mockPublish).toHaveBeenCalledWith(
         "user.two_factor_code",
-        expect.objectContaining({ code, userId: 1, email: "alice@test" })
+        expect.objectContaining({ code, userId: 1, email: "alice@test" }),
       );
     });
 
@@ -105,7 +107,7 @@ describe("Two-factor authentication", () => {
       // email method re-sends the code at challenge time
       expect(mockPublish).toHaveBeenCalledWith(
         "user.two_factor_code",
-        expect.anything()
+        expect.anything(),
       );
 
       const wrong = await request(server())

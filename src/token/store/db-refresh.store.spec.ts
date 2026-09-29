@@ -85,17 +85,23 @@ describe("DbRefreshStore", () => {
     it("throws Invalid for unknown token", async () => {
       repo.findOne.mockResolvedValue(null);
 
-      await expect(store.verify("nope")).rejects.toThrow("Invalid refresh token");
+      await expect(store.verify("nope")).rejects.toThrow(
+        "Invalid refresh token",
+      );
     });
 
     it("revokes the whole family when a revoked token is replayed", async () => {
-      repo.findOne.mockResolvedValue(makeRecord({ revoked: true, familyId: "family-1" }));
+      repo.findOne.mockResolvedValue(
+        makeRecord({ revoked: true, familyId: "family-1" }),
+      );
 
-      await expect(store.verify("stolen")).rejects.toThrow("Refresh token reuse detected");
+      await expect(store.verify("stolen")).rejects.toThrow(
+        "Refresh token reuse detected",
+      );
 
       expect(repo.update).toHaveBeenCalledWith(
         { familyId: "family-1", revoked: false },
-        { revoked: true }
+        { revoked: true },
       );
     });
 
@@ -103,7 +109,9 @@ describe("DbRefreshStore", () => {
       const record = makeRecord({ expiresAt: new Date(Date.now() - 1000) });
       repo.findOne.mockResolvedValue(record);
 
-      await expect(store.verify("old")).rejects.toThrow("Refresh token expired");
+      await expect(store.verify("old")).rejects.toThrow(
+        "Refresh token expired",
+      );
       expect(repo.remove).toHaveBeenCalledWith(record);
       expect(repo.update).not.toHaveBeenCalled();
     });
@@ -113,7 +121,11 @@ describe("DbRefreshStore", () => {
 
       const payload = await store.verify("good");
 
-      expect(payload).toEqual({ accountId: 42, clientId: "web", familyId: "family-1" });
+      expect(payload).toEqual({
+        accountId: 42,
+        clientId: "web",
+        familyId: "family-1",
+      });
       expect(repo.findOne).toHaveBeenCalledWith({
         where: { tokenHash: expect.any(String) },
       });
@@ -126,7 +138,7 @@ describe("DbRefreshStore", () => {
 
       expect(repo.update).toHaveBeenCalledWith(
         { tokenHash: expect.any(String) },
-        { revoked: true }
+        { revoked: true },
       );
     });
   });
@@ -137,7 +149,7 @@ describe("DbRefreshStore", () => {
 
       expect(repo.update).toHaveBeenCalledWith(
         { accountId: 42, revoked: false },
-        { revoked: true }
+        { revoked: true },
       );
     });
   });

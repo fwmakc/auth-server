@@ -6,7 +6,7 @@ import { DbRefreshStore } from "@src/token/store";
 export class RefreshHandler {
   constructor(
     private readonly pairHandler: PairHandler,
-    private readonly refreshStore: DbRefreshStore
+    private readonly refreshStore: DbRefreshStore,
   ) {}
 
   async refresh(refresh_token: string, callback = null): Promise<any> {

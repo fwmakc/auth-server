@@ -12,9 +12,9 @@ export class UntiStrategy extends PassportStrategy(Strategy, "unti") {
       callbackURL: configService.get("UNTI_CLIENT_REDIRECT"),
 
       authorizationURL: `https://sso.2035.university/oauth2/authorize?client_id=${configService.get(
-        "UNTI_CLIENT_ID"
+        "UNTI_CLIENT_ID",
       )}&redirect_uri=${configService.get(
-        "UNTI_CLIENT_REDIRECT"
+        "UNTI_CLIENT_REDIRECT",
       )}&response_type=code`,
       tokenURL: "https://sso.2035.university/oauth2/access_token",
       state: true,

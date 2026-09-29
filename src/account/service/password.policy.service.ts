@@ -54,7 +54,7 @@ export class PasswordPolicyService {
       !/[^A-Za-z0-9]/.test(password)
     ) {
       errors.push(
-        "Password must contain a symbol (any character other than latin letters and digits)"
+        "Password must contain a symbol (any character other than latin letters and digits)",
       );
     }
 

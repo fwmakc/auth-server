@@ -43,11 +43,10 @@ describe("Session Characterization — tests to lock current behavior before rem
     });
 
     it("resets id cookie after logout", async () => {
-      let token: string;
       const loginRes = await request(app.getHttpServer())
         .post("/account/methods/login")
         .send({ username: "bob@test", password: "password123" });
-      token = loginRes.body.access_token;
+      const token: string = loginRes.body.access_token;
 
       await request(app.getHttpServer())
         .post("/account/methods/logout")
@@ -127,7 +126,11 @@ describe("Session Characterization — tests to lock current behavior before rem
         originalUrl: "/test",
         headers: { "user-agent": "jest", "accept-language": "en-US" },
       };
-      const result = await sessionsService.log(mockAccount, req as any, "test-log");
+      const result = await sessionsService.log(
+        mockAccount,
+        req as any,
+        "test-log",
+      );
       expect(result).toBeDefined();
       expect(result.id).toBeDefined();
     });
@@ -138,8 +141,9 @@ describe("Session Characterization — tests to lock current behavior before rem
   // ═════════════════════════════════════════════════════════════
   describe("Google OAuth flow", () => {
     it("GET /account/strategies/google/login → 302 redirect to Google", async () => {
-      const res = await request(app.getHttpServer())
-        .get("/account/strategies/google/login");
+      const res = await request(app.getHttpServer()).get(
+        "/account/strategies/google/login",
+      );
 
       expect([302, 500]).toContain(res.status);
       if (res.status === 302) {
@@ -240,9 +244,7 @@ describe("Session Characterization — tests to lock current behavior before rem
   // ═════════════════════════════════════════════════════════════
   describe("Boot regression — app is alive", () => {
     it("GET /account/self without token → 401 (app responds)", async () => {
-      await request(app.getHttpServer())
-        .get("/account/self")
-        .expect(401);
+      await request(app.getHttpServer()).get("/account/self").expect(401);
     });
 
     it("GET /.well-known/jwks.json → 200 (JWKS works)", async () => {
@@ -275,8 +277,9 @@ describe("Session Characterization — tests to lock current behavior before rem
   // ═════════════════════════════════════════════════════════════
   describe("Other OAuth providers — login redirects", () => {
     it("GET /account/strategies/leader/login → 302", async () => {
-      const res = await request(app.getHttpServer())
-        .get("/account/strategies/leader/login");
+      const res = await request(app.getHttpServer()).get(
+        "/account/strategies/leader/login",
+      );
 
       expect([302, 500]).toContain(res.status);
       if (res.status === 302) {
@@ -285,8 +288,9 @@ describe("Session Characterization — tests to lock current behavior before rem
     });
 
     it("GET /account/strategies/2035/login → 302", async () => {
-      const res = await request(app.getHttpServer())
-        .get("/account/strategies/2035/login");
+      const res = await request(app.getHttpServer()).get(
+        "/account/strategies/2035/login",
+      );
 
       expect([302, 500]).toContain(res.status);
       if (res.status === 302) {
@@ -295,8 +299,9 @@ describe("Session Characterization — tests to lock current behavior before rem
     });
 
     it("GET /account/strategies/oauth/login → 302", async () => {
-      const res = await request(app.getHttpServer())
-        .get("/account/strategies/oauth/login");
+      const res = await request(app.getHttpServer()).get(
+        "/account/strategies/oauth/login",
+      );
 
       expect([302, 500]).toContain(res.status);
       if (res.status === 302) {

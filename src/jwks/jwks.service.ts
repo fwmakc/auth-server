@@ -99,7 +99,8 @@ export class JwksService {
       if (user.parentName) info.middle_name = user.parentName;
       if (user.phone) info.phone = user.phone;
       if (user.avatar) info.picture = user.avatar;
-      if (user.birthday) info.birthdate = user.birthday.toISOString().split("T")[0];
+      if (user.birthday)
+        info.birthdate = user.birthday.toISOString().split("T")[0];
       if (user.locale) info.locale = user.locale;
       if (user.timezone) info.zoneinfo = user.timezone;
       if (user.address) info.address = { formatted: user.address };

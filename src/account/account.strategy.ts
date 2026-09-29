@@ -13,7 +13,7 @@ import { AccountService } from "./account.service";
 export class AccountStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService,
-    private readonly accountService: AccountService
+    private readonly accountService: AccountService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

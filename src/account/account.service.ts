@@ -11,14 +11,14 @@ import { AccountEntity } from "./account.entity";
 export class AccountService extends CommonService<AccountDto, AccountEntity> {
   constructor(
     @InjectRepository(AccountEntity)
-    protected readonly repository: Repository<AccountEntity>
+    protected readonly repository: Repository<AccountEntity>,
   ) {
     super();
   }
 
   async create(
     accountDto: AccountDto,
-    relations: Array<RelationsDto> = undefined
+    relations: Array<RelationsDto> = undefined,
   ): Promise<AccountEntity> {
     delete accountDto.isSuperuser;
     delete (accountDto as any).isDeleted;
@@ -29,7 +29,7 @@ export class AccountService extends CommonService<AccountDto, AccountEntity> {
   async update(
     id: number,
     accountDto: AccountDto,
-    relations: Array<RelationsDto> = undefined
+    relations: Array<RelationsDto> = undefined,
   ): Promise<AccountEntity> {
     delete accountDto.isSuperuser;
     delete (accountDto as any).isDeleted;
@@ -44,12 +44,15 @@ export class AccountService extends CommonService<AccountDto, AccountEntity> {
   async login(accountDto: AccountDto): Promise<AccountEntity> {
     const account = await this.findByUsername(accountDto.username);
     if (!account) {
-      await compare(accountDto.password, "$2a$10$A0RBchd2m9OR5L3JjxveC.3Ti.g9NG4CQ0b91ll/t4M5tcPlWoqOG");
+      await compare(
+        accountDto.password,
+        "$2a$10$A0RBchd2m9OR5L3JjxveC.3Ti.g9NG4CQ0b91ll/t4M5tcPlWoqOG",
+      );
       throw new UnauthorizedException("Invalid credentials");
     }
     const isValidPassword = await compare(
       accountDto.password,
-      account.password
+      account.password,
     );
     if (!isValidPassword) {
       throw new UnauthorizedException("Invalid credentials");
@@ -65,7 +68,9 @@ export class AccountService extends CommonService<AccountDto, AccountEntity> {
 
   async hardDelete(id: number): Promise<boolean> {
     await this.repository.manager.transaction(async (manager) => {
-      await manager.query("DELETE FROM account_confirm WHERE account_id = $1", [id]);
+      await manager.query("DELETE FROM account_confirm WHERE account_id = $1", [
+        id,
+      ]);
       await manager.query("DELETE FROM clients WHERE account_id = $1", [id]);
       await manager.query("DELETE FROM users WHERE account_id = $1", [id]);
       await manager.query("DELETE FROM accounts WHERE id = $1", [id]);

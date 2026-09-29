@@ -22,7 +22,7 @@ export class OauthProvider {
   constructor(
     private readonly accountService: AccountService,
     private readonly configService: ConfigService,
-    private readonly strategiesService: AccountStrategiesService
+    private readonly strategiesService: AccountStrategiesService,
   ) {}
 
   async activate(request): Promise<any> {
@@ -56,7 +56,7 @@ export class OauthProvider {
           code,
           client_id,
           redirect_uri,
-        }
+        },
       );
       return data;
     } catch (e) {
@@ -64,7 +64,10 @@ export class OauthProvider {
     }
   }
 
-  async getUser(accessToken: string, refreshToken: string): Promise<OAuthProfile | undefined> {
+  async getUser(
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<OAuthProfile | undefined> {
     const customAccountServer = this.configService.get("OAUTH_SERVER");
 
     try {
@@ -74,7 +77,7 @@ export class OauthProvider {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        }
+        },
       );
       return data;
     } catch (e) {
@@ -106,8 +109,8 @@ export class OauthProvider {
               result,
               userData,
               accessToken,
-              refreshToken
-            )
+              refreshToken,
+            ),
         );
     }
 
@@ -115,7 +118,7 @@ export class OauthProvider {
       .update(account.id, accountDto)
       .then(
         async (result) =>
-          await this.prepareResult(result, userData, accessToken, refreshToken)
+          await this.prepareResult(result, userData, accessToken, refreshToken),
       );
   }
 
@@ -123,7 +126,7 @@ export class OauthProvider {
     result,
     userData,
     accessToken,
-    refreshToken
+    refreshToken,
   ): Promise<AccountDto> {
     await this.strategiesService.updateBy({
       account: { id: result.id },

@@ -15,7 +15,7 @@ export class ChangeAccountHandler {
     protected readonly accountService: AccountService,
     protected readonly accountConfirmService: AccountConfirmService,
     protected readonly hashAuthHandler: HashAccountHandler,
-    protected readonly passwordPolicyService: PasswordPolicyService
+    protected readonly passwordPolicyService: PasswordPolicyService,
   ) {}
 
   async change(accountDto: AccountDto, code: string): Promise<boolean> {

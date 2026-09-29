@@ -10,7 +10,7 @@ export class UntiProvider {
   constructor(
     private readonly accountService: AccountService,
     private readonly configService: ConfigService,
-    private readonly strategiesService: AccountStrategiesService
+    private readonly strategiesService: AccountStrategiesService,
   ) {}
 
   async activate(request): Promise<any> {
@@ -46,7 +46,7 @@ export class UntiProvider {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-        }
+        },
       );
       return data;
     } catch (e) {
@@ -56,14 +56,11 @@ export class UntiProvider {
 
   async getUser(accessToken: string): Promise<any> {
     try {
-      const { data } = await httpGet(
-        "https://sso.2035.university/users/me",
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const { data } = await httpGet("https://sso.2035.university/users/me", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       return data;
     } catch (e) {
       console.error(e);

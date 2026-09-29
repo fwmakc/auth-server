@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Req, Res } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Req,
+  Res,
+} from "@nestjs/common";
 import { AccountDto } from "@src/account/account.dto";
 import { ApiTags } from "@nestjs/swagger";
 import { Account } from "api-server-toolkit";
@@ -16,7 +25,7 @@ export class MethodsAccountController {
     @Body() accountDto: AccountDto,
     @Param("code") code: string,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     return await this.methodsAccountService.change(accountDto, code, req, res);
   }
@@ -26,7 +35,7 @@ export class MethodsAccountController {
   async confirm(
     @Param("code") code: string,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     return await this.methodsAccountService.confirm(code, req, res);
   }
@@ -36,7 +45,7 @@ export class MethodsAccountController {
   async login(
     @Body() grantsTokenDto: GrantsTokenDto,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     return await this.methodsAccountService.login(grantsTokenDto, req, res);
   }
@@ -53,13 +62,13 @@ export class MethodsAccountController {
     @Body() accountDto: AccountDto,
     @Body("subject") subject: string,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     return await this.methodsAccountService.register(
       accountDto,
       subject,
       req,
-      res
+      res,
     );
   }
 
@@ -69,13 +78,13 @@ export class MethodsAccountController {
     @Body() accountDto: AccountDto,
     @Body("subject") subject: string,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     return await this.methodsAccountService.reset(
       accountDto,
       subject,
       req,
-      res
+      res,
     );
   }
 
@@ -90,7 +99,7 @@ export class MethodsAccountController {
   async deactivate(
     @Body("password") password: string,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     return await this.methodsAccountService.deactivate(password, req, res);
   }
@@ -100,7 +109,7 @@ export class MethodsAccountController {
   async delete(
     @Param("id") id: string,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     return await this.methodsAccountService.delete(Number(id), req, res);
   }

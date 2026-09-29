@@ -11,7 +11,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService,
     private readonly accountService: AccountService,
-    private readonly strategiesService: AccountStrategiesService
+    private readonly strategiesService: AccountStrategiesService,
   ) {
     super({
       clientID: configService.get("GOOGLE_CLIENT_ID"),
@@ -41,7 +41,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
         .create(accountDto)
         .then(
           async (result) =>
-            await this.prepareResult(result, profile, accessToken, refreshToken)
+            await this.prepareResult(
+              result,
+              profile,
+              accessToken,
+              refreshToken,
+            ),
         );
     }
 
@@ -49,7 +54,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
       .update(account.id, accountDto)
       .then(
         async (result) =>
-          await this.prepareResult(result, profile, accessToken, refreshToken)
+          await this.prepareResult(result, profile, accessToken, refreshToken),
       );
   }
 
@@ -57,7 +62,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     account,
     profile,
     accessToken,
-    refreshToken
+    refreshToken,
   ): Promise<AccountDto> {
     const data = profile._json;
     await this.strategiesService.updateBy({

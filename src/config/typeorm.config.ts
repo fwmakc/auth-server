@@ -5,12 +5,7 @@ import { DataSource, DataSourceOptions } from "typeorm";
 dotenv.config();
 
 type DatabaseTypes =
-  | "mysql"
-  | "postgres"
-  | "sqlite"
-  | "mssql"
-  | "oracle"
-  | "mongodb";
+  "mysql" | "postgres" | "sqlite" | "mssql" | "oracle" | "mongodb";
 
 const config = {
   type: process.env.DB_TYPE as DatabaseTypes,

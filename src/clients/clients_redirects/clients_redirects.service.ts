@@ -12,7 +12,7 @@ export class ClientsRedirectsService extends CommonService<
 > {
   constructor(
     @InjectRepository(ClientsRedirectsEntity)
-    protected readonly repository: Repository<ClientsRedirectsEntity>
+    protected readonly repository: Repository<ClientsRedirectsEntity>,
   ) {
     super();
   }

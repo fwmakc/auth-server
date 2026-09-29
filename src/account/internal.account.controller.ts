@@ -19,9 +19,10 @@ export class InternalAccountController {
 
   constructor(
     private readonly accountService: AccountService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {
-    this.cacheTtl = Number(this.configService.get("INTERNAL_INFO_CACHE_TTL")) || 30;
+    this.cacheTtl =
+      Number(this.configService.get("INTERNAL_INFO_CACHE_TTL")) || 30;
   }
 
   private verifyInternalKey(provided: string): boolean {
@@ -37,7 +38,7 @@ export class InternalAccountController {
   @Header("Cache-Control", `max-age=30`)
   async getInfo(
     @Param("id", ParseIntPipe) id: number,
-    @Headers("x-internal-api-key") internalKey: string
+    @Headers("x-internal-api-key") internalKey: string,
   ) {
     if (!this.verifyInternalKey(internalKey)) {
       throw new NotFoundException();

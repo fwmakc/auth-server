@@ -10,7 +10,7 @@ export class GrantsTokenDto extends CommonDto {
   @DtoEnumColumn(
     "Тип гранта. Один из password, refresh_token, authorization_code, client_credentials",
     TypeGrants,
-    { required: true }
+    { required: true },
   )
   grant_type: TypeGrants;
 
@@ -52,7 +52,7 @@ export class GrantsTokenDto extends CommonDto {
   @IsOptional()
   @IsString()
   @DtoColumn(
-    "Ключ для беспарольного доступа, сгенерированный как хэш от chatId"
+    "Ключ для беспарольного доступа, сгенерированный как хэш от chatId",
   )
   key?: string;
 

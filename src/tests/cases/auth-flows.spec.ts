@@ -68,7 +68,7 @@ describe("Auth Flows — register, confirm, login, reset", () => {
 
       expect(mockPublish).toHaveBeenCalledWith(
         "user.registered",
-        expect.objectContaining({ username: "newuser@test" })
+        expect.objectContaining({ username: "newuser@test" }),
       );
     });
 
@@ -119,7 +119,7 @@ describe("Auth Flows — register, confirm, login, reset", () => {
 
       expect(mockPublish).toHaveBeenCalledWith(
         "user.confirmed",
-        expect.objectContaining({ username: "alice@test" })
+        expect.objectContaining({ username: "alice@test" }),
       );
     });
 
@@ -215,7 +215,7 @@ describe("Auth Flows — register, confirm, login, reset", () => {
       expect(res.body.success).toBe(true);
       expect(mockPublish).toHaveBeenCalledWith(
         "password.reset",
-        expect.objectContaining({ username: "bob@test" })
+        expect.objectContaining({ username: "bob@test" }),
       );
     });
 

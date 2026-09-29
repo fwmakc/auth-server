@@ -12,7 +12,7 @@ import { ConfigService } from "@nestjs/config";
 export class OpenAccountController {
   constructor(
     private readonly configService: ConfigService,
-    private readonly openAccountService: OpenAccountService
+    private readonly openAccountService: OpenAccountService,
   ) {}
 
   @Get("")
@@ -34,7 +34,7 @@ export class OpenAccountController {
   async openAuth(
     @Data() openAccountDto: OpenAccountDto,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     const client = await this.openAccountService.verify(openAccountDto);
     const cookie = new Cookie(req, res);
@@ -54,7 +54,7 @@ export class OpenAccountController {
       const url = await this.openAccountService.code(
         client,
         idCookie,
-        openAccountDto.state
+        openAccountDto.state,
       );
       return await res.redirect(url);
     }
@@ -66,7 +66,7 @@ export class OpenAccountController {
       const url = await this.openAccountService.token(
         client,
         idCookie,
-        openAccountDto.state
+        openAccountDto.state,
       );
       return await res.redirect(url);
     }

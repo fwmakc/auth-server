@@ -28,7 +28,9 @@ let transactionalDataSource: DataSource | undefined;
       async dataSourceFactory(option) {
         if (!option) throw new Error("Invalid options passed");
         if (!transactionalDataSource) {
-          transactionalDataSource = addTransactionalDataSource(new DataSource(option));
+          transactionalDataSource = addTransactionalDataSource(
+            new DataSource(option),
+          );
         }
         return transactionalDataSource;
       },

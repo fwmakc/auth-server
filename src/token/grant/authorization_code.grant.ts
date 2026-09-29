@@ -9,14 +9,14 @@ export class AuthorizationCodeGrant {
   constructor(
     private readonly openAccountService: OpenAccountService,
     private readonly clientsService: ClientsService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
   ) {}
 
   async authorizationCode(grantsTokenDto: GrantsTokenDto): Promise<any> {
     if (grantsTokenDto.grant_type !== "authorization_code") {
       throw new BadRequestException(
         "Specified type of grant_type field is not supported in this request",
-        "unsupported_grant_type"
+        "unsupported_grant_type",
       );
     }
     if (
@@ -26,7 +26,7 @@ export class AuthorizationCodeGrant {
     ) {
       throw new BadRequestException(
         "Not specified authorization code, client_id or redirect uri in this request",
-        "invalid_grant"
+        "invalid_grant",
       );
     }
     const { code, client_id, redirect_uri } = grantsTokenDto;
@@ -37,7 +37,7 @@ export class AuthorizationCodeGrant {
     if (!id) {
       throw new BadRequestException(
         "Specified authorization code is invalid",
-        "invalid_grant"
+        "invalid_grant",
       );
     }
     const client = await this.clientsService.clientsGetWhere(
@@ -48,12 +48,12 @@ export class AuthorizationCodeGrant {
           uri: redirect_uri,
         },
       },
-      [{ name: "account" }, { name: "redirects" }]
+      [{ name: "account" }, { name: "redirects" }],
     );
     if (!client?.account) {
       throw new BadRequestException(
         "Client authentication failed. Unknown client [client.authorization.code.grant]",
-        "invalid_client"
+        "invalid_client",
       );
     }
     client.code = null;
@@ -66,7 +66,7 @@ export class AuthorizationCodeGrant {
     if (!token) {
       throw new BadRequestException(
         "Client authentication failed. Unknown client [token.authorization.code.grant]",
-        "invalid_client"
+        "invalid_client",
       );
     }
     return await this.tokenService.prepare(token, grantsTokenDto.state);

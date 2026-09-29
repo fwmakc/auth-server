@@ -13,7 +13,7 @@ export class AccountSessionsService extends CommonService<
 > {
   constructor(
     @InjectRepository(AccountSessionsEntity)
-    protected readonly repository: Repository<AccountSessionsEntity>
+    protected readonly repository: Repository<AccountSessionsEntity>,
   ) {
     super();
   }
@@ -44,7 +44,7 @@ export class AccountSessionsService extends CommonService<
 
   async getByAuthId(
     authId: number,
-    relations: Array<RelationsDto> = undefined
+    relations: Array<RelationsDto> = undefined,
   ): Promise<AccountSessionsEntity[]> {
     const sessions = await this.repository.find({
       relations: relations?.map((i) => i.name),

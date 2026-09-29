@@ -3,7 +3,7 @@ import { JwtModuleOptions } from "@nestjs/jwt";
 import { getKeySet } from "@src/jwks/keys";
 
 export const getJwtConfig = async (
-  ConfigService: ConfigService
+  ConfigService: ConfigService,
 ): Promise<JwtModuleOptions> => {
   const keySet = getKeySet();
 

@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, ForbiddenException, Param, ParseIntPipe, Post, Req, Res } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  ForbiddenException,
+  Param,
+  ParseIntPipe,
+  Post,
+  Req,
+  Res,
+} from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { CommonDoc, Account, Self } from "api-server-toolkit";
 import { Throttle } from "@nestjs/throttler";
@@ -34,7 +44,7 @@ export class TokenController {
   async token(
     @Body() grantsTokenDto: GrantsTokenDto,
     @Req() request: any,
-    @Res({ passthrough: true }) response: any
+    @Res({ passthrough: true }) response: any,
   ): Promise<any> {
     if (grantsTokenDto.grant_type === "authorization_code") {
       return await this.grantsTokenService.authorizationCode(grantsTokenDto);
@@ -46,14 +56,14 @@ export class TokenController {
       return await this.grantsTokenService.key(
         grantsTokenDto,
         request,
-        response
+        response,
       );
     }
     if (grantsTokenDto.grant_type === "password") {
       return await this.grantsTokenService.password(
         grantsTokenDto,
         request,
-        response
+        response,
       );
     }
     if (grantsTokenDto.grant_type === "refresh_token") {
@@ -71,7 +81,7 @@ export class TokenController {
   @Delete("revoke/:id")
   async revokeAccount(
     @Param("id", ParseIntPipe) id: number,
-    @Self() account: any
+    @Self() account: any,
   ): Promise<any> {
     if (!account.isSuperuser) {
       throw new ForbiddenException("Only superuser can revoke other accounts");

@@ -15,7 +15,7 @@ import {
 @Controller("account/methods/2fa")
 export class TwoFactorAccountController {
   constructor(
-    private readonly twoFactorAccountService: TwoFactorAccountService
+    private readonly twoFactorAccountService: TwoFactorAccountService,
   ) {}
 
   @Account()
@@ -27,10 +27,7 @@ export class TwoFactorAccountController {
   @Account()
   @Throttle({ auth: { ttl: 60000, limit: 5 } })
   @Post("setup")
-  async setup(
-    @Self() account: AccountEntity,
-    @Body() dto: TwoFactorSetupDto
-  ) {
+  async setup(@Self() account: AccountEntity, @Body() dto: TwoFactorSetupDto) {
     return await this.twoFactorAccountService.setup(account, dto.method);
   }
 
@@ -39,7 +36,7 @@ export class TwoFactorAccountController {
   @Post("setup/confirm")
   async confirmSetup(
     @Self() account: AccountEntity,
-    @Body() dto: TwoFactorCodeDto
+    @Body() dto: TwoFactorCodeDto,
   ) {
     return await this.twoFactorAccountService.confirmSetup(account, dto.code);
   }
@@ -49,10 +46,13 @@ export class TwoFactorAccountController {
   @Post("disable")
   async disable(
     @Self() account: AccountEntity,
-    @Body() dto: TwoFactorDisableDto
+    @Body() dto: TwoFactorDisableDto,
   ) {
     return {
-      success: await this.twoFactorAccountService.disable(account, dto.password),
+      success: await this.twoFactorAccountService.disable(
+        account,
+        dto.password,
+      ),
     };
   }
 
@@ -61,14 +61,14 @@ export class TwoFactorAccountController {
   async verify(
     @Body() dto: TwoFactorVerifyDto,
     @Req() req: any,
-    @Res({ passthrough: true }) res: any
+    @Res({ passthrough: true }) res: any,
   ) {
     const token = await this.twoFactorAccountService.verify(
       dto.mfa_token,
       dto.code,
       req,
       res,
-      dto.state
+      dto.state,
     );
     return { success: true, ...token };
   }

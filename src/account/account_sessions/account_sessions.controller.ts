@@ -30,7 +30,7 @@ export class AccountSessionsController extends EntityController({
   @Get("get_by_auth_id")
   async getByAuthId(
     @Data("id") id: number,
-    @Data("relations") relations: Array<RelationsDto>
+    @Data("relations") relations: Array<RelationsDto>,
   ) {
     const result = await this.service.getByAuthId(id, relations);
     if (!result) {

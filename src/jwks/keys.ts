@@ -50,12 +50,12 @@ export function getKeySet(): KeySet {
     const logger = new Logger("JWKS");
     logger.warn(
       "JWT_PRIVATE_KEY_PATH / JWT_PUBLIC_KEY_PATH not set or files missing. " +
-      "Using ephemeral keys — all tokens invalidated on restart, multi-instance broken. " +
-      "Set key paths in production."
+        "Using ephemeral keys — all tokens invalidated on restart, multi-instance broken. " +
+        "Set key paths in production.",
     );
     const { privateKey: priv, publicKey: pub } = crypto.generateKeyPairSync(
       "rsa",
-      { modulusLength: 2048 }
+      { modulusLength: 2048 },
     );
     privateKey = priv.export({ type: "pkcs8", format: "pem" }).toString();
     publicKey = pub.export({ type: "spki", format: "pem" }).toString();

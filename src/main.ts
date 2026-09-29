@@ -1,12 +1,25 @@
 import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { bootstrap } from "api-server-toolkit/bootstrap";
-import { Sentry, Helmet, Morgan, Cors, CookieParser, Passport, ValidationPipe, Log, Prefix, Swagger } from "api-server-toolkit/bootstrap/setup";
+import {
+  Sentry,
+  Helmet,
+  Morgan,
+  Cors,
+  CookieParser,
+  Passport,
+  ValidationPipe,
+  Log,
+  Prefix,
+  Swagger,
+} from "api-server-toolkit/bootstrap/setup";
 import { AppModule } from "@src/app.module";
 
 async function main() {
   if (process.env.TRANSACTIONAL === "true") {
-    const { initializeTransactionalContext } = require("typeorm-transactional");
+    const { initializeTransactionalContext } = await import(
+      "typeorm-transactional"
+    );
     initializeTransactionalContext();
   }
 

@@ -14,24 +14,24 @@ export class RegisterAccountHandler {
     protected readonly accountConfirmService: AccountConfirmService,
     protected readonly configService: ConfigService,
     protected readonly hashAuthHandler: HashAccountHandler,
-    protected readonly passwordPolicyService: PasswordPolicyService
+    protected readonly passwordPolicyService: PasswordPolicyService,
   ) {}
 
   async authCreate(accountDto: AccountDto): Promise<AccountEntity> {
     const authExists = await this.accountService.findByUsername(
-      accountDto.username
+      accountDto.username,
     );
     if (authExists) {
       if (+authExists.isActivated) {
         throw new BadRequestException(
-          "User with this username is already in the system"
+          "User with this username is already in the system",
         );
       }
       return authExists;
     }
     this.passwordPolicyService.assertValid(accountDto.password);
     accountDto.password = await this.hashAuthHandler.generate(
-      accountDto.password
+      accountDto.password,
     );
 
     // используйте данную строку, если пользователь будет сразу же активирован

@@ -10,7 +10,7 @@ export class LeaderProvider {
   constructor(
     private readonly accountService: AccountService,
     private readonly configService: ConfigService,
-    private readonly strategiesService: AccountStrategiesService
+    private readonly strategiesService: AccountStrategiesService,
   ) {}
 
   async activate(request): Promise<any> {
@@ -40,7 +40,7 @@ export class LeaderProvider {
           code: token,
           client_id: this.configService.get("LEADER_CLIENT_ID"),
           client_secret: this.configService.get("LEADER_CLIENT_SECRET"),
-        }
+        },
       );
       return data;
     } catch (e) {
@@ -54,7 +54,7 @@ export class LeaderProvider {
         `https://apps.leader-id.ru/api/v1/users/${userId}`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
-        }
+        },
       );
       return data;
     } catch (e) {

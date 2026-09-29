@@ -1,5 +1,10 @@
 import { BaseEntity, Entity, OneToMany } from "typeorm";
-import { CreatedColumn, IdColumn, UpdatedColumn, VarcharColumn } from "api-server-toolkit";
+import {
+  CreatedColumn,
+  IdColumn,
+  UpdatedColumn,
+  VarcharColumn,
+} from "api-server-toolkit";
 import { AccountRoleEntity } from "../account_roles/account_role.entity";
 
 @Entity({ name: "roles" })

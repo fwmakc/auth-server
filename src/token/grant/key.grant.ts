@@ -10,20 +10,20 @@ export class KeyGrant {
   constructor(
     private readonly accountService: AccountService,
     private readonly tokenService: TokenService,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
   ) {}
 
   async key(grantsTokenDto: GrantsTokenDto, request, response): Promise<any> {
     if (grantsTokenDto.grant_type !== "key") {
       throw new BadRequestException(
         "Specified type of grant_type field is not supported in this request",
-        "unsupported_grant_type"
+        "unsupported_grant_type",
       );
     }
     if (!grantsTokenDto.key) {
       throw new BadRequestException(
         "Not specified key in this request",
-        "invalid_grant"
+        "invalid_grant",
       );
     }
     const { key } = grantsTokenDto;
@@ -31,7 +31,7 @@ export class KeyGrant {
     if (!user) {
       throw new BadRequestException(
         "User authentication failed. Unknown user",
-        "invalid_user"
+        "invalid_user",
       );
     }
 
@@ -44,7 +44,7 @@ export class KeyGrant {
       if (!account) {
         throw new BadRequestException(
           "User authentication failed. Unknown account",
-          "invalid_user"
+          "invalid_user",
         );
       }
     }
@@ -57,7 +57,7 @@ export class KeyGrant {
     if (!token) {
       throw new BadRequestException(
         "User authentication failed. Unknown user",
-        "invalid_user"
+        "invalid_user",
       );
     }
     if (response) {

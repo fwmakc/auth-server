@@ -10,7 +10,7 @@ import { ClientsService } from "@src/clients/clients.service";
 export class ClientsStrategy extends PassportStrategy(Strategy, "clients") {
   constructor(
     private readonly configService: ConfigService,
-    private readonly clientsService: ClientsService
+    private readonly clientsService: ClientsService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -25,7 +25,7 @@ export class ClientsStrategy extends PassportStrategy(Strategy, "clients") {
 
   async validate(
     request: Request,
-    { client_id }: Pick<ClientsEntity, "client_id">
+    { client_id }: Pick<ClientsEntity, "client_id">,
   ) {
     // const authorization = request.body?.['client_secret'] || request.headers?.['client_secret'] || request.headers?.['authorization'];
     // const client_secret = authorization?.replace(/.*?bearer\s*/ui, '');

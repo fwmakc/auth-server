@@ -9,12 +9,12 @@ export class ResetAccountHandler {
   constructor(
     protected readonly accountService: AccountService,
     protected readonly accountConfirmService: AccountConfirmService,
-    protected readonly configService: ConfigService
+    protected readonly configService: ConfigService,
   ) {}
 
   async confirmCreate(accountDto: AccountDto): Promise<any> {
     const account = await this.accountService.findByUsername(
-      accountDto.username
+      accountDto.username,
     );
     if (!account) {
       throw new UnauthorizedException("User not found");
@@ -22,10 +22,7 @@ export class ResetAccountHandler {
     return await this.accountConfirmService.generate(account, "reset");
   }
 
-  async sendMail(
-    username: string,
-    code: string
-  ): Promise<string> {
+  async sendMail(username: string, code: string): Promise<string> {
     const url = this.configService.get("FORM_CHANGE");
     return `${url}?code=${code}`;
   }

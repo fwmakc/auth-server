@@ -26,7 +26,7 @@ export class MethodsAccountService {
     protected readonly resetAuthHandler: ResetAccountHandler,
     protected readonly grantsTokenService: GrantsTokenService,
     protected readonly openAccountService: OpenAccountService,
-    @Inject(IEventClient) protected readonly eventClient: IEventClient
+    @Inject(IEventClient) protected readonly eventClient: IEventClient,
   ) {}
 
   async change(accountDto: AccountDto, code: string, req, res): Promise<any> {
@@ -49,7 +49,11 @@ export class MethodsAccountService {
 
   async login(grantsTokenDto: GrantsTokenDto, req, res): Promise<any> {
     grantsTokenDto.grant_type = TypeGrants.PASSWORD;
-    const token = await this.grantsTokenService.password(grantsTokenDto, req, res);
+    const token = await this.grantsTokenService.password(
+      grantsTokenDto,
+      req,
+      res,
+    );
     return { success: true, ...token };
   }
 
@@ -62,7 +66,7 @@ export class MethodsAccountService {
     accountDto: AccountDto,
     subject: string,
     req,
-    res
+    res,
   ): Promise<any> {
     const account = await this.registerAuthHandler.authCreate(accountDto);
     if (!account.isActivated) {
@@ -73,13 +77,13 @@ export class MethodsAccountService {
         email: account.username,
         subject,
         confirmUrl,
-    });
+      });
     } else {
       this.eventClient.publish("user.registered", {
         userId: Number(account.id),
         username: account.username,
         email: account.username,
-    });
+      });
     }
     return { success: true };
   }
@@ -88,7 +92,7 @@ export class MethodsAccountService {
     const confirm = await this.resetAuthHandler.confirmCreate(accountDto);
     const resetUrl = await this.resetAuthHandler.sendMail(
       accountDto.username,
-      confirm.code
+      confirm.code,
     );
     this.eventClient.publish("password.reset", {
       username: accountDto.username,
@@ -104,7 +108,7 @@ export class MethodsAccountService {
       req.user,
       password,
       req,
-      res
+      res,
     );
     this.eventClient.publish("user.deactivated", {
       userId: Number(account.id),

@@ -14,7 +14,10 @@ export class AccountRolesService {
     private readonly roleRepository: Repository<RoleEntity>,
   ) {}
 
-  async assign(accountId: number, dto: AccountRoleAssignmentDto): Promise<void> {
+  async assign(
+    accountId: number,
+    dto: AccountRoleAssignmentDto,
+  ): Promise<void> {
     await this.repository.delete({ accountId });
 
     if (!dto.roles.length) return;
