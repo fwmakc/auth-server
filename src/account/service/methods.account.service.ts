@@ -91,7 +91,9 @@ export class MethodsAccountService {
   }
 
   async logout(req, res): Promise<any> {
-    await this.logoutAuthHandler.logout(req);
+    // res обязателен: handler сбрасывает id/query cookies (иначе cookie с
+    // refresh остаётся в браузере после logout)
+    await this.logoutAuthHandler.logout(req, res);
     this.audit.log({
       action: "auth.logout",
       accountId: Number(req?.user?.id),
@@ -122,6 +124,19 @@ export class MethodsAccountService {
       });
       throw e;
     }
+    if (!account) {
+      // активный дубликат: ответ такой же, как при успешной регистрации,
+      // но письмо не уходит (иначе — перебор логинов и email-bombing)
+      this.audit.log({
+        action: "auth.register",
+        outcome: "failure",
+        accountUsername: accountDto.username,
+        ip: req?.ip,
+        userAgent: req?.headers?.["user-agent"],
+        details: { reason: "duplicate active account" },
+      });
+      return { success: true };
+    }
     this.audit.log({
       action: "auth.register",
       accountId: Number(account.id),
@@ -151,22 +166,35 @@ export class MethodsAccountService {
   async reset(accountDto: AccountDto, subject: string, req, res): Promise<any> {
     try {
       const confirm = await this.resetAuthHandler.confirmCreate(accountDto);
-      const resetUrl = await this.resetAuthHandler.sendMail(
-        accountDto.username,
-        confirm.code,
-      );
-      this.audit.log({
-        action: "auth.password.reset_requested",
-        accountUsername: accountDto.username,
-        ip: req?.ip,
-        userAgent: req?.headers?.["user-agent"],
-      });
-      this.eventClient.publish("password.reset", {
-        username: accountDto.username,
-        email: accountDto.username,
-        subject,
-        resetUrl,
-      });
+      if (confirm) {
+        const resetUrl = await this.resetAuthHandler.sendMail(
+          accountDto.username,
+          confirm.code,
+        );
+        this.audit.log({
+          action: "auth.password.reset_requested",
+          accountUsername: accountDto.username,
+          ip: req?.ip,
+          userAgent: req?.headers?.["user-agent"],
+        });
+        this.eventClient.publish("password.reset", {
+          username: accountDto.username,
+          email: accountDto.username,
+          subject,
+          resetUrl,
+        });
+      } else {
+        // неизвестный аккаунт: ответ тот же { success: true } (анти-enumeration),
+        // в аудит — честный failure
+        this.audit.log({
+          action: "auth.password.reset_requested",
+          outcome: "failure",
+          accountUsername: accountDto.username,
+          ip: req?.ip,
+          userAgent: req?.headers?.["user-agent"],
+          details: { reason: "unknown account" },
+        });
+      }
       return { success: true };
     } catch (e) {
       this.audit.log({

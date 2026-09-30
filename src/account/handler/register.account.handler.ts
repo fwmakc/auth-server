@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AccountDto } from "@src/account/account.dto";
 import { AccountEntity } from "@src/account/account.entity";
@@ -17,15 +17,18 @@ export class RegisterAccountHandler {
     protected readonly passwordPolicyService: PasswordPolicyService,
   ) {}
 
-  async authCreate(accountDto: AccountDto): Promise<AccountEntity> {
+  /**
+   * Активный дубликат возвращает null (не throw): ответ registration-эндпоинта
+   * не должен различать «занят» и «создан», иначе — перебор логинов.
+   * Письмо на чужой адрес в этом случае не уходит (email-bombing).
+   */
+  async authCreate(accountDto: AccountDto): Promise<AccountEntity | null> {
     const authExists = await this.accountService.findByUsername(
       accountDto.username,
     );
     if (authExists) {
       if (+authExists.isActivated) {
-        throw new BadRequestException(
-          "User with this username is already in the system",
-        );
+        return null;
       }
       return authExists;
     }

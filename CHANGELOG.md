@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.9] - 2026-09-30
+### Fixed
+- **Password change now revokes every refresh token of the account** (self-pentest): `POST /account/methods/change/:code` rotated the password but left all refresh families valid — a stolen refresh token survived the credential rotation. The change handler now calls `DbRefreshStore.revokeAll(account.id)` (the same store logout uses). Access tokens still expire on their own 15-minute budget.
+- **Logout actually clears cookies** (self-pentest): `MethodsAccountService.logout` accepted `res` but never passed it to the handler, so the `id`/`query` cookies survived logout in the browser. The handler already supported `response` — it is now forwarded.
+- **Account enumeration via register** (self-pentest): registering an already-activated username answered 400 «already in the system», letting anyone probe which emails exist (and re-registering unactivated accounts could bomb arbitrary mailboxes). The response is now uniform `{ success: true }` for duplicates — no email is sent, the attempt is audited as a failure.
+- **Account enumeration + timing leak via password reset** (self-pentest): reset for an unknown username answered 401 «User not found» (and skipped the bcrypt work that an existing account performs). The response is now uniform `{ success: true }`, with a dummy bcrypt hash equalizing timing; no reset code is created and no email leaves the system.
+- **Confirm-code TTL check broke on TZ≠UTC hosts** (found by tests during this wave): `account_confirm.created_at` is a naive-UTC column (DB `CURRENT_TIMESTAMP`), but the cutoff was a JS `Date` — node-postgres serializes Date params in the host timezone and postgres discards the offset when comparing to `timestamp`, so on a UTC+3 host a seconds-old reset code looked 3 hours old and `findByCode` always returned null («Invalid reset code» for every correct code). The cutoff is now passed as a UTC-naive string, removing the timezone from the comparison entirely.
+- Toolkit pinned `#v0.22.0`: `AccessRule.filter` compiles into binds (fail-closed scope rules), delete guards cover tenant binds, scoped `movePosition`, search no longer widens relation loading, `getClientIp()`/`TRUST_PROXY` fix X-Forwarded-For spoofing.
+
 ## [0.8.8] - 2026-09-30
 ### Fixed
 - Toolkit `#v0.21.1`: `AuditModule.forRoot()` could not see the app-root `EventClientModule` (Nest module scopes are not shared), so `AuditService` ran without an event client and audit entries degraded to fallback log lines. With 0.21.1 the module binds the client itself — audit events now actually reach event-server's `audit_events` store.

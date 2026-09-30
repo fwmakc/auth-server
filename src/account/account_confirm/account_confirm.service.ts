@@ -27,7 +27,15 @@ export class AccountConfirmService {
     // reset codes live 1 hour, 2FA login codes 5 minutes, confirm codes 24 hours
     const maxAgeMs =
       type === "reset" ? 3600_000 : type === "2fa" ? 5 * 60_000 : 24 * 3600_000;
-    where.createdAt = MoreThan(new Date(Date.now() - maxAgeMs));
+    // created_at в колонке — naive UTC (DB CURRENT_TIMESTAMP), но Date-параметры
+    // pg сериализует в локальной зоне, а postgres при сравнении с timestamp
+    // отбрасывает offset → на хостах с TZ≠UTC свежий код выглядит старым и
+    // валидация всегда падает. Отсечка строкой в UTC-naive — зона не участвует.
+    const cutoff = new Date(Date.now() - maxAgeMs)
+      .toISOString()
+      .replace("T", " ")
+      .replace("Z", "");
+    where.createdAt = MoreThan(cutoff as any);
     return await this.repository.findOne({
       where,
       relations: ["account"],

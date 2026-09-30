@@ -5,6 +5,7 @@ import { DataSource } from "typeorm";
 import { createHttpTestApp, mockPublish } from "../app.testingModule";
 import { AccountEntity } from "@src/account/account.entity";
 import { AccountConfirmEntity } from "@src/account/account_confirm/account_confirm.entity";
+import { RefreshTokenEntity } from "@src/token/store/refresh-token.entity";
 
 describe("Auth Flows — register, confirm, login, reset", () => {
   let app: INestApplication;
@@ -72,7 +73,9 @@ describe("Auth Flows — register, confirm, login, reset", () => {
       );
     });
 
-    it("register duplicate activated user → 400", async () => {
+    it("register duplicate activated user → uniform 201, no email event (anti-enumeration)", async () => {
+      mockPublish.mockClear();
+
       const res = await request(app.getHttpServer())
         .post("/account/methods/register")
         .send({
@@ -80,9 +83,15 @@ describe("Auth Flows — register, confirm, login, reset", () => {
           password: "password123",
           subject: "Confirm",
         })
-        .expect(400);
+        .expect(201);
 
-      expect(JSON.stringify(res.body)).toContain("already in the system");
+      expect(res.body).toEqual({ success: true });
+      // на чужой адрес письмо не уходит: ни подтверждение, ни что-либо ещё
+      // (audit.event в моке не считается — это внутренняя телеметрия)
+      expect(mockPublish).not.toHaveBeenCalledWith(
+        "user.registered",
+        expect.anything(),
+      );
     });
 
     it("register duplicate unactivated user → returns existing (no error)", async () => {
@@ -219,14 +228,23 @@ describe("Auth Flows — register, confirm, login, reset", () => {
       );
     });
 
-    it("reset non-existent user → 401", async () => {
-      await request(app.getHttpServer())
+    it("reset non-existent user → uniform 201, no email event (anti-enumeration)", async () => {
+      mockPublish.mockClear();
+
+      const res = await request(app.getHttpServer())
         .post("/account/methods/reset")
         .send({
           username: "ghost@test",
           subject: "Reset",
         })
-        .expect(401);
+        .expect(201);
+
+      // ответ неотличим от ответа для существующего аккаунта
+      expect(res.body).toEqual({ success: true });
+      expect(mockPublish).not.toHaveBeenCalledWith(
+        "password.reset",
+        expect.anything(),
+      );
     });
 
     it("reset for alice → create fresh code via API, then change password", async () => {
@@ -249,10 +267,22 @@ describe("Auth Flows — register, confirm, login, reset", () => {
         .send({
           username: "alice@test",
           password: "newpassword123",
-        })
-        .expect(201);
+        });
+      console.log("CHANGE DEBUG", changeRes.status, JSON.stringify(changeRes.body), "code:", resetCode);
+      expect(changeRes.status).toBe(201);
 
       expect(changeRes.body.success).toBe(true);
+
+      // смена пароля ревокает все refresh-токены аккаунта:
+      // украденный refresh после смены пароля мёртв
+      const alice = await dataSource
+        .getRepository(AccountEntity)
+        .findOneBy({ username: "alice@test" });
+      const aliceRefreshTokens = await dataSource
+        .getRepository(RefreshTokenEntity)
+        .find({ where: { accountId: alice.id as any } });
+      expect(aliceRefreshTokens.length).toBeGreaterThan(0);
+      expect(aliceRefreshTokens.every((t) => t.revoked)).toBe(true);
     });
 
     it("new password works after change", async () => {

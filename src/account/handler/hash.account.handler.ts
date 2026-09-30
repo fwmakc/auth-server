@@ -8,4 +8,13 @@ export class HashAccountHandler {
     const passwordHashed = await hash(password, salt);
     return passwordHashed;
   }
+
+  /**
+   * bcrypt той же стоимости, что реальная проверка пароля: выравнивает
+   * тайминги ответов там, где проверять нечего (reset несуществующего
+   * аккаунта) — иначе время ответа выдаёт существование аккаунта.
+   */
+  async dummyHash(): Promise<string> {
+    return this.generate("dummy");
+  }
 }

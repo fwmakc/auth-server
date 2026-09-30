@@ -1,7 +1,7 @@
 # AI Context — auth-server
 
 > Auto-generated. Run `npm run ai-context` to regenerate.
-> Generated: 2026-09-29T00:12:25.484Z
+> Generated: 2026-09-30T15:43:36.964Z
 
 ---
 
@@ -166,10 +166,10 @@ Base path: `/token`
 ### AccountService extends `CommonService`
 
 - `create(accountDto: AccountDto,
-    relations: Array<RelationsDto> = undefined): Promise<AccountEntity>`
+    relations: Array<RelationsDto> = undefined,): Promise<AccountEntity>`
 - `update(id: number,
     accountDto: AccountDto,
-    relations: Array<RelationsDto> = undefined): Promise<AccountEntity>`
+    relations: Array<RelationsDto> = undefined,): Promise<AccountEntity>`
 - `findByUsername(username: string): Promise<AccountEntity>`
 - `login(accountDto: AccountDto): Promise<AccountEntity>`
 - `hardDelete(id: number): Promise<boolean>`
@@ -182,30 +182,32 @@ Base path: `/token`
 
 ### AccountRolesService
 
-- `assign(accountId: number, dto: AccountRoleAssignmentDto): Promise<void>`
+- `assign(accountId: number,
+    dto: AccountRoleAssignmentDto,
+    actor?: { id?: number | string; username?: string },): Promise<void>`
 - `removeByAccount(accountId: number): Promise<void>`
 - `findByAccount(accountId: number): Promise<AccountRoleEntity[]>`
 
 ### AccountSessionsService extends `CommonService`
 
 - `getByAuthId(authId: number,
-    relations: Array<RelationsDto> = undefined): Promise<AccountSessionsEntity[]>`
+    relations: Array<RelationsDto> = undefined,): Promise<AccountSessionsEntity[]>`
 
 ### AccountStrategiesService extends `CommonService`
 
 - `find(find: FindDto,
-    bind: BindDto = { allow: true }): Promise<AccountStrategiesEntity[]>`
+    bind: BindDto = { allow: true },): Promise<AccountStrategiesEntity[]>`
 - `findFirst(find: FindDto,
-    bind: BindDto = { allow: true }): Promise<AccountStrategiesEntity>`
+    bind: BindDto = { allow: true },): Promise<AccountStrategiesEntity>`
 - `findMany(find: FindManyDto,
-    bind: BindDto = { allow: true }): Promise<AccountStrategiesEntity[]>`
+    bind: BindDto = { allow: true },): Promise<AccountStrategiesEntity[]>`
 - `findOne(find: FindOneDto,
-    bind: BindDto = { allow: true }): Promise<AccountStrategiesEntity>`
-- `encodeTokens(authStrategiesDto: AccountStrategiesDto): Promise<AccountStrategiesDto>`
-- `decodeTokens(authStrategiesDto: AccountStrategiesEntity): Promise<AccountStrategiesEntity>`
-- `decodeEntries(authStrategiesDto: Array<AccountStrategiesEntity>): Promise<AccountStrategiesEntity[]>`
+    bind: BindDto = { allow: true },): Promise<AccountStrategiesEntity>`
+- `encodeTokens(authStrategiesDto: AccountStrategiesDto,): Promise<AccountStrategiesDto>`
+- `decodeTokens(authStrategiesDto: AccountStrategiesEntity,): Promise<AccountStrategiesEntity>`
+- `decodeEntries(authStrategiesDto: Array<AccountStrategiesEntity>,): Promise<AccountStrategiesEntity[]>`
 - `updateBy(authStrategiesDto: AccountStrategiesDto,
-    relations: Array<RelationsDto> = undefined): Promise<AccountStrategiesEntity>`
+    relations: Array<RelationsDto> = undefined,): Promise<AccountStrategiesEntity>`
 - `removeBy(authStrategiesDto: AccountStrategiesDto): Promise<boolean>`
 
 ### TwoFactorAccountService
@@ -215,22 +217,26 @@ Base path: `/token`
 - `status(account: AccountEntity): Promise<`
 - `challenge(account: AccountEntity): Promise<`
 - `setup(account: AccountEntity,
-    method: TwoFactorMethod): Promise<`
+    method: TwoFactorMethod,): Promise<`
 - `confirmSetup(account: AccountEntity,
-    code: string): Promise<`
+    code: string,): Promise<`
 - `disable(account: AccountEntity, password: string): Promise<boolean>`
-- `verify(mfaToken: string, code: string, request?: any, response?: any, state?: any): Promise<any>`
+- `verify(mfaToken: string,
+    code: string,
+    request?: any,
+    response?: any,
+    state?: any,): Promise<any>`
 - `checkTotp(row: AccountTwoFactorEntity,
-    code: string): Promise<boolean>`
+    code: string,): Promise<boolean>`
 - `sendCode(account: AccountEntity): Promise<void>`
 - `upsertPending(accountId: number,
     method: TwoFactorMethod,
-    secret: { encrypted: string; iv: string } | null): Promise<AccountTwoFactorEntity>`
-- `encryptSecret(secret: string): Promise<`
-- `decryptSecret(secret: { encrypted: string; iv: string } | null | undefined): Promise<string | null>`
+    secret: { encrypted: string; iv: string } | null,): Promise<AccountTwoFactorEntity>`
+- `encryptSecret(secret: string,): Promise<`
+- `decryptSecret(secret: { encrypted: string; iv: string } | null | undefined,): Promise<string | null>`
 - `generateRecoveryCodes(): Promise<`
 - `consumeRecoveryCode(row: AccountTwoFactorEntity,
-    code: string): Promise<boolean>`
+    code: string,): Promise<boolean>`
 - `registerFailure(row: AccountTwoFactorEntity): Promise<void>`
 - `randomBlock(): string`
 
@@ -241,12 +247,12 @@ Base path: `/token`
 - `login(grantsTokenDto: GrantsTokenDto,
     response_type: string,
     req,
-    res): Promise<any>`
+    res,): Promise<any>`
 - `logout(req, res): Promise<any>`
 - `register(accountDto: AccountDto,
     subject: string,
     req,
-    res): Promise<any>`
+    res,): Promise<any>`
 - `reset(accountDto: AccountDto, subject: string, req, res): Promise<any>`
 
 ### MethodsAccountService
@@ -258,7 +264,7 @@ Base path: `/token`
 - `register(accountDto: AccountDto,
     subject: string,
     req,
-    res): Promise<any>`
+    res,): Promise<any>`
 - `reset(accountDto: AccountDto, subject: string, req, res): Promise<any>`
 - `deactivate(password: string, req, res): Promise<any>`
 - `delete(targetUserId: number, req, res): Promise<any>`
@@ -270,13 +276,13 @@ Base path: `/token`
 - `verifyCodeSignature(code: string): object`
 - `code(clientsDto: ClientsDto,
     id: number,
-    state: string): Promise<string>`
+    state: string,): Promise<string>`
 - `token(clientsDto: ClientsDto,
     id: number,
-    state: string): Promise<string>`
+    state: string,): Promise<string>`
 - `verify(openAccountDto: OpenAccountDto): Promise<ClientsDto>`
 - `codeGenerate(clientsDto: ClientsDto,
-    id: number): Promise<ClientsEntity>`
+    id: number,): Promise<ClientsEntity>`
 - `codeVerify(code: string, clientsDto: ClientsDto): Promise<number>`
 
 ### PasswordPolicyService
@@ -290,10 +296,10 @@ Base path: `/token`
 
 - `create(clientsDto: ClientsDto,
     relations: Array<RelationsDto> = undefined,
-    bind: BindDto): Promise<ClientsEntity>`
+    bind: BindDto,): Promise<ClientsEntity>`
 - `clientsVerify(client_id: string, client_secret: string): Promise<any>`
 - `clientsGetWhere(where: object,
-    relations: Array<RelationsDto> = undefined): Promise<ClientsEntity>`
+    relations: Array<RelationsDto> = undefined,): Promise<ClientsEntity>`
 
 ### UsersService extends `CommonService`
 
@@ -307,7 +313,7 @@ Base path: `/token`
 - `key(grantsTokenDto: GrantsTokenDto, request, response): Promise<any>`
 - `password(grantsTokenDto: GrantsTokenDto,
     request,
-    response): Promise<any>`
+    response,): Promise<any>`
 - `refreshToken(grantsTokenDto: GrantsTokenDto): Promise<any>`
 - `revoke(token: string): Promise<any>`
 - `revokeAll(accountId: number): Promise<any>`
