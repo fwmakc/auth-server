@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.6] - 2026-09-29
+### Changed
+- Toolkit pinned to v0.20.3 (QueueWorker claim: Postgres forbids FOR UPDATE on the nullable side of an outer join — relations are now hydrated by a second lock-free query inside the claim transaction).
+
 ## [0.8.5] - 2026-09-29
 ### Fixed
 - `POST /account/methods/reset` (password reset request) rejected every request with «password must be a string»: it validates `AccountDto`, where `password` was `@IsString()` without `@IsOptional()` — absurd for a forgotten-password flow. `password` is now optional at the DTO level; register and change/:code still enforce presence and the policy through `PasswordPolicyService` (`assertValid` rejects undefined).
