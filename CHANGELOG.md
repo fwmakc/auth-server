@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.8] - 2026-09-30
+### Fixed
+- Toolkit `#v0.21.1`: `AuditModule.forRoot()` could not see the app-root `EventClientModule` (Nest module scopes are not shared), so `AuditService` ran without an event client and audit entries degraded to fallback log lines. With 0.21.1 the module binds the client itself — audit events now actually reach event-server's `audit_events` store.
+
 ## [0.8.7] - 2026-09-30
 ### Added
 - **Audit logging for every security-relevant action** (toolkit 0.21.0 `AuditService`, published as `audit.event` into event-server 0.8.0's tamper-evident store; `AuditModule.forRoot({ mutations: false })` — all auth mutations are audited explicitly, so the generic mutation interceptor is off):
