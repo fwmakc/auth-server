@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
+import { AUTH_THROTTLE } from "@src/app.throttler";
 import { Account, Self } from "api-server-toolkit";
 import { AccountEntity } from "../account.entity";
 import { TwoFactorAccountService } from "./two_factor.account.service";
@@ -25,14 +26,14 @@ export class TwoFactorAccountController {
   }
 
   @Account()
-  @Throttle({ auth: { ttl: 60000, limit: 5 } })
+  @Throttle(AUTH_THROTTLE)
   @Post("setup")
   async setup(@Self() account: AccountEntity, @Body() dto: TwoFactorSetupDto) {
     return await this.twoFactorAccountService.setup(account, dto.method);
   }
 
   @Account()
-  @Throttle({ auth: { ttl: 60000, limit: 5 } })
+  @Throttle(AUTH_THROTTLE)
   @Post("setup/confirm")
   async confirmSetup(
     @Self() account: AccountEntity,
@@ -42,7 +43,7 @@ export class TwoFactorAccountController {
   }
 
   @Account()
-  @Throttle({ auth: { ttl: 60000, limit: 5 } })
+  @Throttle(AUTH_THROTTLE)
   @Post("disable")
   async disable(
     @Self() account: AccountEntity,
@@ -56,7 +57,7 @@ export class TwoFactorAccountController {
     };
   }
 
-  @Throttle({ auth: { ttl: 60000, limit: 5 } })
+  @Throttle(AUTH_THROTTLE)
   @Post("verify")
   async verify(
     @Body() dto: TwoFactorVerifyDto,

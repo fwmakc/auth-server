@@ -1,7 +1,31 @@
 import "reflect-metadata";
 import { ExecutionContext } from "@nestjs/common";
 import { ThrottlerGuard } from "@nestjs/throttler";
-import { AppThrottlerGuard } from "./app.throttler";
+import { AppThrottlerGuard, throttleEnvInt } from "./app.throttler";
+
+describe("throttleEnvInt", () => {
+  const NAME = "THROTTLE_SPEC_VAR";
+
+  afterEach(() => {
+    delete process.env[NAME];
+  });
+
+  it("returns the default when the variable is unset", () => {
+    expect(throttleEnvInt(NAME, 5)).toBe(5);
+  });
+
+  it("parses a positive integer", () => {
+    process.env[NAME] = "42";
+    expect(throttleEnvInt(NAME, 5)).toBe(42);
+  });
+
+  it("falls back on zero, negative, and garbage values", () => {
+    for (const bad of ["0", "-3", "abc", "3.7"]) {
+      process.env[NAME] = bad;
+      expect(throttleEnvInt(NAME, 5)).toBe(5);
+    }
+  });
+});
 
 describe("AppThrottlerGuard", () => {
   const buildGuard = () => {

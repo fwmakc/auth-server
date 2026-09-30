@@ -12,6 +12,7 @@ import {
 import { ApiTags } from "@nestjs/swagger";
 import { CommonDoc, Account, Self } from "api-server-toolkit";
 import { Throttle } from "@nestjs/throttler";
+import { TOKEN_THROTTLE } from "@src/app.throttler";
 import { GrantsTokenDto } from "@src/token/dto/grants.token.dto";
 import { GrantsTokenService } from "@src/token/service/grants.token.service";
 
@@ -20,7 +21,7 @@ import { GrantsTokenService } from "@src/token/service/grants.token.service";
 export class TokenController {
   constructor(private readonly grantsTokenService: GrantsTokenService) {}
 
-  @Throttle({ auth: { ttl: 60000, limit: 10 } })
+  @Throttle(TOKEN_THROTTLE)
   @Post("/")
   @CommonDoc({
     title: "Базовый метод получения токена",
@@ -71,7 +72,7 @@ export class TokenController {
     }
   }
 
-  @Throttle({ auth: { ttl: 60000, limit: 10 } })
+  @Throttle(TOKEN_THROTTLE)
   @Post("revoke")
   async revoke(@Body("token") token: string): Promise<any> {
     return await this.grantsTokenService.revoke(token);

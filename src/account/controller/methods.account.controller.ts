@@ -11,7 +11,8 @@ import {
 import { AccountDto } from "@src/account/account.dto";
 import { ApiTags } from "@nestjs/swagger";
 import { Account } from "api-server-toolkit";
-import { SkipThrottle, Throttle } from "@nestjs/throttler";
+import { Throttle } from "@nestjs/throttler";
+import { AUTH_THROTTLE, AUTH_THROTTLE_STRICT } from "@src/app.throttler";
 import { MethodsAccountService } from "@src/account/service/methods.account.service";
 import { GrantsTokenDto } from "@src/token/dto/grants.token.dto";
 
@@ -20,6 +21,7 @@ import { GrantsTokenDto } from "@src/token/dto/grants.token.dto";
 export class MethodsAccountController {
   constructor(private readonly methodsAccountService: MethodsAccountService) {}
 
+  @Throttle(AUTH_THROTTLE_STRICT)
   @Post("change/:code")
   async change(
     @Body() accountDto: AccountDto,
@@ -30,7 +32,7 @@ export class MethodsAccountController {
     return await this.methodsAccountService.change(accountDto, code, req, res);
   }
 
-  @Throttle({ auth: { ttl: 60000, limit: 5 } })
+  @Throttle(AUTH_THROTTLE)
   @Get("confirm/:code")
   async confirm(
     @Param("code") code: string,
@@ -40,7 +42,7 @@ export class MethodsAccountController {
     return await this.methodsAccountService.confirm(code, req, res);
   }
 
-  @Throttle({ auth: { ttl: 60000, limit: 5 } })
+  @Throttle(AUTH_THROTTLE)
   @Post("login")
   async login(
     @Body() grantsTokenDto: GrantsTokenDto,
@@ -56,7 +58,7 @@ export class MethodsAccountController {
     return await this.methodsAccountService.logout(req, res);
   }
 
-  @Throttle({ auth: { ttl: 60000, limit: 3 } })
+  @Throttle(AUTH_THROTTLE_STRICT)
   @Post("register")
   async register(
     @Body() accountDto: AccountDto,
@@ -72,7 +74,7 @@ export class MethodsAccountController {
     );
   }
 
-  @Throttle({ auth: { ttl: 60000, limit: 3 } })
+  @Throttle(AUTH_THROTTLE_STRICT)
   @Post("reset")
   async reset(
     @Body() accountDto: AccountDto,

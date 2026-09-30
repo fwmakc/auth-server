@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.10] - 2026-09-30
+### Added
+- **Env-tunable rate limiting** (load-testing wave): the named throttle sets
+  read from env — `THROTTLE_AUTH_TTL` / `THROTTLE_AUTH_LIMIT` (login, confirm,
+  2FA verification), `THROTTLE_AUTH_STRICT_LIMIT` (register, reset),
+  `THROTTLE_TOKEN_LIMIT` (token endpoints), `THROTTLE_DEFAULT_TTL/LIMIT`
+  (everything else). The per-route `@Throttle` decorators now share the same
+  constants as `ThrottlerModule.forRoot`, so a deployment can trade
+  brute-force protection for throughput without a rebuild. Defaults keep the
+  historical limits (5/min login, 3/min register/reset, 10/min tokens,
+  10/s default); a bad value falls back to the default (fail closed).
+### Fixed
+- `POST /account/methods/change/:code` had **no route-level throttle** — it
+  accepted a plaintext password + one-time code at the default 10/s. It now
+  sits in the strict tier (3/min like register/reset).
+
 ## [0.8.9] - 2026-09-30
 ### Fixed
 - **Password change now revokes every refresh token of the account** (self-pentest): `POST /account/methods/change/:code` rotated the password but left all refresh families valid — a stolen refresh token survived the credential rotation. The change handler now calls `DbRefreshStore.revokeAll(account.id)` (the same store logout uses). Access tokens still expire on their own 15-minute budget.

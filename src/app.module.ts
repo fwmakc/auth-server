@@ -10,7 +10,7 @@ import { getDbConfig } from "@config/db.config";
 import { HealthModule } from "api-server-toolkit/health";
 import { MetricsModule } from "api-server-toolkit/metrics";
 import { AuditModule } from "api-server-toolkit";
-import { AppThrottlerGuard } from "./app.throttler";
+import { AppThrottlerGuard, throttlerDefaults } from "./app.throttler";
 import AppImports from "./app.imports";
 
 let transactionalDataSource: DataSource | undefined;
@@ -19,10 +19,7 @@ let transactionalDataSource: DataSource | undefined;
   imports: [
     SentryModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
-    ThrottlerModule.forRoot([
-      { name: "default", ttl: 1000, limit: 10 },
-      { name: "auth", ttl: 60000, limit: 5 },
-    ]),
+    ThrottlerModule.forRoot(throttlerDefaults()),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
