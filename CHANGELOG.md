@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-09-30
+### Added
+- **Redis-backed rate-limit storage** (HA wave): `THROTTLE_STORAGE=redis` +
+  `REDIS_URL` moves the throttler counters into Redis via
+  `ThrottlerStorageRedisService`, so N auth replicas enforce ONE shared limit
+  instead of N independent ones (in-memory counters multiply the effective
+  caps by the replica count). Default stays `memory` — single-replica
+  behavior unchanged. Fail-closed: while Redis is unreachable, storage calls
+  reject and guarded requests fail (a rate limiter must not fail open);
+  the client connects at boot, fails fast (`enableOfflineQueue: false`,
+  2 retries, 3s connect timeout) — lazy connect would 500 the first
+  requests on the not-yet-open stream. Compose service `redis` added in
+  gateway-server; `THROTTLE_STORAGE` / `REDIS_URL` pass through there.
+- **Boot migrations are multi-replica safe**: `dataSourceFactory` now runs
+  them through toolkit `runMigrationsUnderLock()` (pg advisory xact lock) —
+  simultaneously scaling replicas serialize instead of racing `InitialSchema`
+  on a cold database.
+### Fixed
+- **2FA lockout counter was read-modify-write** (HA audit): `registerFailure`
+  saved the whole row after incrementing `failed_attempts` in memory —
+  concurrent verification attempts (parallel requests or replicas) lost
+  increments, silently weakening the lockout threshold. One atomic
+  `UPDATE ... RETURNING` now decides both the increment and the lock
+  transition; the `auth.2fa.locked` audit entry is emitted from the verify
+  flow when the update stamps a future `locked_until`.
+
 ## [0.8.10] - 2026-09-30
 ### Added
 - **Env-tunable rate limiting** (load-testing wave): the named throttle sets

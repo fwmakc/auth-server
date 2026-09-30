@@ -1,6 +1,6 @@
 {
   "name": "auth-server",
-  "version": "0.8.10",
+  "version": "0.9.0",
   "description": "OAuth2 authorization server — registration, login, JWT issuance, social login",
   "license": "MIT",
   "private": true,
@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@casl/ability": "^6.5.0",
+    "@nest-lab/throttler-storage-redis": "^1.2.0",
     "@nestjs/common": "^11.0.0",
     "@nestjs/config": "^4.0.0",
     "@nestjs/core": "^11.0.0",
@@ -53,7 +54,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "@sentry/nestjs": "^10.69.0",
     "@supercharge/request-ip": "^1.2.0",
-    "api-server-toolkit": "github:fwmakc/api-server-toolkit#v0.22.0",
+    "api-server-toolkit": "github:fwmakc/api-server-toolkit#v0.23.0",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
@@ -61,6 +62,7 @@
     "dotenv": "^16.3.1",
     "event-server": "github:fwmakc/event-server#v0.8.0",
     "helmet": "^8.3.0",
+    "ioredis": "^5.11.1",
     "js-yaml": "^4.1.0",
     "json-2-csv": "^5.5.9",
     "mime-types": "^2.1.35",

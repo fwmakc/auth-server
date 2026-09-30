@@ -244,7 +244,7 @@ export class TwoFactorAccountService {
       (recoveryUsed = await this.consumeRecoveryCode(row, code));
 
     if (!valid) {
-      await this.registerFailure(row);
+      const { failedAttempts, locked } = await this.registerFailure(row);
       this.audit.log({
         action: "auth.2fa.challenge_failed",
         outcome: "failure",
@@ -252,9 +252,21 @@ export class TwoFactorAccountService {
         accountUsername: account.username,
         details: {
           method: row.method,
-          failedAttempts: (row.failedAttempts || 0) + 1,
+          failedAttempts,
         },
       });
+      if (locked) {
+        this.audit.log({
+          action: "auth.2fa.locked",
+          outcome: "failure",
+          accountId: Number(account.id),
+          accountUsername: account.username,
+          details: {
+            reason: `${MAX_FAILED_ATTEMPTS} failed attempts`,
+            lockedMinutes: LOCK_MINUTES,
+          },
+        });
+      }
       throw new UnauthorizedException("Invalid verification code");
     }
 
@@ -369,22 +381,39 @@ export class TwoFactorAccountService {
     return false;
   }
 
-  private async registerFailure(row: AccountTwoFactorEntity): Promise<void> {
-    row.failedAttempts = (row.failedAttempts || 0) + 1;
-    if (row.failedAttempts >= MAX_FAILED_ATTEMPTS) {
-      row.lockedUntil = new Date(Date.now() + LOCK_MINUTES * 60 * 1000);
-      row.failedAttempts = 0;
-      this.audit.log({
-        action: "auth.2fa.locked",
-        outcome: "failure",
-        accountId: Number(row.account?.id),
-        details: {
-          reason: `${MAX_FAILED_ATTEMPTS} failed attempts`,
-          lockedMinutes: LOCK_MINUTES,
-        },
-      });
-    }
-    await this.repository.save(row);
+  /**
+   * Atomic failure counter: concurrent attempts (parallel requests or
+   * replicas) must each land their increment, otherwise the lockout
+   * threshold silently weakens. A single UPDATE decides both the
+   * increment and the lock transition, so no read-modify-write race.
+   */
+  private async registerFailure(
+    row: AccountTwoFactorEntity,
+  ): Promise<{ failedAttempts: number; locked: boolean }> {
+    const result = await this.repository
+      .createQueryBuilder()
+      .update(AccountTwoFactorEntity)
+      .set({
+        failedAttempts: () =>
+          `CASE WHEN COALESCE(failed_attempts, 0) + 1 >= ${MAX_FAILED_ATTEMPTS} ` +
+          `THEN 0 ELSE COALESCE(failed_attempts, 0) + 1 END`,
+        lockedUntil: () =>
+          `CASE WHEN COALESCE(failed_attempts, 0) + 1 >= ${MAX_FAILED_ATTEMPTS} ` +
+          `THEN NOW() + INTERVAL '${LOCK_MINUTES} minutes' ELSE locked_until END`,
+      })
+      .where("id = :id", { id: row.id })
+      .returning(["failed_attempts", "locked_until"])
+      .execute();
+    const updated = result?.raw?.[0] as
+      | { failed_attempts: number; locked_until: Date | null }
+      | undefined;
+    const lockedUntil = updated?.locked_until
+      ? new Date(updated.locked_until)
+      : null;
+    return {
+      failedAttempts: Number(updated?.failed_attempts ?? 0),
+      locked: !!lockedUntil && lockedUntil > new Date(),
+    };
   }
 }
 

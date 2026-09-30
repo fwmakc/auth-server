@@ -1,5 +1,7 @@
 import { ExecutionContext } from "@nestjs/common";
-import { ThrottlerGuard } from "@nestjs/throttler";
+import { ThrottlerGuard, ThrottlerStorage } from "@nestjs/throttler";
+import { ThrottlerStorageRedisService } from "@nest-lab/throttler-storage-redis";
+import Redis from "ioredis";
 
 /**
  * Positive-integer env reader for throttle settings; anything but a plain
@@ -49,6 +51,32 @@ export const throttlerDefaults = () => [
   },
   { name: "auth", ttl: AUTH_TTL, limit: AUTH_THROTTLE.auth.limit },
 ];
+
+/**
+ * Rate-limit counter storage. In-memory by default — correct for a single
+ * replica, but N replicas would each enforce their own limit, multiplying
+ * the effective cap. THROTTLE_STORAGE=redis moves counters into Redis
+ * (REDIS_URL) so all replicas share one counter set. Fail-closed: when
+ * Redis is unreachable, storage calls reject and guarded requests fail —
+ * a rate limiter must not silently fail open.
+ */
+export const buildThrottleStorage = (
+  env: NodeJS.ProcessEnv = process.env,
+): ThrottlerStorage | undefined => {
+  if (env.THROTTLE_STORAGE !== "redis") return undefined;
+  if (!env.REDIS_URL) {
+    throw new Error("THROTTLE_STORAGE=redis requires REDIS_URL");
+  }
+  return new ThrottlerStorageRedisService(
+    new Redis(env.REDIS_URL, {
+      // Connect at boot (not lazily): with lazyConnect the first requests
+      // would 500 on the not-yet-open stream (fail-closed, but needless).
+      enableOfflineQueue: false, // fail fast while disconnected
+      maxRetriesPerRequest: 2,
+      connectTimeout: 3000,
+    }),
+  );
+};
 
 /**
  * Skips rate limiting for the health endpoint: docker/k8s probes and nginx

@@ -4,13 +4,17 @@ import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { SentryGlobalFilter, SentryModule } from "@sentry/nestjs/setup";
-import { DataSource } from "typeorm";
+import { DataSource, DataSourceOptions } from "typeorm";
 import { addTransactionalDataSource } from "typeorm-transactional";
 import { getDbConfig } from "@config/db.config";
 import { HealthModule } from "api-server-toolkit/health";
 import { MetricsModule } from "api-server-toolkit/metrics";
-import { AuditModule } from "api-server-toolkit";
-import { AppThrottlerGuard, throttlerDefaults } from "./app.throttler";
+import { AuditModule, runMigrationsUnderLock } from "api-server-toolkit";
+import {
+  AppThrottlerGuard,
+  buildThrottleStorage,
+  throttlerDefaults,
+} from "./app.throttler";
 import AppImports from "./app.imports";
 
 let transactionalDataSource: DataSource | undefined;
@@ -19,16 +23,26 @@ let transactionalDataSource: DataSource | undefined;
   imports: [
     SentryModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
-    ThrottlerModule.forRoot(throttlerDefaults()),
+    ThrottlerModule.forRoot({
+      throttlers: throttlerDefaults(),
+      storage: buildThrottleStorage(),
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: getDbConfig,
       async dataSourceFactory(option) {
         if (!option) throw new Error("Invalid options passed");
+        // Serialize boot migrations across replicas: TypeORM has no
+        // built-in migration locking, so simultaneous boots on a cold DB
+        // race. The helper consumes `migrationsRun` from the options.
+        const { migrationsRun, ...dsOption } = option;
+        if (migrationsRun) {
+          await runMigrationsUnderLock(dsOption as DataSourceOptions);
+        }
         if (!transactionalDataSource) {
           transactionalDataSource = addTransactionalDataSource(
-            new DataSource(option),
+            new DataSource(dsOption as DataSourceOptions),
           );
         }
         return transactionalDataSource;
