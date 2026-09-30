@@ -4,6 +4,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { AccountRoleEntity } from "./account_role.entity";
 import { RoleEntity } from "../roles/role.entity";
 import { AccountRoleAssignmentDto } from "./account_role.dto";
+import { AuditService } from "api-server-toolkit";
 
 @Injectable()
 export class AccountRolesService {
@@ -12,11 +13,13 @@ export class AccountRolesService {
     private readonly repository: Repository<AccountRoleEntity>,
     @InjectRepository(RoleEntity)
     private readonly roleRepository: Repository<RoleEntity>,
+    private readonly audit?: AuditService,
   ) {}
 
   async assign(
     accountId: number,
     dto: AccountRoleAssignmentDto,
+    actor?: { id?: number | string; username?: string },
   ): Promise<void> {
     await this.repository.delete({ accountId });
 
@@ -41,6 +44,22 @@ export class AccountRolesService {
     });
 
     await this.repository.save(entities);
+
+    // Смена полномочий — одно из ключевых аудит-событий: фиксируем и актора,
+    // и итоговый набор ролей с tenant scope.
+    this.audit?.log({
+      action: "auth.roles.changed",
+      accountId: Number(actor?.id),
+      accountUsername: actor?.username,
+      targetType: "account",
+      targetId: accountId,
+      details: {
+        roles: dto.roles.map((item) => ({
+          roleId: item.roleId,
+          tenant: item.tenant,
+        })),
+      },
+    });
   }
 
   async removeByAccount(accountId: number): Promise<void> {

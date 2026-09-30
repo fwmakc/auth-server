@@ -8,7 +8,7 @@ import { AccountService } from "@src/account/account.service";
 import { TwoFactorAccountService } from "@src/account/account_two_factor/two_factor.account.service";
 import { GrantsTokenDto } from "@src/token/dto/grants.token.dto";
 import { TokenService } from "@src/token/token.service";
-import { Cookie } from "api-server-toolkit";
+import { AuditService, Cookie } from "api-server-toolkit";
 
 @Injectable()
 export class PasswordGrant {
@@ -17,6 +17,7 @@ export class PasswordGrant {
     private readonly tokenService: TokenService,
     @Inject(forwardRef(() => TwoFactorAccountService))
     private readonly twoFactorAccountService: TwoFactorAccountService,
+    private readonly audit: AuditService,
   ) {}
 
   async password(
@@ -37,28 +38,68 @@ export class PasswordGrant {
       );
     }
     const { username, password } = grantsTokenDto;
-    const account = await this.accountService.login({ username, password });
+    const meta = {
+      ip: request?.ip,
+      userAgent: request?.headers?.["user-agent"],
+    };
+    let account;
+    try {
+      account = await this.accountService.login({ username, password });
+    } catch (e) {
+      this.audit.log({
+        action: "auth.login.failed",
+        outcome: "failure",
+        accountUsername: username,
+        ...meta,
+        details: { reason: e?.message },
+      });
+      throw e;
+    }
 
     // 2FA: no tokens, no id cookie until the second factor is verified
     const challenge = await this.twoFactorAccountService.challenge(account);
     if (challenge) {
+      this.audit.log({
+        action: "auth.2fa.challenge",
+        accountId: Number(account.id),
+        accountUsername: account.username,
+        ...meta,
+      });
       return challenge;
     }
 
-    const token = await this.tokenService.pair({ id: account.id });
-    if (!token) {
-      throw new BadRequestException(
-        "User authentication failed. Unknown user",
-        "invalid_user",
-      );
+    try {
+      const token = await this.tokenService.pair({ id: account.id });
+      if (!token) {
+        throw new BadRequestException(
+          "User authentication failed. Unknown user",
+          "invalid_user",
+        );
+      }
+      // if (request) {
+      //   await this.accountSessionsService.start(account, request);
+      // }
+      if (response) {
+        const cookie = new Cookie(request, response);
+        cookie.set("id", account.id);
+      }
+      this.audit.log({
+        action: "auth.login.success",
+        accountId: Number(account.id),
+        accountUsername: account.username,
+        ...meta,
+      });
+      return await this.tokenService.prepare(token, grantsTokenDto.state);
+    } catch (e) {
+      this.audit.log({
+        action: "auth.login.failed",
+        outcome: "failure",
+        accountId: Number(account.id),
+        accountUsername: account.username,
+        ...meta,
+        details: { reason: e?.message },
+      });
+      throw e;
     }
-    // if (request) {
-    //   await this.accountSessionsService.start(account, request);
-    // }
-    if (response) {
-      const cookie = new Cookie(request, response);
-      cookie.set("id", account.id);
-    }
-    return await this.tokenService.prepare(token, grantsTokenDto.state);
   }
 }

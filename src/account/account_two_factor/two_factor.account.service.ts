@@ -11,7 +11,7 @@ import { Repository } from "typeorm";
 import { compare, genSalt, hash } from "bcryptjs";
 import { randomBytes } from "crypto";
 import { authenticator } from "otplib";
-import { Cookie, decrypt, encrypt, IEventClient } from "api-server-toolkit";
+import { Cookie, decrypt, encrypt, IEventClient, AuditService } from "api-server-toolkit";
 
 import { AccountEntity } from "../account.entity";
 import { AccountService } from "../account.service";
@@ -38,6 +38,7 @@ export class TwoFactorAccountService {
     @Inject(forwardRef(() => TokenService))
     protected readonly tokenService: TokenService,
     @Inject(IEventClient) protected readonly eventClient: IEventClient,
+    protected readonly audit: AuditService,
   ) {}
 
   /** Master switch: without it no login is ever challenged. */
@@ -136,35 +137,68 @@ export class TwoFactorAccountService {
       throw new BadRequestException("No pending two-factor setup");
     }
 
-    if (row.method === "totp") {
-      const secret = await this.decryptSecret(row.secret);
-      if (!secret || !authenticator.check(code, secret)) {
-        throw new BadRequestException("Invalid verification code");
+    try {
+      if (row.method === "totp") {
+        const secret = await this.decryptSecret(row.secret);
+        if (!secret || !authenticator.check(code, secret)) {
+          throw new BadRequestException("Invalid verification code");
+        }
+      } else {
+        const confirm = await this.accountConfirmService.validate(code, "2fa");
+        if (!confirm) {
+          throw new BadRequestException("Invalid verification code");
+        }
       }
-    } else {
-      const confirm = await this.accountConfirmService.validate(code, "2fa");
-      if (!confirm) {
-        throw new BadRequestException("Invalid verification code");
-      }
+
+      const recoveryCodes = await this.generateRecoveryCodes();
+      row.enabled = true;
+      row.recoveryCodes = recoveryCodes.hashes;
+      row.failedAttempts = 0;
+      row.lockedUntil = null;
+      await this.repository.save(row);
+
+      this.audit.log({
+        action: "auth.2fa.enabled",
+        accountId: Number(account.id),
+        accountUsername: account.username,
+        details: { method: row.method },
+      });
+      return { recoveryCodes: recoveryCodes.plain };
+    } catch (e) {
+      this.audit.log({
+        action: "auth.2fa.enabled",
+        outcome: "failure",
+        accountId: Number(account.id),
+        accountUsername: account.username,
+        details: { method: row.method, reason: e?.message },
+      });
+      throw e;
     }
-
-    const recoveryCodes = await this.generateRecoveryCodes();
-    row.enabled = true;
-    row.recoveryCodes = recoveryCodes.hashes;
-    row.failedAttempts = 0;
-    row.lockedUntil = null;
-    await this.repository.save(row);
-
-    return { recoveryCodes: recoveryCodes.plain };
   }
 
   /** Requires the account password — dropping a second factor is sensitive. */
   async disable(account: AccountEntity, password: string): Promise<boolean> {
-    await this.accountService.login({ username: account.username, password });
+    try {
+      await this.accountService.login({ username: account.username, password });
+    } catch (e) {
+      this.audit.log({
+        action: "auth.2fa.disabled",
+        outcome: "failure",
+        accountId: Number(account.id),
+        accountUsername: account.username,
+        details: { reason: e?.message },
+      });
+      throw e;
+    }
     const row = await this.find(account.id);
     if (row) {
       await this.repository.delete(row.id);
     }
+    this.audit.log({
+      action: "auth.2fa.disabled",
+      accountId: Number(account.id),
+      accountUsername: account.username,
+    });
     return true;
   }
 
@@ -190,19 +224,37 @@ export class TwoFactorAccountService {
       );
     }
     if (row.lockedUntil && row.lockedUntil > new Date()) {
+      this.audit.log({
+        action: "auth.2fa.locked",
+        outcome: "failure",
+        accountId: Number(account.id),
+        accountUsername: account.username,
+        details: { reason: "attempt while locked" },
+      });
       throw new UnauthorizedException(
         "Too many failed attempts; try again later",
       );
     }
 
+    let recoveryUsed = false;
     const valid =
       (row.method === "totp" && (await this.checkTotp(row, code))) ||
       (row.method === "email" &&
         !!(await this.accountConfirmService.validate(code, "2fa"))) ||
-      (await this.consumeRecoveryCode(row, code));
+      (recoveryUsed = await this.consumeRecoveryCode(row, code));
 
     if (!valid) {
       await this.registerFailure(row);
+      this.audit.log({
+        action: "auth.2fa.challenge_failed",
+        outcome: "failure",
+        accountId: Number(account.id),
+        accountUsername: account.username,
+        details: {
+          method: row.method,
+          failedAttempts: (row.failedAttempts || 0) + 1,
+        },
+      });
       throw new UnauthorizedException("Invalid verification code");
     }
 
@@ -210,12 +262,28 @@ export class TwoFactorAccountService {
     row.lockedUntil = null;
     await this.repository.save(row);
 
+    if (recoveryUsed) {
+      this.audit.log({
+        action: "auth.2fa.recovery_used",
+        accountId: Number(account.id),
+        accountUsername: account.username,
+      });
+    }
+
     if (response) {
       const cookie = new Cookie(request, response);
       cookie.set("id", account.id);
     }
 
     const token = await this.tokenService.pair({ id: account.id });
+    this.audit.log({
+      action: "auth.login.success",
+      accountId: Number(account.id),
+      accountUsername: account.username,
+      ip: request?.ip,
+      userAgent: request?.headers?.["user-agent"],
+      details: { method: "2fa" },
+    });
     return await this.tokenService.prepare(token, state);
   }
 
@@ -306,6 +374,15 @@ export class TwoFactorAccountService {
     if (row.failedAttempts >= MAX_FAILED_ATTEMPTS) {
       row.lockedUntil = new Date(Date.now() + LOCK_MINUTES * 60 * 1000);
       row.failedAttempts = 0;
+      this.audit.log({
+        action: "auth.2fa.locked",
+        outcome: "failure",
+        accountId: Number(row.account?.id),
+        details: {
+          reason: `${MAX_FAILED_ATTEMPTS} failed attempts`,
+          lockedMinutes: LOCK_MINUTES,
+        },
+      });
     }
     await this.repository.save(row);
   }

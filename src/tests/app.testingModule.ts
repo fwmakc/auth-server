@@ -21,7 +21,7 @@ import { ClientsRedirectsModule } from "@src/clients/clients_redirects/clients_r
 import { JwksModule } from "@src/jwks/jwks.module";
 import { TokenModule } from "@src/token/token.module";
 import { UsersModule } from "@src/db/users/users.module";
-import { IEventClient } from "api-server-toolkit";
+import { IEventClient, AuditModule } from "api-server-toolkit";
 
 import { AccountEntity } from "@src/account/account.entity";
 import { AccountConfirmEntity } from "@src/account/account_confirm/account_confirm.entity";
@@ -139,6 +139,7 @@ export const createTestModule = async (): Promise<TestingModule> => {
       JwksModule,
       TokenModule,
       UsersModule,
+      AuditModule.forRoot({ mutations: false }),
     ],
   })
     .overrideProvider(IEventClient)

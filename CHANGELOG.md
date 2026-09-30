@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.7] - 2026-09-30
+### Added
+- **Audit logging for every security-relevant action** (toolkit 0.21.0 `AuditService`, published as `audit.event` into event-server 0.8.0's tamper-evident store; `AuditModule.forRoot({ mutations: false })` — all auth mutations are audited explicitly, so the generic mutation interceptor is off):
+  - login: `auth.login.success` / `auth.login.failed` (with reason), `auth.2fa.challenge`, 2FA verify success as `auth.login.success` with `method: "2fa"`;
+  - 2FA lifecycle: `auth.2fa.enabled` / `auth.2fa.disabled` (failure-safe wrapped), `auth.2fa.challenge_failed`, `auth.2fa.locked` (attempt while locked + threshold lock), `auth.2fa.recovery_used`;
+  - account lifecycle: `auth.register`, `auth.confirm.success` / `auth.confirm.failed`, `auth.password.change`, `auth.password.reset_requested`, `auth.logout`, `auth.account.deactivated`, `auth.account.deleted` (with deleted username in details);
+  - roles: `auth.roles.changed` on `POST /account/roles` with the acting account and assigned role in details.
+- Every entry carries ip / user-agent from the request and `requestId` from the ALS context.
+
+### Changed
+- Pins: toolkit `#v0.21.0`, event-server `#v0.8.0` (from legacy `#v1.1.0`) — picks up the `audit.event` contract.
+
 ## [0.8.6] - 2026-09-29
 ### Changed
 - Toolkit pinned to v0.20.3 (QueueWorker claim: Postgres forbids FOR UPDATE on the nullable side of an outer join — relations are now hydrated by a second lock-free query inside the claim transaction).

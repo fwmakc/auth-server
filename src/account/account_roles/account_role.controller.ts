@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Body,
+  Req,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { Access } from "api-server-toolkit";
@@ -24,8 +25,9 @@ export class AccountRoleAssignmentController {
   async assign(
     @Param("accountId", ParseIntPipe) accountId: number,
     @Body() dto: AccountRoleAssignmentDto,
+    @Req() req: any,
   ): Promise<void> {
-    await this.accountRolesService.assign(accountId, dto);
+    await this.accountRolesService.assign(accountId, dto, req?.user);
   }
 
   @Access(SUPERUSER)
