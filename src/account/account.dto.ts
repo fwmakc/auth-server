@@ -25,8 +25,12 @@ export class AccountDto extends CommonDto {
   })
   username?: string;
 
+  // Optional at the DTO level: password reset is requested by username only
+  // (the whole point is a forgotten password). Handlers that do need it
+  // (register, change) enforce presence through PasswordPolicyService.
   // Enforced by PasswordPolicyService (PASSWORD_* env), not by a static
   // decorator — env is the single source of truth for the policy
+  @IsOptional()
   @IsString()
   @DtoColumn("Пароль, заданный пользователем")
   password?: string;
