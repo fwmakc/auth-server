@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { getKeySet } from "@src/jwks/keys";
+import { getKeyRing, getKeySet } from "@src/jwks/keys";
 import { AccountEntity } from "@src/account/account.entity";
 import { UsersEntity } from "@src/db/users/users.entity";
 
@@ -18,6 +18,12 @@ export class JwksService {
 
   getJwk() {
     return getKeySet().jwk;
+  }
+
+  // Current signing key first, then the rotation-window previous keys —
+  // consumers (jwks-rsa) pick by the token's kid header.
+  getJwks() {
+    return getKeyRing().verification.map((key) => key.jwk);
   }
 
   getIssuer() {

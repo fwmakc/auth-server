@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
-import { getKeySet } from "@src/jwks/keys";
+import { findVerificationKey, kidOfToken } from "@src/jwks/keys";
 import { AccountService } from "./account.service";
 
 @Injectable()
@@ -21,7 +21,16 @@ export class AccountStrategy extends PassportStrategy(Strategy) {
     const audience = configService.get<string>("JWT_AUDIENCE");
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: getKeySet().publicKey,
+      // Key-rotation overlap: select the verification key by the token's
+      // kid header — tokens signed by a retired key stay valid until they
+      // expire naturally (see JWT_PREVIOUS_PUBLIC_KEY_PATHS).
+      secretOrKeyProvider: (_request, rawJwtToken, done) => {
+        try {
+          done(null, findVerificationKey(kidOfToken(rawJwtToken)).publicKey);
+        } catch (e) {
+          done(e as Error);
+        }
+      },
       algorithms: ["RS256"],
       ...(issuer ? { issuer } : {}),
       ...(audience ? { audience } : {}),

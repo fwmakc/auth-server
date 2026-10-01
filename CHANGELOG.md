@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-10-01
+### Added
+- **JWT key rotation (dual-key overlap)**: `JWT_PREVIOUS_PUBLIC_KEY_PATHS` (comma-separated retired public keys) — the key ring verifies tokens against the current pair **plus** every listed previous key and publishes all of them in `/.well-known/jwks.json`, so api/file/message keep accepting old-key tokens through the same JWKS (consumers already select by the token's `kid`). auth-server's own `AccountStrategy` and the token verify handler now select the verification key by `kid` too (previously: single local public key — old-key tokens would 401 on auth routes during rotation). Missing previous-key file is a hard boot error (a silent drop would 401 every outstanding token). Zero-downtime procedure: gateway-server `scripts/rotate-jwt-keys.sh` + `docs/secret-rotation.md`.
+- **AES envelope versions** flow through: OAuth strategy tokens and 2FA secrets store `{ v, encrypted, iv }` and decrypt by the stored version (legacy envelopes without `v` = key v1 — unchanged behavior).
+- `scripts/reencrypt-aes.mjs` — one-pass re-encryption of `account_strategies` + `account_two_factor` envelopes to the current key version (dry run by default, `--apply`, idempotent, ships in the Docker image).
+
+### Tests
+- `keys.spec.ts` (7): ring composition (signing first), retired-kid selection (old token verifies against the retired key and NOT the current one), kid-header parsing, unknown-kid fallback, fail-fast on missing previous file, empty-window shape.
+
 ## [0.10.0] - 2026-10-01
 ### Added
 - **Optional JWT issuer/audience verification** (`JWT_ISSUER` / `JWT_AUDIENCE`):

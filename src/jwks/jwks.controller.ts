@@ -11,7 +11,7 @@ export class JwksController {
 
   @Get("jwks.json")
   getJwks() {
-    return { keys: [this.jwksService.getJwk()] };
+    return { keys: this.jwksService.getJwks() };
   }
 
   @Get("openid-configuration")

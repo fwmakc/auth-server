@@ -38,10 +38,11 @@ export class AccountTwoFactorEntity extends BaseEntity {
   @EnumColumn("method", ["totp", "email"], "totp")
   method: "totp" | "email";
 
-  // TOTP secret encrypted via toolkit encrypt() (AES-GCM, AES_SECRET);
-  // stored as { encrypted, iv }, null for the email method
+  // TOTP secret encrypted via toolkit encrypt() (AES-GCM, versioned key);
+  // stored as { v, encrypted, iv } (v absent in pre-rotation data), null for
+  // the email method
   @JsonColumn("secret")
-  secret?: { encrypted: string; iv: string } | null;
+  secret?: { v?: number; encrypted: string; iv: string } | null;
 
   // false until the first successful setup/confirm
   @BooleanColumn("enabled", false)

@@ -74,14 +74,22 @@ export class AccountStrategiesService extends CommonService<
   ): Promise<AccountStrategiesEntity> {
     if (authStrategiesDto?.accessToken) {
       try {
-        const { encrypted, iv } = JSON.parse(authStrategiesDto.accessToken);
-        authStrategiesDto.accessToken = await decrypt(encrypted, iv);
+        const parsed = JSON.parse(authStrategiesDto.accessToken);
+        authStrategiesDto.accessToken = await decrypt(
+          parsed.encrypted,
+          parsed.iv,
+          parsed.v,
+        );
       } catch {}
     }
     if (authStrategiesDto?.refreshToken) {
       try {
-        const { encrypted, iv } = JSON.parse(authStrategiesDto.refreshToken);
-        authStrategiesDto.refreshToken = await decrypt(encrypted, iv);
+        const parsed = JSON.parse(authStrategiesDto.refreshToken);
+        authStrategiesDto.refreshToken = await decrypt(
+          parsed.encrypted,
+          parsed.iv,
+          parsed.v,
+        );
       } catch {}
     }
     return authStrategiesDto;

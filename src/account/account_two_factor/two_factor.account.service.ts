@@ -361,17 +361,17 @@ export class TwoFactorAccountService {
 
   private async encryptSecret(
     secret: string,
-  ): Promise<{ encrypted: string; iv: string }> {
-    return (await encrypt(secret)) as { encrypted: string; iv: string };
+  ): Promise<{ v?: number; encrypted: string; iv: string }> {
+    return (await encrypt(secret)) as { v?: number; encrypted: string; iv: string };
   }
 
   private async decryptSecret(
-    secret: { encrypted: string; iv: string } | null | undefined,
+    secret: { v?: number; encrypted: string; iv: string } | null | undefined,
   ): Promise<string | null> {
     if (!secret?.encrypted || !secret?.iv) {
       return null;
     }
-    return await decrypt(secret.encrypted, secret.iv);
+    return await decrypt(secret.encrypted, secret.iv, secret.v);
   }
 
   private async generateRecoveryCodes(): Promise<{
