@@ -9,7 +9,7 @@ import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { compare, genSalt, hash } from "bcryptjs";
-import { randomBytes } from "crypto";
+import { randomBytes, randomUUID } from "crypto";
 import { authenticator } from "otplib";
 import { Cookie, decrypt, encrypt, IEventClient, AuditService } from "api-server-toolkit";
 
@@ -17,6 +17,7 @@ import { AccountEntity } from "../account.entity";
 import { AccountService } from "../account.service";
 import { AccountConfirmService } from "../account_confirm/account_confirm.service";
 import { AccountTwoFactorEntity } from "./account_two_factor.entity";
+import { UsedMfaJtiEntity } from "@src/token/store";
 import { TokenService } from "@src/token/token.service";
 
 export type TwoFactorMethod = "totp" | "email";
@@ -30,6 +31,8 @@ export class TwoFactorAccountService {
   constructor(
     @InjectRepository(AccountTwoFactorEntity)
     protected readonly repository: Repository<AccountTwoFactorEntity>,
+    @InjectRepository(UsedMfaJtiEntity)
+    protected readonly mfaJtiRepository: Repository<UsedMfaJtiEntity>,
     protected readonly configService: ConfigService,
     @Inject(forwardRef(() => AccountService))
     protected readonly accountService: AccountService,
@@ -85,7 +88,9 @@ export class TwoFactorAccountService {
       await this.sendCode(account);
     }
     const mfa = await this.tokenService.one(
-      { id: account.id, type: "mfa" },
+      // jti makes the challenge single-use: verify() records it in
+      // used_mfa_jti, a second exchange with the same token is rejected.
+      { id: account.id, type: "mfa", jti: randomUUID() },
       "JWT_MFA_EXPIRES",
       "5m",
     );
@@ -274,6 +279,23 @@ export class TwoFactorAccountService {
     row.lockedUntil = null;
     await this.repository.save(row);
 
+    // Single-use challenge: record the jti atomically. Empty returning =
+    // this challenge was already exchanged — replay gets the same response
+    // as a wrong code (no oracle for "the code was right the first time").
+    if (payload.jti) {
+      const recorded = await this.mfaJtiRepository
+        .createQueryBuilder()
+        .insert()
+        .into(UsedMfaJtiEntity)
+        .values({ jti: payload.jti })
+        .orIgnore()
+        .returning("id")
+        .execute();
+      if (recorded.raw.length === 0) {
+        throw new UnauthorizedException("Invalid verification code");
+      }
+    }
+
     if (recoveryUsed) {
       this.audit.log({
         action: "auth.2fa.recovery_used",
@@ -402,7 +424,8 @@ export class TwoFactorAccountService {
           `THEN NOW() + INTERVAL '${LOCK_MINUTES} minutes' ELSE locked_until END`,
       })
       .where("id = :id", { id: row.id })
-      .returning(["failed_attempts", "locked_until"])
+      // returning() resolves property paths; raw rows use database names.
+      .returning(["failedAttempts", "lockedUntil"])
       .execute();
     const updated = result?.raw?.[0] as
       | { failed_attempts: number; locked_until: Date | null }

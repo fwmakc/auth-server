@@ -30,7 +30,7 @@ import { AccountStrategiesEntity } from "@src/account/account_strategies/account
 import { ClientsEntity } from "@src/clients/clients.entity";
 import { ClientsRedirectsEntity } from "@src/clients/clients_redirects/clients_redirects.entity";
 import { UsersEntity } from "@src/db/users/users.entity";
-import { RefreshTokenEntity } from "@src/token/store";
+import { RefreshTokenEntity, UsedMfaJtiEntity } from "@src/token/store";
 import { AccountRoleEntity } from "@src/account/account_roles/account_role.entity";
 import { RoleEntity } from "@src/account/roles/role.entity";
 import { AccountTwoFactorEntity } from "@src/account/account_two_factor/account_two_factor.entity";
@@ -52,6 +52,7 @@ const TEST_ENTITIES = [
   AccountRoleEntity,
   RoleEntity,
   AccountTwoFactorEntity,
+  UsedMfaJtiEntity,
 ];
 
 function setTestEnv() {
@@ -61,7 +62,9 @@ function setTestEnv() {
   process.env.DB_PORT = "5432";
   process.env.DB_NAME = "auth_server_test";
   process.env.DB_USER = "root";
-  process.env.DB_PASSWORD = "1234";
+  // CI initializes postgres with 1234; a local run can point at its own
+  // instance via DB_PASSWORD (see jest.config.js probe).
+  process.env.DB_PASSWORD = process.env.DB_PASSWORD || "1234";
   process.env.DB_LOG = "false";
   process.env.JWT_ACCESS_EXPIRES = "15m";
   process.env.JWT_REFRESH_EXPIRES = "30d";
@@ -116,7 +119,7 @@ export const createTestModule = async (): Promise<TestingModule> => {
         host: "localhost",
         port: 5432,
         username: "root",
-        password: "1234",
+        password: process.env.DB_PASSWORD,
         database: "auth_server_test",
         entities: TEST_ENTITIES,
         synchronize: true,

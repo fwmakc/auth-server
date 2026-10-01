@@ -40,9 +40,10 @@ describe("TwoFactorAccountService.registerFailure", () => {
     expect(set.lockedUntil()).toContain(
       "COALESCE(failed_attempts, 0) + 1 >= 5",
     );
+    // property paths — raw rows still come back with database names
     expect(qb.returning).toHaveBeenCalledWith([
-      "failed_attempts",
-      "locked_until",
+      "failedAttempts",
+      "lockedUntil",
     ]);
   });
 

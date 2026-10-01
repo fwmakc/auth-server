@@ -104,17 +104,34 @@ export class DbRefreshStore implements OnModuleInit, OnModuleDestroy {
   }
 
   async verify(token: string): Promise<RefreshTokenPayload> {
-    const record = await this.repo.findOne({
-      where: { tokenHash: this.hash(token) },
-    });
+    const tokenHash = this.hash(token);
 
-    if (!record) {
-      throw new UnauthorizedException("Invalid refresh token");
-    }
+    // Atomic consume: exactly one concurrent request can flip revoked
+    // false -> true (UPDATE ... WHERE revoked = false RETURNING). A second
+    // use of the same token finds 0 rows and trips reuse detection — the
+    // old read-check-revoke sequence had a window where parallel requests
+    // could both rotate.
+    const consumed = await this.repo
+      .createQueryBuilder()
+      .update(RefreshTokenEntity)
+      .set({ revoked: true })
+      .where("token_hash = :hash AND revoked = false", { hash: tokenHash })
+      // returning() takes property paths; the raw rows come back with
+      // database column names.
+      .returning(["accountId", "clientId", "familyId", "expiresAt"])
+      .execute();
 
-    // Повторное использование отозванного токена — признак кражи:
-    // инвалидируем всю семью (rotated-предков уже отозвали, живых бьём).
-    if (record.revoked) {
+    if (!consumed.raw?.length) {
+      const record = await this.repo.findOne({
+        where: { tokenHash },
+      });
+
+      if (!record) {
+        throw new UnauthorizedException("Invalid refresh token");
+      }
+
+      // Повторное использование отозванного токена — признак кражи:
+      // инвалидируем всю семью (rotated-предков уже отозвали, живых бьём).
       await this.repo.update(
         { familyId: record.familyId, revoked: false },
         { revoked: true },
@@ -122,15 +139,15 @@ export class DbRefreshStore implements OnModuleInit, OnModuleDestroy {
       throw new UnauthorizedException("Refresh token reuse detected");
     }
 
-    if (record.expiresAt < new Date()) {
-      await this.repo.remove(record);
+    const row = consumed.raw[0];
+    if (new Date(row.expires_at) < new Date()) {
       throw new UnauthorizedException("Refresh token expired");
     }
 
     return {
-      accountId: record.accountId,
-      clientId: record.clientId || undefined,
-      familyId: record.familyId || undefined,
+      accountId: Number(row.account_id),
+      clientId: row.client_id || undefined,
+      familyId: row.family_id || undefined,
     };
   }
 

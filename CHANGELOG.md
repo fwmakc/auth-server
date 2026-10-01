@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-10-01
+### Added
+- **Optional JWT issuer/audience verification** (`JWT_ISSUER` / `JWT_AUDIENCE`):
+  when set, auth signs tokens with `iss`/`aud` claims and every verification
+  (local `AccountStrategy` and the toolkit one) enforces them. Off by
+  default — set the SAME values on every service of the stack and roll in
+  one deployment: validators reject tokens without the claims.
+- **Single-use 2FA challenge tokens**: the `mfa_token` issued at login now
+  carries a random `jti`; a successful verify records it in the new
+  `used_mfa_jti` ledger (unique index, `ON CONFLICT` decides atomically —
+  parallel replays cannot both win). Exchanging the same challenge twice
+  returns the same 401 "Invalid verification code" as a wrong code, so a
+  successful first exchange leaks no oracle. Challenge tokens signed before
+  this release (no `jti`) keep working.
+### Fixed
+- **Refresh-token rotation race (TOCTOU)**: `verify()` did
+  read-check-revoke in three statements — two parallel refreshes with the
+  same token could both pass the `revoked = false` check and both rotate.
+  Now a single atomic `UPDATE ... WHERE token_hash = :hash AND revoked =
+  false RETURNING ...` consumes the token; zero rows means either unknown
+  token ("Invalid refresh token") or a replay, which revokes the whole
+  token family ("Refresh token reuse detected") as before. Expired tokens
+  are consumed without family teardown (expiry is normal lifecycle, not
+  theft).
+- `registerFailure`'s `RETURNING` listed database column names, which
+  TypeORM resolves as property paths — it returned no rows, so the
+  lockout audit event always said `locked: false` (enforcement itself read
+  the fresh row and was correct).
+- Local test runs honor `DB_PASSWORD` from the environment instead of
+  hardcoding `1234`.
+
 ## [0.9.0] - 2026-09-30
 ### Added
 - **Redis-backed rate-limit storage** (HA wave): `THROTTLE_STORAGE=redis` +

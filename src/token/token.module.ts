@@ -23,7 +23,7 @@ import { AccountModule } from "@src/account/account.module";
 import { TwoFactorModule } from "@src/account/account_two_factor/two_factor.account.module";
 import { UsersModule } from "@src/db/users/users.module";
 
-import { DbRefreshStore, RefreshTokenEntity } from "@src/token/store";
+import { DbRefreshStore, RefreshTokenEntity, UsedMfaJtiEntity } from "@src/token/store";
 
 @Module({
   controllers: [TokenController],
@@ -34,7 +34,7 @@ import { DbRefreshStore, RefreshTokenEntity } from "@src/token/store";
       inject: [ConfigService],
       useFactory: getJwtConfig,
     }),
-    TypeOrmModule.forFeature([RefreshTokenEntity]),
+    TypeOrmModule.forFeature([RefreshTokenEntity, UsedMfaJtiEntity]),
     forwardRef(() => ClientsModule),
     forwardRef(() => AccountModule),
     forwardRef(() => TwoFactorModule),

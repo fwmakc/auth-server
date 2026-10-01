@@ -4,3 +4,4 @@ export {
   IssuedRefreshToken,
 } from "./db-refresh.store";
 export { RefreshTokenEntity } from "./refresh-token.entity";
+export { UsedMfaJtiEntity } from "./used-mfa-jti.entity";

@@ -15,10 +15,16 @@ export class AccountStrategy extends PassportStrategy(Strategy) {
     private readonly configService: ConfigService,
     private readonly accountService: AccountService,
   ) {
+    // Mirror the jwt.config signing claims: when JWT_ISSUER/JWT_AUDIENCE are
+    // set, verification enforces them (undefined option = check skipped).
+    const issuer = configService.get<string>("JWT_ISSUER");
+    const audience = configService.get<string>("JWT_AUDIENCE");
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: getKeySet().publicKey,
       algorithms: ["RS256"],
+      ...(issuer ? { issuer } : {}),
+      ...(audience ? { audience } : {}),
     });
   }
 

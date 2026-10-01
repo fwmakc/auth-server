@@ -249,5 +249,24 @@ describe("Two-factor authentication", () => {
         .send({ mfa_token: challenge.body.mfa_token, code: "123456" })
         .expect(401);
     });
+
+    it("mfa_token is single-use: replaying a successful exchange fails", async () => {
+      const challenge = await login("bob@test", "password123").expect(201);
+      const code = authenticator.generate(secret);
+
+      const first = await request(server())
+        .post("/account/methods/2fa/verify")
+        .send({ mfa_token: challenge.body.mfa_token, code })
+        .expect(201);
+      expect(first.body.access_token).toBeDefined();
+
+      // Same challenge token + same (still valid within the TOTP window)
+      // code — only the recorded jti makes this a detected replay.
+      const replay = await request(server())
+        .post("/account/methods/2fa/verify")
+        .send({ mfa_token: challenge.body.mfa_token, code })
+        .expect(401);
+      expect(replay.body.message).toBe("Invalid verification code");
+    });
   });
 });

@@ -81,16 +81,59 @@ describe("DbRefreshStore", () => {
     });
   });
 
-  describe("verify — reuse detection", () => {
-    it("throws Invalid for unknown token", async () => {
+  describe("verify — atomic consume + reuse detection", () => {
+    let qb: Record<string, jest.Mock>;
+
+    beforeEach(() => {
+      // UpdateQueryBuilder chain: update().set().where().returning().execute()
+      qb = {
+        update: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        returning: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue({ raw: [] }),
+      };
+      repo.createQueryBuilder = jest.fn().mockReturnValue(qb);
+    });
+
+    it("consumes a live token atomically and returns its payload", async () => {
+      qb.execute.mockResolvedValue({
+        raw: [
+          {
+            account_id: "42",
+            client_id: "web",
+            family_id: "family-1",
+            expires_at: new Date(Date.now() + 86400000),
+          },
+        ],
+      });
+
+      const payload = await store.verify("good");
+
+      expect(payload).toEqual({
+        accountId: 42,
+        clientId: "web",
+        familyId: "family-1",
+      });
+      // Only rows not yet revoked may flip — the WHERE carries both terms.
+      expect(qb.where).toHaveBeenCalledWith(
+        "token_hash = :hash AND revoked = false",
+        { hash: expect.any(String) },
+      );
+      expect(qb.set).toHaveBeenCalledWith({ revoked: true });
+    });
+
+    it("throws Invalid for a token that never existed (no rows, no record)", async () => {
       repo.findOne.mockResolvedValue(null);
 
       await expect(store.verify("nope")).rejects.toThrow(
         "Invalid refresh token",
       );
+      expect(repo.update).not.toHaveBeenCalled();
     });
 
-    it("revokes the whole family when a revoked token is replayed", async () => {
+    it("revokes the whole family when a consumed token is replayed", async () => {
+      // First use left revoked=true, so the atomic UPDATE matches nothing.
       repo.findOne.mockResolvedValue(
         makeRecord({ revoked: true, familyId: "family-1" }),
       );
@@ -105,30 +148,48 @@ describe("DbRefreshStore", () => {
       );
     });
 
-    it("removes and rejects an expired token", async () => {
-      const record = makeRecord({ expiresAt: new Date(Date.now() - 1000) });
-      repo.findOne.mockResolvedValue(record);
+    it("a second concurrent-style use of the same token trips reuse detection", async () => {
+      // Emulate a lost race: replay after the first consume flipped the row.
+      qb.execute.mockResolvedValueOnce({
+        raw: [
+          {
+            account_id: "42",
+            client_id: null,
+            family_id: "family-1",
+            expires_at: new Date(Date.now() + 86400000),
+          },
+        ],
+      });
+      repo.findOne.mockResolvedValue(
+        makeRecord({ revoked: true, familyId: "family-1" }),
+      );
+
+      await expect(store.verify("good")).resolves.toEqual({
+        accountId: 42,
+        familyId: "family-1",
+      });
+      await expect(store.verify("good")).rejects.toThrow(
+        "Refresh token reuse detected",
+      );
+    });
+
+    it("rejects an expired token after consume without reuse teardown", async () => {
+      qb.execute.mockResolvedValue({
+        raw: [
+          {
+            account_id: "42",
+            client_id: null,
+            family_id: "family-1",
+            expires_at: new Date(Date.now() - 1000),
+          },
+        ],
+      });
 
       await expect(store.verify("old")).rejects.toThrow(
         "Refresh token expired",
       );
-      expect(repo.remove).toHaveBeenCalledWith(record);
+      // Expiry is normal lifecycle — the family must stay untouched.
       expect(repo.update).not.toHaveBeenCalled();
-    });
-
-    it("returns payload for a valid token", async () => {
-      repo.findOne.mockResolvedValue(makeRecord({ clientId: "web" }));
-
-      const payload = await store.verify("good");
-
-      expect(payload).toEqual({
-        accountId: 42,
-        clientId: "web",
-        familyId: "family-1",
-      });
-      expect(repo.findOne).toHaveBeenCalledWith({
-        where: { tokenHash: expect.any(String) },
-      });
     });
   });
 

@@ -8,12 +8,13 @@ import { TokenModule } from "@src/token/token.module";
 import { EventClientModule } from "api-server-toolkit";
 
 import { AccountTwoFactorEntity } from "./account_two_factor.entity";
+import { UsedMfaJtiEntity } from "@src/token/store";
 import { TwoFactorAccountService } from "./two_factor.account.service";
 import { TwoFactorAccountController } from "./two_factor.account.controller";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AccountTwoFactorEntity]),
+    TypeOrmModule.forFeature([AccountTwoFactorEntity, UsedMfaJtiEntity]),
     forwardRef(() => AccountModule),
     forwardRef(() => AccountConfirmModule),
     forwardRef(() => TokenModule),
