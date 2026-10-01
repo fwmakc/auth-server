@@ -15,23 +15,28 @@ import { AccountService } from "./account.service";
 @ApiExcludeController()
 @Controller("account/internal")
 export class InternalAccountController {
-  private readonly cacheTtl: number;
-
   constructor(
     private readonly accountService: AccountService,
     private readonly configService: ConfigService,
-  ) {
-    this.cacheTtl =
-      Number(this.configService.get("INTERNAL_INFO_CACHE_TTL")) || 30;
-  }
+  ) {}
 
+  // Local check (not the toolkit InternalAuthGuard) on purpose: this route
+  // masks a bad key as 404 so probes can't distinguish "no route" from "no
+  // access" — an e2e test pins that. Same rotation window as the guard:
+  // INTERNAL_API_KEY_PREVIOUS (comma-separated) stays valid while callers
+  // switch to the new key (docs/secret-rotation.md).
   private verifyInternalKey(provided: string): boolean {
-    const expected = this.configService.get("INTERNAL_API_KEY");
-    if (!expected || !provided) return false;
-    const a = Buffer.from(provided);
-    const b = Buffer.from(expected);
-    if (a.length !== b.length) return false;
-    return timingSafeEqual(a, b);
+    if (!provided) return false;
+    const current = this.configService.get("INTERNAL_API_KEY");
+    const previous = (this.configService.get("INTERNAL_API_KEY_PREVIOUS") || "")
+      .split(",")
+      .map((key) => key.trim())
+      .filter(Boolean);
+    return [current, ...previous].filter(Boolean).some((expected) => {
+      const a = Buffer.from(provided);
+      const b = Buffer.from(expected);
+      return a.length === b.length && timingSafeEqual(a, b);
+    });
   }
 
   @Get("info/:id")

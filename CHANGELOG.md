@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.1] - 2026-10-01
+### Fixed
+- `GET /account/internal/info/:id` joins the rotation window: it keeps its **local** key check (not the toolkit guard) on purpose — this route masks a bad key as 404 so probes can't distinguish "no route" from "no access" (pinned by e2e); the check now also accepts `INTERNAL_API_KEY_PREVIOUS` (comma-separated, per-key constant-time), same semantics as `InternalAuthGuard`. Found live: during the stand rotation the retired key was rejected here while every other validator already accepted it.
+
 ## [0.11.0] - 2026-10-01
 ### Added
 - **JWT key rotation (dual-key overlap)**: `JWT_PREVIOUS_PUBLIC_KEY_PATHS` (comma-separated retired public keys) — the key ring verifies tokens against the current pair **plus** every listed previous key and publishes all of them in `/.well-known/jwks.json`, so api/file/message keep accepting old-key tokens through the same JWKS (consumers already select by the token's `kid`). auth-server's own `AccountStrategy` and the token verify handler now select the verification key by `kid` too (previously: single local public key — old-key tokens would 401 on auth routes during rotation). Missing previous-key file is a hard boot error (a silent drop would 401 every outstanding token). Zero-downtime procedure: gateway-server `scripts/rotate-jwt-keys.sh` + `docs/secret-rotation.md`.

@@ -99,6 +99,26 @@ describe("Access Control — guards, internal API, logout", () => {
         .expect(404);
     });
 
+    it("with previous internal key during the rotation window → 200", async () => {
+      process.env.INTERNAL_API_KEY_PREVIOUS = "retired-internal-key";
+      try {
+        const res = await request(app.getHttpServer())
+          .get("/account/internal/info/1")
+          .set("x-internal-api-key", "retired-internal-key")
+          .expect(200);
+        expect(Number(res.body.id)).toBe(1);
+      } finally {
+        delete process.env.INTERNAL_API_KEY_PREVIOUS;
+      }
+    });
+
+    it("previous key rejected once the window closes → 404", async () => {
+      await request(app.getHttpServer())
+        .get("/account/internal/info/1")
+        .set("x-internal-api-key", "retired-internal-key")
+        .expect(404);
+    });
+
     it("with valid internal key → 200, returns account info", async () => {
       const res = await request(app.getHttpServer())
         .get("/account/internal/info/1")
