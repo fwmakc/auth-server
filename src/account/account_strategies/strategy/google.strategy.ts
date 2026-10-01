@@ -31,14 +31,16 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
 
     const account = await this.accountService.findByUsername(data.email);
 
-    const accountDto: AccountDto = {
-      username: data.email,
-      isActivated: true,
-    };
-
     if (!account) {
+      // New account: the email is verified by the provider, so it may start
+      // activated. An EXISTING account is never flipped to activated here —
+      // activation is owned by the local confirmation flow, and an OAuth
+      // login must not confirm an account that never verified its email.
       return await this.accountService
-        .create(accountDto)
+        .create({
+          username: data.email,
+          isActivated: true,
+        })
         .then(
           async (result) =>
             await this.prepareResult(
@@ -50,12 +52,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
         );
     }
 
-    return await this.accountService
-      .update(account.id, accountDto)
-      .then(
-        async (result) =>
-          await this.prepareResult(result, profile, accessToken, refreshToken),
-      );
+    return await this.prepareResult(
+      account,
+      profile,
+      accessToken,
+      refreshToken,
+    );
   }
 
   async prepareResult(

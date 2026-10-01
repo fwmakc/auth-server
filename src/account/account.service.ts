@@ -50,6 +50,11 @@ export class AccountService extends CommonService<AccountDto, AccountEntity> {
       );
       throw new UnauthorizedException("Invalid credentials");
     }
+    // An account without a password hash (OAuth-only login) must answer 401
+    // with the generic message — bcrypt would throw Invalid salt → 500.
+    if (!account.password) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
     const isValidPassword = await compare(
       accountDto.password,
       account.password,

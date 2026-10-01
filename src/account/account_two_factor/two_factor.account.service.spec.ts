@@ -20,6 +20,11 @@ const buildService = (qb: any) => {
   return service;
 };
 
+// emulate the pg driver: a naive UTC wallclock arrives as a Date parsed in
+// the host's local frame, offset minutes away from the true instant
+const asPgNaive = (t: Date) =>
+  new Date(t.getTime() + new Date().getTimezoneOffset() * 60_000);
+
 describe("TwoFactorAccountService.registerFailure", () => {
   it("increments atomically and reports the new counter", async () => {
     const qb = buildQueryBuilder([{ failed_attempts: 3, locked_until: null }]);
@@ -49,7 +54,9 @@ describe("TwoFactorAccountService.registerFailure", () => {
 
   it("reports a lock when the update stamped a future locked_until", async () => {
     const future = new Date(Date.now() + 5 * 60 * 1000);
-    const qb = buildQueryBuilder([{ failed_attempts: 0, locked_until: future }]);
+    const qb = buildQueryBuilder([
+      { failed_attempts: 0, locked_until: asPgNaive(future) },
+    ]);
     const service = buildService(qb);
 
     await expect(
@@ -59,7 +66,9 @@ describe("TwoFactorAccountService.registerFailure", () => {
 
   it("treats a past locked_until as unlocked (stale lock row)", async () => {
     const past = new Date(Date.now() - 1000);
-    const qb = buildQueryBuilder([{ failed_attempts: 1, locked_until: past }]);
+    const qb = buildQueryBuilder([
+      { failed_attempts: 1, locked_until: asPgNaive(past) },
+    ]);
     const service = buildService(qb);
 
     await expect(

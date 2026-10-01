@@ -74,20 +74,15 @@ export class UntiProvider {
 
     const account = await this.accountService.findByUsername(profile.email);
 
-    const accountDto: AccountDto = {
-      username: profile.email,
-      isActivated: true,
-    };
-
     if (!account) {
       return await this.accountService
-        .create(accountDto)
+        .create({ username: profile.email, isActivated: true })
         .then(async (result) => await this.prepareResult(result, profile));
     }
 
-    return await this.accountService
-      .update(account.id, accountDto)
-      .then(async (result) => await this.prepareResult(result, profile));
+    // Existing accounts keep their activation state: an OAuth login must not
+    // confirm an account that never completed the local email confirmation.
+    return await this.prepareResult(account, profile);
   }
 
   async prepareResult(account, profile): Promise<AccountDto> {

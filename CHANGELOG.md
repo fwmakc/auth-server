@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-10-01
+### Security (Wave 6)
+- **`grant_type=key` removed** from `POST /token`: the grant minted a token pair from a static hash in the legacy `users` table — passwordless login with a long-lived shared secret, no 2FA, no rotation. No consumers left in the workspace (grep over api/message/file). `KeyGrant`, its module wiring, the dispatch branch and the `key` DTO field are gone; `findByHash` on users stays (chat identity link, read-only).
+- **Single-use codes are consumed atomically**: confirm/reset/2fa codes now claim the row with `DELETE ... RETURNING` in one statement — two concurrent submissions of the same code can no longer both pass the old find-then-delete race (winner takes the row, loser gets "invalid code"). The entity is hydrated from the RETURNING payload plus a fresh account lookup (the row is gone by then); done via raw SQL because the query-builder `.returning()` silently drops non-property columns like `account_id`.
+- **OAuth logins can no longer activate an inactive account**: a login via Google/Leader-ID/UNTI/generic OAuth verified the email and then flipped `isActivated` to true — bypassing the local confirm flow (and its email-ownership proof for accounts created with an unverified address). Existing accounts now log in without any write; only NEW provider-verified accounts are born activated. Leader-ID additionally requires an email-confirmed profile (username IS email, so phone-confirmed profiles were unusable anyway).
+- **`account_sessions.get_by_auth_id` no longer echoes other users' sessions**: the route took `auth_id` straight from the query string and joined account relations — any authenticated user could read session rows of any id. Rebuilt as a self-scoped `@Account()` + `@Self()` handler; relation injection whitelist (`account`) instead of an arbitrary join.
+- **2FA lockout is TZ-safe**: `locked_until` is a naive UTC wallclock; the pg driver parses it in the host's local frame, so on any TZ≠UTC host the lock appeared already expired (5-attempt lockout never engaged — pinned by the integration test, failed live on a UTC+3 host before the fix). Comparisons re-anchor by the host offset (`utcFromNaive`).
+- **Recovery-code consumption is race-free and self-healing**: the burned hash is removed with an atomic `jsonb @>`-contained UPDATE (returning the id decides), and the row bookkeeping (`failedAttempts`/`lockedUntil` reset) uses a partial `repository.update` — a full `save(row)` could resurrect a just-consumed code from the in-memory snapshot.
+- **`JWT_ACCESS_EXPIRES` has a 15m default** in the pair handler — an unset env var used to mint non-expiring access tokens.
+- **Login with an empty credential hash fails closed**: accounts without a local password (OAuth-only) got `compare(password, null)` → driver-level error/500-ish path instead of a clean 401; guard added in login + deactivate.
+
+### Removed
+- `src/token/grant/key.grant.ts` and the `key` field of the token request DTO.
+
+### Tests
+- Full suite 151/151 against real Postgres (integration): 2FA flows (TOTP+email, lockout, recovery, mfa single-use), auth flows, access control, sessions, token grants, refresh families.
+- `registerFailure` unit spec mocks now emulate the pg naive-timestamp parse (TZ-proof on any host).
+
+### Assessed, no action
+- Client secrets (`clients.client_secret`): JWT minted at registration, stored bcrypt-hashed, verified by compare only — the JWT signature is never checked at verify time, so JWKS key rotation cannot invalidate existing client secrets; a `kid` ring for client secrets is unnecessary.
+
 ## [0.11.1] - 2026-10-01
 ### Fixed
 - `GET /account/internal/info/:id` joins the rotation window: it keeps its **local** key check (not the toolkit guard) on purpose — this route masks a bad key as 404 so probes can't distinguish "no route" from "no access" (pinned by e2e); the check now also accepts `INTERNAL_API_KEY_PREVIOUS` (comma-separated, per-key constant-time), same semantics as `InternalAuthGuard`. Found live: during the stand rotation the retired key was rejected here while every other validator already accepted it.

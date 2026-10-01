@@ -4,6 +4,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { randomInt } from "crypto";
 import { AccountConfirmEntity } from "./account_confirm.entity";
+import { AccountEntity } from "../account.entity";
 
 @Injectable()
 export class AccountConfirmService {
@@ -89,10 +90,41 @@ export class AccountConfirmService {
   }
 
   async validate(code, type = "code") {
-    const entrie = await this.findByCode(code, type);
-    if (entrie) {
-      await this.remove(entrie.id);
+    // Atomic consumption: the row is claimed by the DELETE itself, so two
+    // concurrent submissions of the same code cannot both pass a find-then-
+    // delete race. Freshness (the same age windows as findByCode) is enforced
+    // in the same statement; stale codes stay until TTL cleanup but never
+    // validate.
+    const maxAgeMs =
+      type === "reset" ? 3600_000 : type === "2fa" ? 5 * 60_000 : 24 * 3600_000;
+    const cutoff = new Date(Date.now() - maxAgeMs)
+      .toISOString()
+      .replace("T", " ")
+      .replace("Z", "");
+    // Raw SQL: TypeORM's query-builder .returning() silently drops columns
+    // that are not entity property names (account_id is only a join column),
+    // so the atomic claim goes through the driver directly. repository.query
+    // returns [rows, affected] for DML — unwrap both possible shapes.
+    const result: any = await this.repository.query(
+      "DELETE FROM account_confirm WHERE code = $1 AND type = $2 AND created_at > $3 RETURNING id, account_id, code, type",
+      [code, type, cutoff],
+    );
+    const rows = Array.isArray(result?.[0]) ? result[0] : result;
+    const raw = rows?.[0];
+    if (!raw) {
+      return null;
     }
-    return entrie;
+    // The DELETE itself claimed the row, so the entity must be hydrated from
+    // the RETURNING payload — findById would find nothing. Callers rely on
+    // the account relation (username check, account.id), load it explicitly.
+    const account = await this.repository.manager.findOne(AccountEntity, {
+      where: { id: Number(raw.account_id) },
+    });
+    const entity = new AccountConfirmEntity();
+    entity.id = Number(raw.id);
+    entity.code = raw.code;
+    entity.type = raw.type;
+    entity.account = account;
+    return entity;
   }
 }

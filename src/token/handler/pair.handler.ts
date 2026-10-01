@@ -16,6 +16,8 @@ export class PairHandler {
         type: "access",
       },
       "JWT_ACCESS_EXPIRES",
+      // Unset JWT_ACCESS_EXPIRES must never mint a non-expiring access token.
+      "15m",
     );
 
     // familyId передаётся только при ротации — свежий логин начинает новую семью

@@ -16,7 +16,6 @@ import { GrantsTokenService } from "@src/token/service/grants.token.service";
 
 import { AuthorizationCodeGrant } from "@src/token/grant/authorization_code.grant";
 import { ClientCredentialsGrant } from "@src/token/grant/client_credentials.grant";
-import { KeyGrant } from "@src/token/grant/key.grant";
 import { PasswordGrant } from "@src/token/grant/password.grant";
 import { RefreshTokenGrant } from "@src/token/grant/refresh_token.grant";
 import { AccountModule } from "@src/account/account.module";
@@ -46,7 +45,6 @@ import { DbRefreshStore, RefreshTokenEntity, UsedMfaJtiEntity } from "@src/token
     GrantsTokenService,
     AuthorizationCodeGrant,
     ClientCredentialsGrant,
-    KeyGrant,
     PasswordGrant,
     RefreshTokenGrant,
 

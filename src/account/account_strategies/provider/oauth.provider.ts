@@ -92,17 +92,15 @@ export class OauthProvider {
 
     const account = await this.accountService.findByUsername(profile.username);
 
-    const accountDto: AccountDto = {
-      username: profile.username,
-      isActivated: !!profile.isActivated,
-    };
-
     const userData = profile?.users;
     const { accessToken, refreshToken } = profile;
 
     if (!account) {
       return await this.accountService
-        .create(accountDto)
+        .create({
+          username: profile.username,
+          isActivated: !!profile.isActivated,
+        })
         .then(
           async (result) =>
             await this.prepareResult(
@@ -114,12 +112,14 @@ export class OauthProvider {
         );
     }
 
-    return await this.accountService
-      .update(account.id, accountDto)
-      .then(
-        async (result) =>
-          await this.prepareResult(result, userData, accessToken, refreshToken),
-      );
+    // Existing accounts keep their activation state: the local confirmation
+    // flow owns it, an OAuth login must not flip it.
+    return await this.prepareResult(
+      account,
+      userData,
+      accessToken,
+      refreshToken,
+    );
   }
 
   async prepareResult(

@@ -228,7 +228,7 @@ export class TwoFactorAccountService {
         "Two-factor authentication is not enabled",
       );
     }
-    if (row.lockedUntil && row.lockedUntil > new Date()) {
+    if (row.lockedUntil && utcFromNaive(row.lockedUntil) > new Date()) {
       this.audit.log({
         action: "auth.2fa.locked",
         outcome: "failure",
@@ -275,9 +275,13 @@ export class TwoFactorAccountService {
       throw new UnauthorizedException("Invalid verification code");
     }
 
-    row.failedAttempts = 0;
-    row.lockedUntil = null;
-    await this.repository.save(row);
+    // Partial update on purpose: saving the whole row would write back the
+    // in-memory recoveryCodes snapshot and resurrect a code consumed
+    // atomically in the DB (possibly by a concurrent challenge).
+    await this.repository.update(row.id, {
+      failedAttempts: 0,
+      lockedUntil: null,
+    });
 
     // Single-use challenge: record the jti atomically. Empty returning =
     // this challenge was already exchanged — replay gets the same response
@@ -388,17 +392,36 @@ export class TwoFactorAccountService {
     return { plain, hashes };
   }
 
+  /**
+   * Atomic recovery-code consumption: the matched hash is removed by the
+   * UPDATE itself (jsonb containment in WHERE, array rebuilt without the
+   * hash). Two concurrent challenges of the same code race on that WHERE —
+   * exactly one UPDATE returns a row; the loser sees none and the code
+   * counts as used (no double-spend).
+   */
   private async consumeRecoveryCode(
     row: AccountTwoFactorEntity,
     code: string,
   ): Promise<boolean> {
     const codes = row.recoveryCodes || [];
-    for (let i = 0; i < codes.length; i++) {
-      if (await compare(code, codes[i])) {
-        codes.splice(i, 1);
-        row.recoveryCodes = codes;
+    for (const hashValue of codes) {
+      if (!(await compare(code, hashValue))) continue;
+      const result = await this.repository.query(
+        `UPDATE account_two_factor
+         SET recovery_codes = (
+           SELECT COALESCE(json_agg(e), '[]'::json)
+           FROM json_array_elements(recovery_codes) AS e
+           WHERE e::text <> to_jsonb($1::text)::text
+         )
+         WHERE id = $2 AND recovery_codes::jsonb @> to_jsonb($1::text)
+         RETURNING id`,
+        [hashValue, row.id],
+      );
+      if (result?.length > 0) {
+        row.recoveryCodes = codes.filter((c) => c !== hashValue);
         return true;
       }
+      return false;
     }
     return false;
   }
@@ -431,13 +454,21 @@ export class TwoFactorAccountService {
       | { failed_attempts: number; locked_until: Date | null }
       | undefined;
     const lockedUntil = updated?.locked_until
-      ? new Date(updated.locked_until)
+      ? utcFromNaive(new Date(updated.locked_until))
       : null;
     return {
       failedAttempts: Number(updated?.failed_attempts ?? 0),
       locked: !!lockedUntil && lockedUntil > new Date(),
     };
   }
+}
+
+// DateColumn stores naive UTC wallclock; the pg driver parses it as local
+// time, so re-anchor by the host offset before any comparison (TZ-safe).
+// UTC+3 example: wallclock 18:31 parsed as local -> epoch 15:31Z; offset is
+// -180 min, so epoch - offset restores 18:31Z.
+function utcFromNaive(date: Date): Date {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
 }
 
 function randomBlock(): string {

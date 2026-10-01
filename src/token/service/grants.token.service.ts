@@ -5,7 +5,6 @@ import { AuthorizationCodeGrant } from "@src/token/grant/authorization_code.gran
 import { ClientCredentialsGrant } from "@src/token/grant/client_credentials.grant";
 import { PasswordGrant } from "@src/token/grant/password.grant";
 import { RefreshTokenGrant } from "@src/token/grant/refresh_token.grant";
-import { KeyGrant } from "@src/token/grant/key.grant";
 import { DbRefreshStore } from "@src/token/store";
 
 @Injectable()
@@ -13,7 +12,6 @@ export class GrantsTokenService {
   constructor(
     private readonly authorizationCodeGrant: AuthorizationCodeGrant,
     private readonly clientCredentialsGrant: ClientCredentialsGrant,
-    private readonly keyGrant: KeyGrant,
     private readonly passwordGrant: PasswordGrant,
     private readonly refreshTokenGrant: RefreshTokenGrant,
     private readonly refreshStore: DbRefreshStore,
@@ -25,10 +23,6 @@ export class GrantsTokenService {
 
   async clientCredentials(grantsTokenDto: GrantsTokenDto): Promise<any> {
     return await this.clientCredentialsGrant.clientCredentials(grantsTokenDto);
-  }
-
-  async key(grantsTokenDto: GrantsTokenDto, request, response): Promise<any> {
-    return await this.keyGrant.key(grantsTokenDto, request, response);
   }
 
   async password(

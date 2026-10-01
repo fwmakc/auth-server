@@ -27,6 +27,11 @@ export class DeactivateAccountHandler {
       throw new UnauthorizedException("Invalid credentials");
     }
 
+    // No stored hash (OAuth-only account) — generic 401, not a bcrypt 500.
+    if (!fullAccount.password) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
+
     const isValid = await compare(password, fullAccount.password);
     if (!isValid) {
       throw new UnauthorizedException("Invalid credentials");

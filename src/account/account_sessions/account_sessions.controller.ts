@@ -1,7 +1,6 @@
 import { Controller, Get, NotFoundException } from "@nestjs/common";
-import { RelationsDto } from "api-server-toolkit";
-import { Data } from "api-server-toolkit";
-import { AccessRule, EntityController } from "api-server-toolkit";
+import { AccessRule, EntityController, Account, Self } from "api-server-toolkit";
+import { AccountDto } from "../account.dto";
 import { AccountSessionsDto } from "./account_sessions.dto";
 import { AccountSessionsEntity } from "./account_sessions.entity";
 import { AccountSessionsService } from "./account_sessions.service";
@@ -27,12 +26,15 @@ export class AccountSessionsController extends EntityController({
     super();
   }
 
+  // Owner-scoped: the account id comes from the JWT, never from the caller;
+  // relations are hard-coded — the client-controlled @Data("relations") here
+  // allowed relation injection on the account relation.
+  @Account()
   @Get("get_by_auth_id")
-  async getByAuthId(
-    @Data("id") id: number,
-    @Data("relations") relations: Array<RelationsDto>,
-  ) {
-    const result = await this.service.getByAuthId(id, relations);
+  async getByAuthId(@Self() account: AccountDto) {
+    const result = await this.service.getByAuthId(account.id, [
+      { name: "account" },
+    ]);
     if (!result) {
       throw new NotFoundException("Any results not found");
     }

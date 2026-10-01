@@ -51,13 +51,6 @@ export class GrantsTokenDto extends CommonDto {
 
   @IsOptional()
   @IsString()
-  @DtoColumn(
-    "Ключ для беспарольного доступа, сгенерированный как хэш от chatId",
-  )
-  key?: string;
-
-  @IsOptional()
-  @IsString()
   @DtoColumn("Url перенаправления после авторизации")
   redirect_uri?: string;
 

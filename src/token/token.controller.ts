@@ -53,13 +53,6 @@ export class TokenController {
     if (grantsTokenDto.grant_type === "client_credentials") {
       return await this.grantsTokenService.clientCredentials(grantsTokenDto);
     }
-    if (grantsTokenDto.grant_type === "key") {
-      return await this.grantsTokenService.key(
-        grantsTokenDto,
-        request,
-        response,
-      );
-    }
     if (grantsTokenDto.grant_type === "password") {
       return await this.grantsTokenService.password(
         grantsTokenDto,
