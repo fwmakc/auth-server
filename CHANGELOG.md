@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Tests
+
+- `scripts/wiring.ts`: кредиты БД переопределяются через env (`DB_PASSWORD`), дефолт не изменился.
 - **Wiring check for a real boot** (`scripts/wiring.ts`, `npm run test:wiring`): boots the real `AppModule` in an application context against a fresh `auth_server_wiring_test` database (drop/create + real `runMigrationsUnderLock` boot migrations — catches entity↔migrations drift that the existing suites, which run test entities with `synchronize: true`, cannot see), then probes live behavior on real Postgres: account round-trip, login (bcrypt verify + 401 on wrong password), confirm-code lifecycle (generate / validate / replay rejected / stale rejected), 2FA email-code lockout (5 wrong codes → `locked_until` set with the attempt counter reset, 6th attempt → rejected). 11/11 checks, process exit code is CI-friendly. Runs via ts-node, not jest: under the jest runtime a full AppModule boot corrupts the `pg` module cache (second `require("pg")` returns an emptied cache — race, jest-only artifact; production node boots are unaffected).
 - CI: new `wiring` job with a TZ matrix (UTC + Europe/Moscow) — the naive-UTC `locked_until` logic is pinned TZ-proof on both frames (the jest suite itself is pinned `TZ=UTC`).
 

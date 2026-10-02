@@ -14,7 +14,7 @@ process.env.DB_TYPE = "postgres";
 process.env.DB_HOST = "127.0.0.1";
 process.env.DB_PORT = "5432";
 process.env.DB_USER = "root";
-process.env.DB_PASSWORD = "1234";
+process.env.DB_PASSWORD = process.env.DB_PASSWORD || "1234";
 process.env.DB_NAME = "auth_server_wiring_test";
 // Instant connection-refused instead of a hanging webhook: audit/event
 // publishes are fire-and-forget (.catch → log) and must not fail the probes.
@@ -60,7 +60,7 @@ async function recreateDatabase(): Promise<void> {
     host: "127.0.0.1",
     port: 5432,
     user: "root",
-    password: "1234",
+    password: process.env.DB_PASSWORD || "1234",
     database: "postgres",
   });
   await client.connect();
