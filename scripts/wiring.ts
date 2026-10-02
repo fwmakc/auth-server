@@ -12,7 +12,7 @@
  */
 process.env.DB_TYPE = "postgres";
 process.env.DB_HOST = "127.0.0.1";
-process.env.DB_PORT = "5432";
+process.env.DB_PORT = process.env.DB_PORT || "5432";
 process.env.DB_USER = "root";
 process.env.DB_PASSWORD = process.env.DB_PASSWORD || "1234";
 process.env.DB_NAME = "auth_server_wiring_test";
@@ -35,7 +35,7 @@ process.env.UNTI_CLIENT_ID = "wiring-dummy";
 process.env.UNTI_CLIENT_SECRET = "wiring-dummy";
 
 import { Client } from "pg";
-import { genSalt, hash } from "bcryptjs";
+import { hash } from "@node-rs/bcrypt";
 import { randomUUID } from "crypto";
 import { DataSource } from "typeorm";
 import { UnauthorizedException } from "@nestjs/common";
@@ -58,7 +58,7 @@ function ok(label: string, cond: boolean, extra?: string): void {
 async function recreateDatabase(): Promise<void> {
   const client = new Client({
     host: "127.0.0.1",
-    port: 5432,
+    port: Number(process.env.DB_PORT || 5432),
     user: "root",
     password: process.env.DB_PASSWORD || "1234",
     database: "postgres",
@@ -111,7 +111,7 @@ async function main(): Promise<void> {
   const wiringAccount = await accountRepo.save(
     accountRepo.create({
       username: "wiring@test",
-      password: await hash("wiring-password-1", await genSalt(10)),
+      password: await hash("wiring-password-1", 10),
       isActivated: true,
     }),
   );
@@ -137,7 +137,7 @@ async function main(): Promise<void> {
   const confirmAccount = await accountRepo.save(
     accountRepo.create({
       username: "confirm@test",
-      password: await hash("x", await genSalt(10)),
+      password: await hash("x", 10),
       isActivated: false,
     }),
   );
@@ -164,7 +164,7 @@ async function main(): Promise<void> {
   const lockedAccount = await accountRepo.save(
     accountRepo.create({
       username: "locked@test",
-      password: await hash("x", await genSalt(10)),
+      password: await hash("x", 10),
       isActivated: true,
     }),
   );

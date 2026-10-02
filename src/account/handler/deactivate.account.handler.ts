@@ -1,5 +1,5 @@
 import { Injectable, Optional, UnauthorizedException } from "@nestjs/common";
-import { compare } from "bcryptjs";
+import { compare } from "@node-rs/bcrypt";
 import { AccountService } from "@src/account/account.service";
 import { AccountSessionsService } from "@src/account/account_sessions/account_sessions.service";
 import { Cookie } from "api-server-toolkit";

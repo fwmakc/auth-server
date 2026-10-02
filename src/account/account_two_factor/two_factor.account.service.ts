@@ -8,7 +8,7 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { compare, genSalt, hash } from "bcryptjs";
+import { compare, hash } from "@node-rs/bcrypt";
 import { randomBytes, randomUUID } from "crypto";
 import { authenticator } from "otplib";
 import { Cookie, decrypt, encrypt, IEventClient, AuditService } from "api-server-toolkit";
@@ -387,7 +387,7 @@ export class TwoFactorAccountService {
     for (let i = 0; i < RECOVERY_CODES_COUNT; i++) {
       const code = `${randomBlock()}-${randomBlock()}`;
       plain.push(code);
-      hashes.push(await hash(code, await genSalt(10)));
+      hashes.push(await hash(code, 10));
     }
     return { plain, hashes };
   }

@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import { genSalt, hash, compare } from "bcryptjs";
+import { genSalt, hash, compare } from "@node-rs/bcrypt";
 import { Repository } from "typeorm";
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -28,8 +28,7 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
     bind: BindDto,
   ): Promise<ClientsEntity> {
     if (clientsDto.client_password) {
-      const salt = await genSalt(10);
-      clientsDto.client_password = await hash(clientsDto.client_password, salt);
+      clientsDto.client_password = await hash(clientsDto.client_password, 10);
     }
     if (clientsDto.client_id) {
       const exists = await this.clientsGetWhere({
@@ -69,10 +68,7 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
       },
       "JWT_CLIENTS_EXPIRES",
     );
-    client.client_secret = await hash(
-      clientSecretData.token,
-      await genSalt(10),
-    );
+    client.client_secret = await hash(clientSecretData.token, 10);
     const updated = await this.update(client.id, client, relations, bind);
     return updated ? client : null;
   }

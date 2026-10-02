@@ -1,4 +1,4 @@
-import { compare } from "bcryptjs";
+import { compare } from "@node-rs/bcrypt";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Injectable, UnauthorizedException } from "@nestjs/common";

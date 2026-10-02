@@ -35,7 +35,7 @@ import { AccountRoleEntity } from "@src/account/account_roles/account_role.entit
 import { RoleEntity } from "@src/account/roles/role.entity";
 import { AccountTwoFactorEntity } from "@src/account/account_two_factor/account_two_factor.entity";
 
-import { genSalt, hash } from "bcryptjs";
+import { hash } from "@node-rs/bcrypt";
 import { TypeClients } from "api-server-toolkit";
 
 const TEST_ENTITIES = [
@@ -179,8 +179,7 @@ export const seedDatabase = async (moduleRef: TestingModule) => {
   const clientsRepo = dataSource.getRepository(ClientsEntity);
   const redirectsRepo = dataSource.getRepository(ClientsRedirectsEntity);
 
-  const salt = await genSalt(10);
-  const pw = await hash("password123", salt);
+  const pw = await hash("password123", 10);
 
   const [alice, bob, admin, pending] = await accountRepo.save([
     accountRepo.create({

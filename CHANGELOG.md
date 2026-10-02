@@ -6,7 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- **Логины перестали блокировать event loop**: `bcryptjs` (чистый JS, ~55–270 мс
+  синхронного CPU на хеш) заменён на нативный `@node-rs/bcrypt` (Rust, работает
+  на libuv threadpool; прекомпилированные бинарники в комплекте — переживает
+  `npm install --ignore-scripts` в Dockerfile, musl/gnu сборки в lockfile).
+  Найдено нагрузочным тестом (Wave 6 / Stage 4): cost-12 шторм давал 2–3.4%
+  500-х — забитый цикл событий морил pg-соединения, TypeORM-раннеры
+  освобождались посреди запроса (`QueryRunnerAlreadyReleasedError` в
+  `DbRefreshStore.issue`). Старые хеши `$2a$` проверяются без миграции
+  (и зафиксированы спекой). Cost 10 не тронут. Вызов `hash(input, cost?,
+  salt?)` берёт cost напрямую, `genSalt` выпилен из точек вызова
+  (register/2FA recovery-коды/clients secrets/test-seeding/wiring).
+
 ### Tests
+
+- `hash.account.handler.spec.ts`: механизм-пин — 4 параллельных хеша не
+  задерживают сэмплер event loop дольше 100 мс (под bcryptjs тест падал бы на
+  ~220 мс блокировки), плюс round-trip и проверка legacy-хеша `$2a$`.
+- `scripts/wiring.ts`: порт БД переопределяется через env (`DB_PORT`, дефолт
+  5432), bcrypt-сиды переведены на нативную библиотеку. 11/11 на реальном
+  Postgres после замены.
+
+### Previous (wiring)
 
 - `scripts/wiring.ts`: кредиты БД переопределяются через env (`DB_PASSWORD`), дефолт не изменился.
 - **Wiring check for a real boot** (`scripts/wiring.ts`, `npm run test:wiring`): boots the real `AppModule` in an application context against a fresh `auth_server_wiring_test` database (drop/create + real `runMigrationsUnderLock` boot migrations — catches entity↔migrations drift that the existing suites, which run test entities with `synchronize: true`, cannot see), then probes live behavior on real Postgres: account round-trip, login (bcrypt verify + 401 on wrong password), confirm-code lifecycle (generate / validate / replay rejected / stale rejected), 2FA email-code lockout (5 wrong codes → `locked_until` set with the attempt counter reset, 6th attempt → rejected). 11/11 checks, process exit code is CI-friendly. Runs via ts-node, not jest: under the jest runtime a full AppModule boot corrupts the `pg` module cache (second `require("pg")` returns an emptied cache — race, jest-only artifact; production node boots are unaffected).

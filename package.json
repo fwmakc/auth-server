@@ -56,7 +56,6 @@
     "@sentry/nestjs": "^10.69.0",
     "@supercharge/request-ip": "^1.2.0",
     "api-server-toolkit": "github:fwmakc/api-server-toolkit#v0.26.2",
-    "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "cookie-parser": "^1.4.6",
@@ -82,13 +81,13 @@
     "rxjs": "^7.8.2",
     "typeorm": "^0.3.31",
     "typeorm-transactional": "^0.5.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "@node-rs/bcrypt": "^1.10.9"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.0",
-    "@types/bcryptjs": "^2.4.2",
     "@types/cookie-parser": "^1.4.6",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",

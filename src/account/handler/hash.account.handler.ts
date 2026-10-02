@@ -1,12 +1,16 @@
 import { Injectable } from "@nestjs/common";
-import { genSalt, hash } from "bcryptjs";
+// @node-rs/bcrypt: native (Rust) bcrypt off the event loop — the pure-JS
+// bcryptjs blocked the loop ~100–300 ms per verify and, under login storms,
+// starved pooled pg connections into QueryRunnerAlreadyReleased 500s
+// (cost-12 storm: 2–3.4% of logins failed). Call shape: hash(input, cost?,
+// salt?) — cost goes directly, genSalt is gone.
+import { hash } from "@node-rs/bcrypt";
 
 @Injectable()
 export class HashAccountHandler {
   async generate(password: string): Promise<string> {
-    const salt = await genSalt(10);
-    const passwordHashed = await hash(password, salt);
-    return passwordHashed;
+    // cost 10 stays the project constant (see AGENTS.md)
+    return hash(password, 10);
   }
 
   /**
