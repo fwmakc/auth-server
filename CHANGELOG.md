@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Tests
+- **Wiring check for a real boot** (`scripts/wiring.ts`, `npm run test:wiring`): boots the real `AppModule` in an application context against a fresh `auth_server_wiring_test` database (drop/create + real `runMigrationsUnderLock` boot migrations — catches entity↔migrations drift that the existing suites, which run test entities with `synchronize: true`, cannot see), then probes live behavior on real Postgres: account round-trip, login (bcrypt verify + 401 on wrong password), confirm-code lifecycle (generate / validate / replay rejected / stale rejected), 2FA email-code lockout (5 wrong codes → `locked_until` set with the attempt counter reset, 6th attempt → rejected). 11/11 checks, process exit code is CI-friendly. Runs via ts-node, not jest: under the jest runtime a full AppModule boot corrupts the `pg` module cache (second `require("pg")` returns an emptied cache — race, jest-only artifact; production node boots are unaffected).
+- CI: new `wiring` job with a TZ matrix (UTC + Europe/Moscow) — the naive-UTC `locked_until` logic is pinned TZ-proof on both frames (the jest suite itself is pinned `TZ=UTC`).
+
 ## [0.12.0] - 2026-10-01
 ### Security (Wave 6)
 - **`grant_type=key` removed** from `POST /token`: the grant minted a token pair from a static hash in the legacy `users` table — passwordless login with a long-lived shared secret, no 2FA, no rotation. No consumers left in the workspace (grep over api/message/file). `KeyGrant`, its module wiring, the dispatch branch and the `key` DTO field are gone; `findByHash` on users stays (chat identity link, read-only).
