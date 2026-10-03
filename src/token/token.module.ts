@@ -1,4 +1,5 @@
 import { Module, forwardRef } from "@nestjs/common";
+import { EventClientModule } from "api-server-toolkit";
 import { TokenController } from "@src/token/token.controller";
 import { TokenService } from "@src/token/token.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -34,6 +35,7 @@ import { DbRefreshStore, RefreshTokenEntity, UsedMfaJtiEntity } from "@src/token
       useFactory: getJwtConfig,
     }),
     TypeOrmModule.forFeature([RefreshTokenEntity, UsedMfaJtiEntity]),
+    EventClientModule,
     forwardRef(() => ClientsModule),
     forwardRef(() => AccountModule),
     forwardRef(() => TwoFactorModule),

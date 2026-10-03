@@ -8,7 +8,7 @@ import { AccountService } from "@src/account/account.service";
 import { TwoFactorAccountService } from "@src/account/account_two_factor/two_factor.account.service";
 import { GrantsTokenDto } from "@src/token/dto/grants.token.dto";
 import { TokenService } from "@src/token/token.service";
-import { AuditService, Cookie } from "api-server-toolkit";
+import { AuditService, Cookie, IEventClient } from "api-server-toolkit";
 
 @Injectable()
 export class PasswordGrant {
@@ -18,6 +18,7 @@ export class PasswordGrant {
     @Inject(forwardRef(() => TwoFactorAccountService))
     private readonly twoFactorAccountService: TwoFactorAccountService,
     private readonly audit: AuditService,
+    @Inject(IEventClient) private readonly eventClient: IEventClient,
   ) {}
 
   async password(
@@ -88,6 +89,13 @@ export class PasswordGrant {
         accountId: Number(account.id),
         accountUsername: account.username,
         ...meta,
+      });
+      this.eventClient.publish("user.login", {
+        userId: Number(account.id),
+        username: account.username,
+        email: account.username,
+        ip: meta.ip,
+        userAgent: meta.userAgent,
       });
       return await this.tokenService.prepare(token, grantsTokenDto.state);
     } catch (e) {

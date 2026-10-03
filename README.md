@@ -26,7 +26,7 @@ This service demonstrates the **auth service pattern** in the toolkit stack:
 - **JWT signing (RS256)** — asymmetric keys, private signs, JWKS verifies
 - **JWKS endpoint** — other services validate tokens without sharing the private key
 - **Social login** — Google, Leader-ID, UNTI, custom OAuth2 providers
-- **Event publishing** — `user.registered`, `user.confirmed`, `password.reset` via event-server
+- **Event publishing** — `user.registered`, `user.login`, `user.confirmed`, `password.reset` via event-server
 - **Two auth surfaces** — forms (HTML redirects) and methods (JSON API)
 
 Clone this when you need: authentication, authorization, OIDC, social login, or session management.
@@ -43,7 +43,7 @@ Clone this when you need: authentication, authorization, OIDC, social login, or 
 - Social login: Google, Leader-ID, UNTI/2035, custom OAuth2
 - OAuth client management (client_id, client_secret, redirect URIs)
 - Session tracking & login logging
-- Event publishing via event-server (`user.registered`, `user.confirmed`, `password.reset`, `user.deactivated`, `user.deleted`)
+- Event publishing via event-server (`user.registered`, `user.login`, `user.confirmed`, `password.reset`, `user.deactivated`, `user.deleted`)
 - Two auth surfaces: **forms-based** (HTML redirects) and **methods-based** (JSON API)
 
 ---
@@ -233,6 +233,7 @@ Events are published via the toolkit's `IEventClient` (HTTP webhook bus through 
 | Event | DTO | Trigger |
 |-------|-----|---------|
 | `user.registered` | `UserRegisteredDto` | On registration (with `confirmUrl` if not yet activated) |
+| `user.login` | `UserLoginDto` | On every successful password login (after `auth.login.success` audit; NOT emitted on a 2FA challenge — that is not a completed login). Carries `ip` and `userAgent` from the request |
 | `user.confirmed` | `UserConfirmedDto` | On account confirmation |
 | `password.reset` | `PasswordResetDto` | On password reset request |
 | `user.deactivated` | `UserDeactivatedDto` | On account deactivation |
