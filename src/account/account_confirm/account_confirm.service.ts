@@ -65,8 +65,9 @@ export class AccountConfirmService {
       type,
     });
 
-    const created = await this.repository.save(entrie);
-    return await this.findById(created.id);
+    // same as generate(): re-reading created.id races a concurrent
+    // delete-and-reinsert for the same account
+    return await this.repository.save(entrie);
   }
 
   async generate(account, type = "code") {
@@ -85,8 +86,10 @@ export class AccountConfirmService {
       },
       type,
     });
-    const created = await this.repository.save(entrie);
-    return await this.findById(created.id);
+    // Return the saved row as-is: a concurrent generate() for the same
+    // account deletes-and-reinserts, so re-reading created.id can hit a row
+    // that is already gone (concurrent 2FA logins → null.code → 500).
+    return await this.repository.save(entrie);
   }
 
   async validate(code, type = "code") {
