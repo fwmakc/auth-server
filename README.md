@@ -188,7 +188,7 @@ Authorization: Bearer <superuser_token>
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| POST | `/account/methods/register` | — | Register new account |
+| POST | `/account/methods/register` | — | Register new account (activation flags in the payload are ignored — activation is granted only by the emailed confirm code, or server-side by OAuth) |
 | POST | `/account/methods/login` | — | Login |
 | POST | `/account/methods/logout` | JWT | Logout |
 | GET | `/account/methods/confirm/:code` | — | Confirm account |

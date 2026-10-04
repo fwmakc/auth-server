@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
+- **`isActivated` из публичного register-пейлоада больше не применяется**:
+  `RegisterAccountHandler.authCreate` стрипает флаг — запрос на регистрацию
+  не может сам себя активировать и перескочить подтверждение по email
+  (иначе аккаунт создавался активированным, а `user.registered` уходил без
+  `confirmUrl`). OAuth-провайдеры (leaderid/unti) не задеты — они создают
+  активированные аккаунты серверно через `accountService.create` напрямую.
+  Регрессионные тесты: `register.account.handler.spec.ts`.
 - **Логины перестали блокировать event loop**: `bcryptjs` (чистый JS, ~55–270 мс
   синхронного CPU на хеш) заменён на нативный `@node-rs/bcrypt` (Rust, работает
   на libuv threadpool; прекомпилированные бинарники в комплекте — переживает

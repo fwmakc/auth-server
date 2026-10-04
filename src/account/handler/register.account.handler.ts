@@ -37,8 +37,10 @@ export class RegisterAccountHandler {
       accountDto.password,
     );
 
-    // используйте данную строку, если пользователь будет сразу же активирован
-    // accountDto.isActivated = true;
+    // Активация зарабатывается подтверждением кода из письма (или выдаётся
+    // серверно OAuth-провайдером, минуя этот хендлер) — клиентский пейлоад
+    // не управляет ею. isSuperuser/isDeleted стрипает AccountService.create.
+    delete accountDto.isActivated;
 
     return await this.accountService.create(accountDto);
   }
