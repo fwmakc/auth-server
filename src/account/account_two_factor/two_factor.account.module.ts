@@ -5,7 +5,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { AccountModule } from "../account.module";
 import { AccountConfirmModule } from "../account_confirm/account_confirm.module";
 import { TokenModule } from "@src/token/token.module";
-import { EventClientModule } from "api-server-toolkit";
+import { OutboxModule } from "api-server-toolkit";
+import { AuthEventOutboxEntity } from "../../db/outbox.entity";
 
 import { AccountTwoFactorEntity } from "./account_two_factor.entity";
 import { UsedMfaJtiEntity } from "@src/token/store";
@@ -18,7 +19,7 @@ import { TwoFactorAccountController } from "./two_factor.account.controller";
     forwardRef(() => AccountModule),
     forwardRef(() => AccountConfirmModule),
     forwardRef(() => TokenModule),
-    EventClientModule,
+    OutboxModule.forRoot(AuthEventOutboxEntity),
     ConfigModule,
   ],
   controllers: [TwoFactorAccountController],

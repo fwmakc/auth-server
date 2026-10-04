@@ -31,7 +31,8 @@ import { AccountStrategiesModule } from "./account_strategies/account_strategies
 import { RolesModule } from "./roles/roles.module";
 
 import { ClientsModule } from "@src/clients/clients.module";
-import { EventClientModule } from "api-server-toolkit";
+import { OutboxModule } from "api-server-toolkit";
+import { AuthEventOutboxEntity } from "../db/outbox.entity";
 import { TokenModule } from "@src/token/token.module";
 import { UsersModule } from "@src/db/users/users.module";
 
@@ -53,7 +54,7 @@ import { UsersModule } from "@src/db/users/users.module";
     forwardRef(() => ClientsModule),
     forwardRef(() => TokenModule),
     forwardRef(() => UsersModule),
-    EventClientModule,
+    OutboxModule.forRoot(AuthEventOutboxEntity),
     ConfigModule,
   ],
   providers: [
