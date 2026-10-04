@@ -9,7 +9,8 @@ import { addTransactionalDataSource } from "typeorm-transactional";
 import { getDbConfig } from "@config/db.config";
 import { HealthModule } from "api-server-toolkit/health";
 import { MetricsModule } from "api-server-toolkit/metrics";
-import { AuditModule, runMigrationsUnderLock } from "api-server-toolkit";
+import { AuditModule, OutboxModule, runMigrationsUnderLock } from "api-server-toolkit";
+import { AuthEventOutboxEntity } from "./db/outbox.entity";
 import {
   AppThrottlerGuard,
   buildThrottleStorage,
@@ -53,7 +54,13 @@ let transactionalDataSource: DataSource | undefined;
     MetricsModule.forRoot({ service: "auth-server" }),
     // mutations:false — every auth mutation is audited explicitly in its
     // handler, so blanket data.* records would only duplicate them.
-    AuditModule.forRoot({ mutations: false }),
+    // client: false + explicit OutboxModule import: audit records travel through
+    // the durable outbox relay instead of the fire-and-forget EventClientModule
+    AuditModule.forRoot({
+      mutations: false,
+      client: false,
+      imports: [OutboxModule.forRoot(AuthEventOutboxEntity)],
+    }),
   ],
   providers: [
     {
