@@ -72,7 +72,7 @@ export class MethodsAccountService {
       ip: req?.ip,
       userAgent: req?.headers?.["user-agent"],
     });
-    this.eventClient.publish("user.confirmed", {
+    await this.eventClient.publish("user.confirmed", {
       userId: Number(account.id),
       username: account.username,
       email: account.username,
@@ -146,7 +146,7 @@ export class MethodsAccountService {
     });
     if (!account.isActivated) {
       const confirmUrl = await this.registerAuthHandler.sendMail(account);
-      this.eventClient.publish("user.registered", {
+      await this.eventClient.publish("user.registered", {
         userId: Number(account.id),
         username: account.username,
         email: account.username,
@@ -154,7 +154,7 @@ export class MethodsAccountService {
         confirmUrl,
       });
     } else {
-      this.eventClient.publish("user.registered", {
+      await this.eventClient.publish("user.registered", {
         userId: Number(account.id),
         username: account.username,
         email: account.username,
@@ -177,7 +177,7 @@ export class MethodsAccountService {
           ip: req?.ip,
           userAgent: req?.headers?.["user-agent"],
         });
-        this.eventClient.publish("password.reset", {
+        await this.eventClient.publish("password.reset", {
           username: accountDto.username,
           email: accountDto.username,
           subject,
@@ -224,7 +224,7 @@ export class MethodsAccountService {
         ip: req?.ip,
         userAgent: req?.headers?.["user-agent"],
       });
-      this.eventClient.publish("user.deactivated", {
+      await this.eventClient.publish("user.deactivated", {
         userId: Number(account.id),
         username: account.username,
         email: account.username,
@@ -256,7 +256,7 @@ export class MethodsAccountService {
       targetId: Number(account.id),
       details: { deletedUsername: account.username },
     });
-    this.eventClient.publish("user.deleted", {
+    await this.eventClient.publish("user.deleted", {
       userId: Number(account.id),
       username: account.username,
       email: account.username,

@@ -90,7 +90,7 @@ export class PasswordGrant {
         accountUsername: account.username,
         ...meta,
       });
-      this.eventClient.publish("user.login", {
+      await this.eventClient.publish("user.login", {
         userId: Number(account.id),
         username: account.username,
         email: account.username,

@@ -240,7 +240,14 @@ Authorization: Bearer <superuser_token>
 
 ## Event Publishing
 
-Events are published via the toolkit's `IEventClient` (HTTP webhook bus through event-server). Contract DTOs imported from `event-server/contracts`.
+Events are published via the toolkit's `IEventClient`, backed by the durable
+outbox (`OutboxModule`): publish() inserts into the local `event_outbox`
+table and a relay worker delivers to event-server with retries — an outage
+delays events instead of losing them. The contract is STRICT (toolkit
+v0.29.0+): every call-site here `await`s publish, so a failed insert fails
+the request visibly instead of dropping the event silently. Audit records
+(`AuditService`) are the one deliberate exception — they catch and log.
+Contract DTOs imported from `event-server/contracts`.
 
 | Event | DTO | Trigger |
 |-------|-----|---------|

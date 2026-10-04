@@ -338,7 +338,7 @@ export class TwoFactorAccountService {
 
   private async sendCode(account: AccountEntity): Promise<void> {
     const confirm = await this.accountConfirmService.generate(account, "2fa");
-    this.eventClient.publish("user.two_factor_code", {
+    await this.eventClient.publish("user.two_factor_code", {
       userId: Number(account.id),
       username: account.username,
       email: account.username,
