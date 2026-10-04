@@ -60,9 +60,21 @@ Vue frontend ──> auth-server (REST, JWT)
 
 ### Modules
 
+### Event publishing
+
+`user.registered` / `user.confirmed` / `password.reset` / `user.deactivated` /
+`user.deleted` / `user.two_factor_code` / `user.login` go through the toolkit
+**`OutboxModule`** (since toolkit v0.28.0): `publish()` writes into the local
+`event_outbox` table (migration `1792300000000-EventOutbox`), a relay worker
+delivers to event-server with exponential backoff. An event-server outage or a
+deploy restart delays mail instead of losing it — the previous
+`EventClientModule` (direct fire-and-forget HTTP) silently dropped events in
+those windows. Error semantics unchanged for handlers: `publish()` without a
+`PublishOptions.manager` never rejects.
+
 | Module | Responsibility |
 |--------|---------------|
-| `AccountModule` | Core auth: registration, login, logout, confirm, reset, deactivate, delete. 5 controllers, sub-services, 8 handlers. Imports `EventClientModule`. |
+| `AccountModule` | Core auth: registration, login, logout, confirm, reset, deactivate, delete. 5 controllers, sub-services, 8 handlers. Imports `OutboxModule` (durable event publishing: events land in the local `event_outbox` table first, a relay delivers to event-server with retries — v0.28.0 toolkit). |
 | `TokenModule` | JWT issuance (RS256), 5 grant classes, token handlers |
 | `JwksModule` | JWKS endpoint, OIDC discovery, `/userinfo` |
 | `AccountStrategiesModule` | Social login (Google, Leader, UNTI, OAuth), session serialization |
