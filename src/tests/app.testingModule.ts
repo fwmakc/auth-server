@@ -34,6 +34,7 @@ import { RefreshTokenEntity, UsedMfaJtiEntity } from "@src/token/store";
 import { AccountRoleEntity } from "@src/account/account_roles/account_role.entity";
 import { RoleEntity } from "@src/account/roles/role.entity";
 import { AccountTwoFactorEntity } from "@src/account/account_two_factor/account_two_factor.entity";
+import { AuthEventOutboxEntity } from "@src/db/outbox.entity";
 
 import { hash } from "@node-rs/bcrypt";
 import { TypeClients } from "api-server-toolkit";
@@ -53,6 +54,9 @@ const TEST_ENTITIES = [
   RoleEntity,
   AccountTwoFactorEntity,
   UsedMfaJtiEntity,
+  // AccountModule/TokenModule import OutboxModule — the relay worker needs
+  // its entity registered or it logs "No metadata" every cycle
+  AuthEventOutboxEntity,
 ];
 
 function setTestEnv() {

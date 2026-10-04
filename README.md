@@ -378,6 +378,15 @@ npm test
 
 Test suites: smoke, token, auth-flows (registration, confirmation, reset with mocked event client), access-control. DB suites need a local Postgres (localhost:5432, root/1234) and skip gracefully without one; they build a throwaway schema with `synchronize` + `dropSchema` — test isolation, not schema management.
 
+The reachability probe (`scripts/probe-db.js`) is TCP-only: any postgres listening on 5432 makes jest run the DB suites with the helper's credentials (`root` / `DB_PASSWORD || 1234`, database `auth_server_test`). If your local instance uses a different password, the suites fail with `password authentication failed` → retry loop → timeout. Point them at it explicitly and create the test database once:
+
+```bash
+DB_PASSWORD=<your-password> npm test
+psql -h localhost -U root -d postgres -c "CREATE DATABASE auth_server_test;"
+```
+
+The gateway stack's postgres (`verify_pg_1234`) works as-is with `DB_PASSWORD=verify_pg_1234`.
+
 ### TypeORM Migrations
 
 The schema lives exclusively in migrations (`src/typeorm/migrations`); CI proves the chain builds it from scratch and checks entity drift. Zero-downtime rule (expand-contract): additive changes first, remove old columns in a later release. With multiple replicas, move migration out of boot (disable `migrationsRun` in `src/config/db.config.ts`) and run `migration:run` once per deploy before rolling new code.
