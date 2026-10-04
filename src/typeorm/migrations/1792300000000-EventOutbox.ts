@@ -7,22 +7,12 @@ export class EventOutbox1792300000000 implements MigrationInterface {
     // Durable event publishing: OutboxEventClient writes here (optionally in
     // the caller's transaction), OutboxRelayWorker delivers to event-server
     // with retries. Column set mirrors toolkit EventOutboxEntity (QueueJobEntity).
-    await queryRunner.query(`CREATE TABLE IF NOT EXISTS "event_outbox" (
-        "id" SERIAL NOT NULL,
-        "status" character varying NOT NULL DEFAULT 'pending',
-        "attempts" integer NOT NULL DEFAULT '0',
-        "last_attempt_at" TIMESTAMP WITH TIME ZONE,
-        "next_attempt_at" TIMESTAMP WITH TIME ZONE,
-        "error_message" text,
-        "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-        "pattern" character varying NOT NULL,
-        "payload" jsonb NOT NULL,
-        "source" character varying,
-        "opts" jsonb,
-        CONSTRAINT "PK_event_outbox_id" PRIMARY KEY ("id")
-    )`);
+    // TypeORM-canonical DDL: the drift probe (migration:generate on a clean
+    // DB) compares this text against entity metadata — IF NOT EXISTS and
+    // non-canonical spacing read as drift.
+    await queryRunner.query(`CREATE TABLE "event_outbox" ("id" SERIAL NOT NULL, "status" character varying NOT NULL DEFAULT 'pending', "attempts" integer NOT NULL DEFAULT '0', "last_attempt_at" TIMESTAMP WITH TIME ZONE, "next_attempt_at" TIMESTAMP WITH TIME ZONE, "error_message" text, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "pattern" character varying NOT NULL, "payload" jsonb NOT NULL, "source" character varying, "opts" jsonb, CONSTRAINT "PK_event_outbox_id" PRIMARY KEY ("id"))`);
     await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS "IDX_event_outbox_claim" ON "event_outbox" ("status", "next_attempt_at")`,
+      `CREATE INDEX "IDX_event_outbox_claim" ON "event_outbox" ("status", "next_attempt_at") `,
     );
   }
 
