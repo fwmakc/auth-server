@@ -24,7 +24,7 @@ describe("Two-factor authentication", () => {
       .getRepository(AccountConfirmEntity)
       .findOne({
         where: { type: "2fa" },
-        relations: ["account"],
+        relations: { account: true },
         order: { createdAt: "DESC" },
       });
     return record?.code || null;

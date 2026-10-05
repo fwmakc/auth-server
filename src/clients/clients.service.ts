@@ -3,7 +3,7 @@ import { genSalt, hash, compare } from "@node-rs/bcrypt";
 import { Repository } from "typeorm";
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CommonService } from "api-server-toolkit";
+import { CommonService, relationsToFindOptions } from "api-server-toolkit";
 import { RelationsDto } from "api-server-toolkit";
 import { TokenService } from "@src/token/token.service";
 import { ClientsDto } from "./clients.dto";
@@ -113,7 +113,9 @@ export class ClientsService extends CommonService<ClientsDto, ClientsEntity> {
     relations: Array<RelationsDto> = undefined,
   ): Promise<ClientsEntity> {
     return await this.repository.findOne({
-      relations: relations?.map((i) => i.name),
+      // typeorm 1.x removed the string[] relations form; the toolkit adapter
+      // converts dot-paths to the object tree (0.3 accepts both forms)
+      relations: relationsToFindOptions(relations?.map((i) => i.name)),
       where,
     });
   }

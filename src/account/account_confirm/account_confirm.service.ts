@@ -17,7 +17,7 @@ export class AccountConfirmService {
     const where: FindOptionsWhere<any> = { id };
     return await this.repository.findOne({
       where,
-      relations: ["account"],
+      relations: { account: true },
     });
   }
 
@@ -39,7 +39,7 @@ export class AccountConfirmService {
     where.createdAt = MoreThan(cutoff as any);
     return await this.repository.findOne({
       where,
-      relations: ["account"],
+      relations: { account: true },
       order: { createdAt: "DESC" },
     });
   }

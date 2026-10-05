@@ -21,7 +21,7 @@ describe("AccountRolesService", () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     roleRepo = {
-      findByIds: jest.fn().mockResolvedValue([]),
+      findBy: jest.fn().mockResolvedValue([]),
     } as any;
     service = new AccountRolesService(repo as any, roleRepo as any);
   });
@@ -29,7 +29,7 @@ describe("AccountRolesService", () => {
   describe("assign", () => {
     it('saves tenantScope="all" from DTO', async () => {
       const adminRole = makeRole(1, "admin");
-      roleRepo.findByIds.mockResolvedValue([adminRole]);
+      roleRepo.findBy.mockResolvedValue([adminRole]);
       repo.save.mockImplementation(async (entities: any[]) => entities);
 
       const dto: AccountRoleAssignmentDto = {
@@ -52,7 +52,7 @@ describe("AccountRolesService", () => {
 
     it("saves tenantScope=null when tenant not provided", async () => {
       const editorRole = makeRole(2, "editor");
-      roleRepo.findByIds.mockResolvedValue([editorRole]);
+      roleRepo.findBy.mockResolvedValue([editorRole]);
       repo.save.mockImplementation(async (entities: any[]) => entities);
 
       const dto: AccountRoleAssignmentDto = {
@@ -71,7 +71,7 @@ describe("AccountRolesService", () => {
 
     it('saves tenantScope="own"', async () => {
       const viewerRole = makeRole(3, "viewer");
-      roleRepo.findByIds.mockResolvedValue([viewerRole]);
+      roleRepo.findBy.mockResolvedValue([viewerRole]);
       repo.save.mockImplementation(async (entities: any[]) => entities);
 
       const dto: AccountRoleAssignmentDto = {
@@ -93,12 +93,12 @@ describe("AccountRolesService", () => {
       await service.assign(10, dto);
 
       expect(repo.delete).toHaveBeenCalledWith({ accountId: 10 });
-      expect(roleRepo.findByIds).not.toHaveBeenCalled();
+      expect(roleRepo.findBy).not.toHaveBeenCalled();
       expect(repo.save).not.toHaveBeenCalled();
     });
 
     it("throws NotFoundException for non-existent roleId", async () => {
-      roleRepo.findByIds.mockResolvedValue([]);
+      roleRepo.findBy.mockResolvedValue([]);
 
       const dto: AccountRoleAssignmentDto = {
         roles: [{ roleId: 999 }],
@@ -109,7 +109,7 @@ describe("AccountRolesService", () => {
     });
 
     it("throws NotFoundException listing missing roleIds when partially not found", async () => {
-      roleRepo.findByIds.mockResolvedValue([makeRole(1, "admin")]);
+      roleRepo.findBy.mockResolvedValue([makeRole(1, "admin")]);
 
       const dto: AccountRoleAssignmentDto = {
         roles: [{ roleId: 1 }, { roleId: 999 }],
@@ -120,7 +120,7 @@ describe("AccountRolesService", () => {
 
     it("deletes old roles before saving new ones", async () => {
       const role = makeRole(1, "admin");
-      roleRepo.findByIds.mockResolvedValue([role]);
+      roleRepo.findBy.mockResolvedValue([role]);
       repo.save.mockImplementation(async (entities: any[]) => entities);
 
       const dto: AccountRoleAssignmentDto = {
@@ -138,7 +138,7 @@ describe("AccountRolesService", () => {
     it("saves multiple roles with different tenant scopes", async () => {
       const adminRole = makeRole(1, "admin");
       const viewerRole = makeRole(2, "viewer");
-      roleRepo.findByIds.mockResolvedValue([adminRole, viewerRole]);
+      roleRepo.findBy.mockResolvedValue([adminRole, viewerRole]);
       repo.save.mockImplementation(async (entities: any[]) => entities);
 
       const dto: AccountRoleAssignmentDto = {
@@ -157,7 +157,7 @@ describe("AccountRolesService", () => {
 
     it("sets accountId on each entity", async () => {
       const role = makeRole(1, "admin");
-      roleRepo.findByIds.mockResolvedValue([role]);
+      roleRepo.findBy.mockResolvedValue([role]);
       repo.save.mockImplementation(async (entities: any[]) => entities);
 
       const dto: AccountRoleAssignmentDto = {
@@ -172,7 +172,7 @@ describe("AccountRolesService", () => {
 
     it("sets roleId on each entity", async () => {
       const role = makeRole(1, "admin");
-      roleRepo.findByIds.mockResolvedValue([role]);
+      roleRepo.findBy.mockResolvedValue([role]);
       repo.save.mockImplementation(async (entities: any[]) => entities);
 
       const dto: AccountRoleAssignmentDto = {
@@ -187,7 +187,7 @@ describe("AccountRolesService", () => {
 
     it("sets role relation on each entity", async () => {
       const role = makeRole(1, "admin");
-      roleRepo.findByIds.mockResolvedValue([role]);
+      roleRepo.findBy.mockResolvedValue([role]);
       repo.save.mockImplementation(async (entities: any[]) => entities);
 
       const dto: AccountRoleAssignmentDto = {
@@ -200,8 +200,8 @@ describe("AccountRolesService", () => {
       );
     });
 
-    it("throws when findByIds returns nothing for multiple roleIds", async () => {
-      roleRepo.findByIds.mockResolvedValue([]);
+    it("throws when findBy returns nothing for multiple roleIds", async () => {
+      roleRepo.findBy.mockResolvedValue([]);
 
       const dto: AccountRoleAssignmentDto = {
         roles: [{ roleId: 1 }, { roleId: 2 }],
@@ -228,7 +228,7 @@ describe("AccountRolesService", () => {
       const result = await service.findByAccount(10);
       expect(repo.find).toHaveBeenCalledWith({
         where: { accountId: 10 },
-        relations: ["role"],
+        relations: { role: true },
       });
       expect(result).toEqual(entities);
     });

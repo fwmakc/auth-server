@@ -34,7 +34,7 @@ describe("Auth Flows — register, confirm, login, reset", () => {
     const repo = dataSource.getRepository(AccountConfirmEntity);
     const record = await repo.findOne({
       where: { type: "reset" },
-      relations: ["account"],
+      relations: { account: true },
       order: { createdAt: "DESC" },
     });
     if (record?.account?.username === username) {

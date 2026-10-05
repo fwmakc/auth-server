@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { AccountRoleEntity } from "./account_role.entity";
@@ -26,7 +26,7 @@ export class AccountRolesService {
     if (!dto.roles.length) return;
 
     const roleIds = dto.roles.map((r) => r.roleId);
-    const roles = await this.roleRepository.findByIds(roleIds);
+    const roles = await this.roleRepository.findBy({ id: In(roleIds) });
     if (roles.length !== roleIds.length) {
       const found = new Set(roles.map((r) => r.id));
       const missing = roleIds.filter((id) => !found.has(id));
@@ -69,7 +69,7 @@ export class AccountRolesService {
   async findByAccount(accountId: number): Promise<AccountRoleEntity[]> {
     return this.repository.find({
       where: { accountId },
-      relations: ["role"],
+      relations: { role: true },
     });
   }
 }
