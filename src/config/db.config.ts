@@ -3,7 +3,8 @@ import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { join } from "path";
 
 type DatabaseTypes =
-  "mysql" | "postgres" | "sqlite" | "mssql" | "oracle" | "mongodb";
+  // typeorm 1.x removed the sqlite driver; the stack runs postgres
+  "mysql" | "postgres" | "mssql" | "oracle" | "mongodb";
 
 export const getDbConfig = async (
   config: ConfigService,

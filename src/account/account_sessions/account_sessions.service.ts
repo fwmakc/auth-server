@@ -1,7 +1,7 @@
 import { Repository } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CommonService } from "api-server-toolkit";
+import { CommonService, relationsToFindOptions } from "api-server-toolkit";
 import { RelationsDto } from "api-server-toolkit";
 import { AccountSessionsDto } from "./account_sessions.dto";
 import { AccountSessionsEntity } from "./account_sessions.entity";
@@ -47,7 +47,8 @@ export class AccountSessionsService extends CommonService<
     relations: Array<RelationsDto> = undefined,
   ): Promise<AccountSessionsEntity[]> {
     const sessions = await this.repository.find({
-      relations: relations?.map((i) => i.name),
+      // typeorm 1.x removed the string[] relations form (toolkit adapter)
+      relations: relationsToFindOptions(relations?.map((i) => i.name)),
       where: {
         account: {
           id: authId,

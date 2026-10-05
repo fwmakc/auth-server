@@ -5,7 +5,8 @@ import { DataSource, DataSourceOptions } from "typeorm";
 dotenv.config();
 
 type DatabaseTypes =
-  "mysql" | "postgres" | "sqlite" | "mssql" | "oracle" | "mongodb";
+  // typeorm 1.x removed the sqlite driver; the stack runs postgres
+  "mysql" | "postgres" | "mssql" | "oracle" | "mongodb";
 
 const config = {
   type: process.env.DB_TYPE as DatabaseTypes,
