@@ -1,6 +1,6 @@
 {
   "name": "auth-server",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "OAuth2 authorization server — registration, login, JWT issuance, social login",
   "license": "MIT",
   "private": true,
@@ -53,6 +53,7 @@
     "@nestjs/swagger": "^11.0.0",
     "@nestjs/throttler": "^6.7.1",
     "@nestjs/typeorm": "^11.0.0",
+    "@node-rs/bcrypt": "^1.10.9",
     "@sentry/nestjs": "^10.69.0",
     "@supercharge/request-ip": "^1.2.0",
     "api-server-toolkit": "github:fwmakc/api-server-toolkit#v0.32.0",
@@ -81,8 +82,7 @@
     "rxjs": "^7.8.2",
     "typeorm": "^1.1.1",
     "typeorm-transactional": "^0.5.0",
-    "uuid": "^9.0.1",
-    "@node-rs/bcrypt": "^1.10.9"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",

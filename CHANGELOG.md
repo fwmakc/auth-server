@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-10-06
+### Added
+- **`GET /account/internal/list?after=<id>&limit=<n>`** — курсорный
+  листинг аккаунтов (`{items: [{id, username, isActivated}]}`, limit ≤
+  1000) для бэкфилла accounts-зеркала в api-server
+  (`scripts/backfill-accounts.ts`). Тот же masked-404 internal-контракт,
+  что у `info/:id` (плохой ключ неотличим от отсутствующего маршрута);
+  срез минимальный — без ролей и без хешей паролей. `AccountService.
+  listAfter(afterId, take)` под ним; +3 теста (404 без/с неверным ключом,
+  курсорная страница, пустая страница за концом).
+
 ## [Unreleased]
 ### Fixed
 - **`isActivated` из публичного register-пейлоада больше не применяется**:

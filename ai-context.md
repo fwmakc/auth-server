@@ -1,7 +1,7 @@
 # AI Context — auth-server
 
 > Auto-generated. Run `npm run ai-context` to regenerate.
-> Generated: 2026-09-30T15:43:36.964Z
+> Generated: 2026-10-06T08:43:18.251Z
 
 ---
 
@@ -171,6 +171,8 @@ Base path: `/token`
     accountDto: AccountDto,
     relations: Array<RelationsDto> = undefined,): Promise<AccountEntity>`
 - `findByUsername(username: string): Promise<AccountEntity>`
+- `listAfter(afterId: number,
+    take: number,): Promise<Array<Pick<AccountEntity, "id" | "username" | "isActivated">>>`
 - `login(accountDto: AccountDto): Promise<AccountEntity>`
 - `hardDelete(id: number): Promise<boolean>`
 
@@ -179,6 +181,9 @@ Base path: `/token`
 - `findById(id: number): Promise<AccountConfirmEntity>`
 - `findByCode(code: string, type = "code"): Promise<AccountConfirmEntity>`
 - `remove(id: number): Promise<boolean>`
+- `generate(): re-reading created.id races a concurrent
+    // delete-and-reinsert for the same account
+    return await this.repository.save(entrie)`
 
 ### AccountRolesService
 
@@ -233,11 +238,18 @@ Base path: `/token`
     method: TwoFactorMethod,
     secret: { encrypted: string; iv: string } | null,): Promise<AccountTwoFactorEntity>`
 - `encryptSecret(secret: string,): Promise<`
-- `decryptSecret(secret: { encrypted: string; iv: string } | null | undefined,): Promise<string | null>`
+- `decryptSecret(secret: { v?: number; encrypted: string; iv: string } | null | undefined,): Promise<string | null>`
 - `generateRecoveryCodes(): Promise<`
 - `consumeRecoveryCode(row: AccountTwoFactorEntity,
     code: string,): Promise<boolean>`
-- `registerFailure(row: AccountTwoFactorEntity): Promise<void>`
+- `to_jsonb($1::text): :text
+         )
+         WHERE id = $2 AND recovery_codes::jsonb @> to_jsonb($1::text)
+         RETURNING id`,
+        [hashValue, row.id],
+      )`
+- `registerFailure(row: AccountTwoFactorEntity,): Promise<`
+- `utcFromNaive(date: Date): Date`
 - `randomBlock(): string`
 
 ### FormsAccountService
@@ -310,7 +322,6 @@ Base path: `/token`
 
 - `authorizationCode(grantsTokenDto: GrantsTokenDto): Promise<any>`
 - `clientCredentials(grantsTokenDto: GrantsTokenDto): Promise<any>`
-- `key(grantsTokenDto: GrantsTokenDto, request, response): Promise<any>`
 - `password(grantsTokenDto: GrantsTokenDto,
     request,
     response,): Promise<any>`
@@ -466,6 +477,9 @@ Relations: `AccountEntity`, `ClientsRedirectsEntity`
 Relations: `ClientsEntity`
 
 
+### AuthEventOutboxEntity (table: `event_outbox`)
+
+
 ### UsersEntity
 
 | Column | Type |
@@ -489,6 +503,9 @@ Relations: `AccountEntity`
 
 
 ### RefreshTokenEntity (table: `refresh_tokens`)
+
+
+### UsedMfaJtiEntity (table: `used_mfa_jti`)
 
 
 ---
@@ -641,7 +658,6 @@ Relations: `AccountEntity`
 | `password` | `string` | yes |
 | `refresh_token` | `string` | yes |
 | `code` | `string` | yes |
-| `key` | `string` | yes |
 | `redirect_uri` | `string` | yes |
 | `state` | `string` | yes |
 

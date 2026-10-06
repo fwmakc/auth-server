@@ -6,6 +6,7 @@ import {
   NotFoundException,
   Param,
   ParseIntPipe,
+  Query,
 } from "@nestjs/common";
 import { ApiExcludeController } from "@nestjs/swagger";
 import { ConfigService } from "@nestjs/config";
@@ -64,6 +65,36 @@ export class InternalAccountController {
       isSuperuser: account.isSuperuser,
       roles: account.roles,
       roleEntries: account.roleEntries,
+    };
+  }
+
+  // Курсорная страница аккаунтов для бэкфилла accounts-зеркала в
+  // api-server (scripts/backfill-accounts.ts): id/username/isActivated —
+  // минимальный срез, без ролей и без хешей паролей.
+  @Get("list")
+  async list(
+    @Query("after") after: string,
+    @Query("limit") limit: string,
+    @Headers("x-internal-api-key") internalKey: string,
+  ) {
+    if (!this.verifyInternalKey(internalKey)) {
+      throw new NotFoundException();
+    }
+
+    const afterId = Number.parseInt(after ?? "", 10) || 0;
+    const take = Math.min(
+      Math.max(Number.parseInt(limit ?? "", 10) || 500, 1),
+      1000,
+    );
+
+    const rows = await this.accountService.listAfter(afterId, take);
+
+    return {
+      items: rows.map((row) => ({
+        id: Number(row.id),
+        username: row.username,
+        isActivated: row.isActivated,
+      })),
     };
   }
 }

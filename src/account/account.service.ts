@@ -1,5 +1,5 @@
 import { compare } from "@node-rs/bcrypt";
-import { Repository } from "typeorm";
+import { MoreThan, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { CommonService } from "api-server-toolkit";
@@ -39,6 +39,20 @@ export class AccountService extends CommonService<AccountDto, AccountEntity> {
 
   async findByUsername(username: string): Promise<AccountEntity> {
     return await this.repository.findOneBy({ username });
+  }
+
+  // Курсорная страница для бэкфилла accounts-зеркала в api-server:
+  // минимальный срез без ролей и хешей паролей.
+  async listAfter(
+    afterId: number,
+    take: number,
+  ): Promise<Array<Pick<AccountEntity, "id" | "username" | "isActivated">>> {
+    return await this.repository.find({
+      select: { id: true, username: true, isActivated: true },
+      where: { id: MoreThan(afterId) },
+      order: { id: "ASC" },
+      take,
+    });
   }
 
   async login(accountDto: AccountDto): Promise<AccountEntity> {

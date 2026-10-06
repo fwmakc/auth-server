@@ -209,6 +209,7 @@ Authorization: Bearer <superuser_token>
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | GET | `/account/internal/info/:id` | `X-Internal-Api-Key` | Returns `{id, username, isActivated, isSuperuser}` for other services |
+| GET | `/account/internal/list?after=<id>&limit=<n>` | `X-Internal-Api-Key` | Cursor page of `{items: [{id, username, isActivated}]}` (limit ≤ 1000, default 500) — feeds the api-server accounts-mirror backfill (`scripts/backfill-accounts.ts`); minimal slice, no roles, no password hashes |
 
 ### Social Login Strategies
 

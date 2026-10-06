@@ -139,6 +139,38 @@ describe("Access Control — guards, internal API, logout", () => {
     });
   });
 
+  describe("GET /account/internal/list", () => {
+    it("without internal key → 404", async () => {
+      await request(app.getHttpServer())
+        .get("/account/internal/list")
+        .expect(404);
+    });
+
+    it("with valid key → cursor page after the given id", async () => {
+      const res = await request(app.getHttpServer())
+        .get("/account/internal/list?after=1&limit=1")
+        .set("x-internal-api-key", "test-internal-key")
+        .expect(200);
+
+      expect(res.body.items).toHaveLength(1);
+      expect(Number(res.body.items[0].id)).toBe(2);
+      expect(res.body.items[0].username).toBeDefined();
+      expect(typeof res.body.items[0].isActivated).toBe("boolean");
+      // минимальный срез: ни ролей, ни хешей паролей
+      expect(res.body.items[0].password).toBeUndefined();
+      expect(res.body.items[0].roles).toBeUndefined();
+    });
+
+    it("cursor beyond the last id → empty page", async () => {
+      const res = await request(app.getHttpServer())
+        .get("/account/internal/list?after=99999")
+        .set("x-internal-api-key", "test-internal-key")
+        .expect(200);
+
+      expect(res.body.items).toHaveLength(0);
+    });
+  });
+
   // ═══════════════════════════════════════════════════════════
   // JWKS / DISCOVERY
   // ═══════════════════════════════════════════════════════════
