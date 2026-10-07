@@ -4,6 +4,7 @@ import { DataSource } from "typeorm";
 import { authenticator } from "otplib";
 import { createHttpTestApp, mockPublish } from "../app.testingModule";
 import { AccountConfirmEntity } from "@src/account/account_confirm/account_confirm.entity";
+import { AccountTwoFactorEntity } from "@src/account/account_two_factor/account_two_factor.entity";
 
 // encrypt/decrypt read process.env.AES_SECRET directly and require hex
 const TEST_AES_HEX = "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a";
@@ -199,6 +200,92 @@ describe("Two-factor authentication", () => {
         .set("Authorization", `Bearer ${bobToken}`)
         .expect(200);
       expect(status.body.enabled).toBe(false);
+    });
+  });
+
+  describe("recovery codes under concurrency", () => {
+    // Fresh account (admin@test is seeded but untouched by the suites above):
+    // the race lives in SQL, so it needs a real pg — concurrent verifies run
+    // through the HTTP server and interleave on the async bcrypt compares.
+    let accessToken: string;
+    let recoveryCodes: string[];
+
+    const verify = (mfa_token: string, code: string) =>
+      request(server())
+        .post("/account/methods/2fa/verify")
+        .send({ mfa_token, code });
+
+    const challengeFor = async (): Promise<string> => {
+      const challenge = await login("admin@test", "password123").expect(201);
+      expect(challenge.body.twoFactorRequired).toBe(true);
+      return challenge.body.mfa_token as string;
+    };
+
+    const codesLeft = async (): Promise<number> => {
+      const row = await dataSource
+        .getRepository(AccountTwoFactorEntity)
+        .findOneByOrFail({ account: { id: 3 } });
+      return row.recoveryCodes.length;
+    };
+
+    it("setup: admin enables email 2FA and holds 10 codes", async () => {
+      accessToken = (await login("admin@test", "password123")).body
+        .access_token;
+      await request(server())
+        .post("/account/methods/2fa/setup")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ method: "email" })
+        .expect(201);
+      const confirm = await request(server())
+        .post("/account/methods/2fa/setup/confirm")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ code: await latestCode() })
+        .expect(201);
+      recoveryCodes = confirm.body.recoveryCodes;
+      expect(recoveryCodes).toHaveLength(10);
+    });
+
+    it("two concurrent verifies of one code: exactly one wins (no double-spend)", async () => {
+      const mfa = await challengeFor();
+      const [a, b] = await Promise.all([
+        verify(mfa, recoveryCodes[1]),
+        verify(mfa, recoveryCodes[1]),
+      ]);
+      const statuses = [a.status, b.status].sort((x, y) => x - y);
+      expect(statuses).toEqual([201, 401]);
+      const winner = a.status === 201 ? a : b;
+      expect(winner.body.access_token).toBeDefined();
+      // the loser counts as a failure, the code itself is gone from the row
+      expect(await codesLeft()).toBe(9);
+    });
+
+    it("replaying the spent code afterwards fails", async () => {
+      const mfa = await challengeFor();
+      await verify(mfa, recoveryCodes[1]).expect(401);
+    });
+
+    it("two different codes on parallel challenges both succeed and both clear", async () => {
+      // mfa_token is single-use (jti ledger), so two concurrent consumers
+      // means two concurrent login challenges — two browsers both locked out
+      const [mfa1, mfa2] = await Promise.all([
+        challengeFor(),
+        challengeFor(),
+      ]);
+      const [a, b] = await Promise.all([
+        verify(mfa1, recoveryCodes[2]),
+        verify(mfa2, recoveryCodes[3]),
+      ]);
+      expect(a.status).toBe(201);
+      expect(b.status).toBe(201);
+      expect(a.body.access_token).toBeDefined();
+      expect(b.body.access_token).toBeDefined();
+      expect(await codesLeft()).toBe(7);
+    });
+
+    it("both parallel-won codes are dead afterwards", async () => {
+      const mfa = await challengeFor();
+      await verify(mfa, recoveryCodes[2]).expect(401);
+      await verify(mfa, recoveryCodes[3]).expect(401);
     });
   });
 
