@@ -79,16 +79,21 @@ export const buildThrottleStorage = (
 };
 
 /**
- * Skips rate limiting for the health endpoint: docker/k8s probes and nginx
- * upstream checks hit it far more often than a human would, and a 429 on
- * /health marks the container unhealthy and cascades into restarts.
+ * Skips rate limiting for probe endpoints: docker/k8s probes and monitoring
+ * scrapes hit them far more often than a human would, and a 429 on /health
+ * marks the container unhealthy and cascades into restarts (a 429 on
+ * /metrics breaks Prometheus targets for the whole throttle window — the
+ * named auth tier allows only 5/min, and per-replica scraping shares one
+ * scraper IP).
  */
 export class AppThrottlerGuard extends ThrottlerGuard {
+  private static readonly skippedPaths = new Set(["/health", "/metrics"]);
+
   protected override async shouldSkip(
     context: ExecutionContext,
   ): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    if (request?.path === "/health") {
+    if (AppThrottlerGuard.skippedPaths.has(request?.path)) {
       return true;
     }
     return super.shouldSkip(context);

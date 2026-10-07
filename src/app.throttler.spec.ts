@@ -99,10 +99,13 @@ describe("AppThrottlerGuard", () => {
       getType: () => "http",
     }) as unknown as ExecutionContext;
 
-  it("skips rate limiting for /health", async () => {
+  it("skips rate limiting for /health and /metrics", async () => {
     const guard = buildGuard();
     await expect(
       (guard as any).shouldSkip(buildContext("/health")),
+    ).resolves.toBe(true);
+    await expect(
+      (guard as any).shouldSkip(buildContext("/metrics")),
     ).resolves.toBe(true);
   });
 

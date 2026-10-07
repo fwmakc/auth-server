@@ -236,6 +236,7 @@ Authorization: Bearer <superuser_token>
 | GET | `/users/*` | JWT | User profile CRUD (auto-generated via `EntityController`) |
 | POST | `/mail/send` | — | Send email (internal) |
 | POST | `/mail/send_by_template` | — | Send templated email (internal) |
+| GET | `/health`, `/metrics` | — | Liveness probe / Prometheus scrape — both **bypass the throttler** (probes share one scraper IP and would otherwise trip the 5/min auth tier, breaking targets for a minute) |
 
 ---
 
