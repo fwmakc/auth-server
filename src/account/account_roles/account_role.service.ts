@@ -1,10 +1,11 @@
 import { In, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { AuditService, IEventClient } from "api-server-toolkit";
 import { AccountRoleEntity } from "./account_role.entity";
 import { RoleEntity } from "../roles/role.entity";
+import { AccountEntity } from "../account.entity";
 import { AccountRoleAssignmentDto } from "./account_role.dto";
-import { AuditService } from "api-server-toolkit";
 
 @Injectable()
 export class AccountRolesService {
@@ -14,6 +15,10 @@ export class AccountRolesService {
     @InjectRepository(RoleEntity)
     private readonly roleRepository: Repository<RoleEntity>,
     private readonly audit?: AuditService,
+    // Optional like audit: unit suites construct the service bare. In the
+    // real app this is the durable outbox client — publish is STRICT, so
+    // the awaits below must never be dropped.
+    private readonly eventClient?: IEventClient,
   ) {}
 
   async assign(
@@ -23,7 +28,10 @@ export class AccountRolesService {
   ): Promise<void> {
     await this.repository.delete({ accountId });
 
-    if (!dto.roles.length) return;
+    if (!dto.roles.length) {
+      await this.publishRolesChanged(accountId, []);
+      return;
+    }
 
     const roleIds = dto.roles.map((r) => r.roleId);
     const roles = await this.roleRepository.findBy({ id: In(roleIds) });
@@ -60,16 +68,45 @@ export class AccountRolesService {
         })),
       },
     });
+
+    await this.publishRolesChanged(
+      accountId,
+      roles.map((r) => r.name),
+    );
   }
 
   async removeByAccount(accountId: number): Promise<void> {
     await this.repository.delete({ accountId });
+    await this.publishRolesChanged(accountId, []);
   }
 
   async findByAccount(accountId: number): Promise<AccountRoleEntity[]> {
     return this.repository.find({
       where: { accountId },
       relations: { role: true },
+    });
+  }
+
+  /**
+   * Cross-replica cache invalidation: consumers (api/file auth-client) drop
+   * their cached account info on this event, so a revoked role takes effect
+   * immediately instead of after the 30s TTL. `roles` is the full name set
+   * AFTER the change; empty = everything revoked.
+   */
+  private async publishRolesChanged(
+    accountId: number,
+    roleNames: string[],
+  ): Promise<void> {
+    if (!this.eventClient) return;
+    const account = await this.repository.manager.findOne(AccountEntity, {
+      where: { id: accountId },
+    });
+    if (!account) return;
+    await this.eventClient.publish("user.roles_changed", {
+      userId: Number(account.id),
+      username: account.username,
+      email: account.username,
+      roles: roleNames,
     });
   }
 }

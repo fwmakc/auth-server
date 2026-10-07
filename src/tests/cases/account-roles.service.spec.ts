@@ -218,6 +218,88 @@ describe("AccountRolesService", () => {
     });
   });
 
+  describe("user.roles_changed emission", () => {
+    const makeService = () => {
+      const events = { publish: jest.fn().mockResolvedValue(undefined) };
+      const svc = new AccountRolesService(
+        repo as any,
+        roleRepo as any,
+        undefined,
+        events as any,
+      );
+      return { events, svc };
+    };
+
+    it("publishes the full role-name set after assign", async () => {
+      roleRepo.findBy.mockResolvedValue([makeRole(1, "admin")]);
+      repo.save.mockImplementation(async (e: any[]) => e);
+      (repo as any).manager ={
+        findOne: jest
+          .fn()
+          .mockResolvedValue({ id: 10, username: "user@test" }),
+      } as any;
+
+      const { events, svc } = makeService();
+      await svc.assign(10, { roles: [{ roleId: 1 }] });
+
+      expect(events.publish).toHaveBeenCalledWith("user.roles_changed", {
+        userId: 10,
+        username: "user@test",
+        email: "user@test",
+        roles: ["admin"],
+      });
+    });
+
+    it("publishes an empty set when assign clears all roles", async () => {
+      const { events, svc } = makeService();
+      (repo as any).manager ={
+        findOne: jest
+          .fn()
+          .mockResolvedValue({ id: 10, username: "user@test" }),
+      } as any;
+
+      await svc.assign(10, { roles: [] });
+
+      expect(events.publish).toHaveBeenCalledWith(
+        "user.roles_changed",
+        expect.objectContaining({ userId: 10, roles: [] }),
+      );
+    });
+
+    it("publishes an empty set on removeByAccount (everything revoked)", async () => {
+      (repo as any).manager ={
+        findOne: jest
+          .fn()
+          .mockResolvedValue({ id: 10, username: "user@test" }),
+      } as any;
+
+      const { events, svc } = makeService();
+      await svc.removeByAccount(10);
+
+      expect(events.publish).toHaveBeenCalledWith("user.roles_changed", {
+        userId: 10,
+        username: "user@test",
+        email: "user@test",
+        roles: [],
+      });
+    });
+
+    it("skips publishing when the target account no longer exists", async () => {
+      (repo as any).manager ={ findOne: jest.fn().mockResolvedValue(null) } as any;
+
+      const { events, svc } = makeService();
+      await svc.removeByAccount(999);
+
+      expect(events.publish).not.toHaveBeenCalled();
+    });
+
+    it("does not publish when no event client is wired (bare unit construction)", async () => {
+      await service.removeByAccount(10);
+      // repo.manager is undefined here — proves the early return happens
+      // before any repository access
+    });
+  });
+
   describe("findByAccount", () => {
     it("returns entities with role relations", async () => {
       const entities = [

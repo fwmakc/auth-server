@@ -259,8 +259,10 @@ Contract DTOs imported from `event-server/contracts`.
 | `password.reset` | `PasswordResetDto` | On password reset request |
 | `user.deactivated` | `UserDeactivatedDto` | On account deactivation |
 | `user.deleted` | `UserDeletedDto` | On account deletion |
+| `user.roles_changed` | `UserRolesChangedDto` | On every role mutation (`AccountRolesService.assign` / `removeByAccount`) — full role-name set after the change, empty = all revoked. Consumers drop their cached auth info so revocation lands immediately, not after the 30s cache TTL |
 
-All publishing is centralized in `src/account/service/methods.account.service.ts`.
+All publishing is centralized in `src/account/service/methods.account.service.ts`
+plus `src/account/account_roles/account_role.service.ts` (roles_changed).
 
 ---
 

@@ -17,6 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   курсорная страница, пустая страница за концом).
 
 ## [Unreleased]
+### Added
+- **`user.roles_changed` event (event-server/contracts ≥ v1.6.0)**:
+  `AccountRolesService.assign()` и `removeByAccount()` публикуют событие
+  через durable outbox после сохранения — userId, username, email и полный
+  набор имён ролей после изменения (пустой = все сняты). Потребители
+  (api/file auth-client) сбрасывают кэш аккаунта, поэтому отзыв роли
+  срабатывает сразу, а не после 30с TTL кэша. +5 юнит-тестов emission
+  (`account-roles.service.spec.ts`).
 ### Fixed
 - **`isActivated` из публичного register-пейлоада больше не применяется**:
   `RegisterAccountHandler.authCreate` стрипает флаг — запрос на регистрацию
