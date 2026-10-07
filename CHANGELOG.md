@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   listAfter(afterId, take)` под ним; +3 теста (404 без/с неверным ключом,
   курсорная страница, пустая страница за концом).
 
-## [Unreleased]
+## [0.14.0] - 2026-10-07
 ### Added
 - **`user.roles_changed` event (event-server/contracts ≥ v1.6.0)**:
   `AccountRolesService.assign()` и `removeByAccount()` публикуют событие
@@ -45,9 +45,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   salt?)` берёт cost напрямую, `genSalt` выпилен из точек вызова
   (register/2FA recovery-коды/clients secrets/test-seeding/wiring).
 
-### Tests
+### Fixed
+- **`/metrics` и `/health` выведены из-под троттлинга**: named `auth`-tier
+  (5/60s) применялся ко всем роутам, и Prometheus-скрейп (4 запроса/мин с
+  одного IP) упирался в лимит — цель надолго зависала в 429. `AppThrottlerGuard.
+  shouldSkip` пропускает оба пути; `/metrics` остаётся внутренним (не за nginx).
+- **`AccountRolesModule` и `RolesModule` получают outbox напрямую**: после
+  появления зависимости `IEventClient` у `AccountRolesService` контейнер падал
+  на старте (`UnknownDependenciesException`) — `AccountModule` не ре-экспортирует
+  outbox-клиент, а `RolesModule` дублирует провайдера сервиса (легаси). Оба модуля
+  импортируют `OutboxModule.forRoot(AuthEventOutboxEntity)` (тулкит дедуплицирует
+  одинаковые forRoot в один инстанс).
 
-- `hash.account.handler.spec.ts`: механизм-пин — 4 параллельных хеша не
+### Tests
+- **Recovery-коды под конкуренцией** (`two-factor.spec.ts`, реальный pg):
+  два параллельных verify одного кода → ровно один успех; повтор → 401;
+  два разных кода на параллельных login-challenge (mfa_token одноразовый) →
+  оба успеха, оба кода сожжены. Пин атомарного `jsonb @>`-UPDATE: двойного
+  расхода нет.
+
+- `hash.account.handler.spec.ts": механизм-пин — 4 параллельных хеша не
   задерживают сэмплер event loop дольше 100 мс (под bcryptjs тест падал бы на
   ~220 мс блокировки), плюс round-trip и проверка legacy-хеша `$2a$`.
 - `scripts/wiring.ts`: порт БД переопределяется через env (`DB_PORT`, дефолт

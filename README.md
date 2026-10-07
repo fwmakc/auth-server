@@ -1,7 +1,7 @@
 # Auth Server
 
 [![Tests](https://github.com/fwmakc/auth-server/actions/workflows/test.yml/badge.svg)](https://github.com/fwmakc/auth-server/actions/workflows/test.yml)
-[![Version](https://img.shields.io/badge/version-v0.6.0-blue)](https://github.com/fwmakc/auth-server/releases)
+[![Version](https://img.shields.io/badge/version-v0.14.0-blue)](https://github.com/fwmakc/auth-server/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/fwmakc/auth-server/blob/master/LICENSE)
 
 > Reference implementation: authentication service pattern — JWT RS256, JWKS endpoint, SSO, event-driven lifecycle.
@@ -668,10 +668,10 @@ Each service versions **independently** (semver): a `vX.Y.Z` git tag marks the r
 | Service | Version |
 |---------|---------|
 | [api-server-toolkit](https://github.com/fwmakc/api-server-toolkit) | v0.32.0 |
-| [event-server](https://github.com/fwmakc/event-server) | v1.5.0 |
-| [auth-server](https://github.com/fwmakc/auth-server) | v0.13.0 |
+| [event-server](https://github.com/fwmakc/event-server) | v1.6.0 |
+| [auth-server](https://github.com/fwmakc/auth-server) | v0.14.0 |
 | [message-server](https://github.com/fwmakc/message-server) | v0.7.0 |
-| [file-server](https://github.com/fwmakc/file-server) | v0.8.1 |
+| [file-server](https://github.com/fwmakc/file-server) | v0.8.2 |
 | [chat-server](https://github.com/fwmakc/chat-server) | v0.1.3 (frozen) |
 | [api-server](https://github.com/fwmakc/api-server) | v0.8.0 |
 | [gateway-server](https://github.com/fwmakc/gateway-server) | v0.6.0 (infra) |
