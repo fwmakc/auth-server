@@ -1,5 +1,7 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { OutboxModule } from "api-server-toolkit";
+import { AuthEventOutboxEntity } from "../../db/outbox.entity";
 import { AccountRoleEntity } from "./account_role.entity";
 import { AccountRolesService } from "./account_role.service";
 import { AccountRoleAssignmentController } from "./account_role.controller";
@@ -11,6 +13,9 @@ import { AccountModule } from "../account.module";
   imports: [
     TypeOrmModule.forFeature([AccountRoleEntity, RoleEntity]),
     forwardRef(() => AccountModule),
+    // IEventClient for the user.roles_changed emission — same outbox
+    // instance everywhere (toolkit dedupes identical forRoot calls).
+    OutboxModule.forRoot(AuthEventOutboxEntity),
   ],
   providers: [AccountRolesService],
   exports: [AccountRolesService],
