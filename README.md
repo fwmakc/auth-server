@@ -663,7 +663,7 @@ Each service versions **independently** (semver): a `vX.Y.Z` git tag marks the r
 
 ### Current versions
 
-> Synced across all repos on 2026-10-07. Source of truth: the `v*` git tags at each repo HEAD.
+> Synced across all repos on 2026-10-07 (wave 13). Source of truth: the `v*` git tags at each repo HEAD.
 
 | Service | Version |
 |---------|---------|
@@ -671,8 +671,8 @@ Each service versions **independently** (semver): a `vX.Y.Z` git tag marks the r
 | [event-server](https://github.com/fwmakc/event-server) | v1.6.0 |
 | [auth-server](https://github.com/fwmakc/auth-server) | v0.14.0 |
 | [message-server](https://github.com/fwmakc/message-server) | v0.7.0 |
-| [file-server](https://github.com/fwmakc/file-server) | v0.8.2 |
+| [file-server](https://github.com/fwmakc/file-server) | v0.8.3 |
 | [chat-server](https://github.com/fwmakc/chat-server) | v0.1.3 (frozen) |
-| [api-server](https://github.com/fwmakc/api-server) | v0.8.0 |
+| [api-server](https://github.com/fwmakc/api-server) | v0.9.0 |
 | [gateway-server](https://github.com/fwmakc/gateway-server) | v0.6.0 (infra) |
 | [api-server-scaffold](https://github.com/fwmakc/api-server-scaffold) | v0.1.5 |
