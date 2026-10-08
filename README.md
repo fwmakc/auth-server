@@ -647,13 +647,74 @@ yourself.
 
 ---
 
+## Production Notes
+
+Deployment runbook for the whole stack (service registry, secrets, TLS,
+upgrades, scaling, operations): [gateway-server/docs/DEPLOYMENT.md](https://github.com/fwmakc/gateway-server/blob/master/docs/DEPLOYMENT.md).
+
+**Role in the stack.** The only issuer of identity. Owns accounts,
+registration/confirmation, the OAuth2 password grant, JWT signing (RS256,
+shared key pair via the compose `auth-keys` job), refresh-token rotation,
+2FA (TOTP or email one-time code), social SSO, the password policy and the
+login throttler. Every other service verifies tokens locally through
+`/.well-known/jwks.json` — nothing calls auth-server on the hot path.
+
+**Wiring.**
+
+- Receives edge traffic: `/account`, `/token`, `/auth`, `/.well-known`,
+  `/users`, `/roles`, `/clients`, `/userinfo` (nginx zone: 5 req/s per IP).
+- Publishes `user.registered`, `user.confirmed`, `password.reset`,
+  `user.deactivated`, `user.deleted`, `user.roles_changed`,
+  `user.two_factor_code`, `audit.event`. Mail never leaves this service
+  directly — auth emits events, message-server sends.
+- Consumer-side caches of roles/activation are invalidated by those events
+  within seconds (measured 2026-10-08: moderator grant 3.0 s, revoke 1.5 s).
+
+**Production configuration.**
+
+| Concern | Setting |
+|---------|---------|
+| Required secrets | `DB_PASSWORD`, `AES_SECRET` (hex; rotates via `AES_SECRET_V2` + `scripts/reencrypt-aes.mjs`), `INTERNAL_API_KEY` |
+| JWT keys | shared pair in the `auth_keys` volume (compose default); bring-your-own or rotate with `scripts/rotate-jwt-keys.sh` + `JWT_PREVIOUS_PUBLIC_KEY_PATHS` |
+| Token binding | `JWT_ISSUER` / `JWT_AUDIENCE` — identical stack-wide, rolled out in one deploy |
+| Rate-limit store | `THROTTLE_STORAGE=redis` **mandatory at 2+ replicas** — in-memory counters would multiply the effective limits by the replica count |
+| SMTP | deliberately absent — mail goes through the event bus |
+| 2FA | master switch `TWO_FACTOR_ENABLED` (off by default); per-account setup via `/account/methods/2fa` |
+
+**Scaling.** Stateless. The ceiling is bcrypt: ~17.8 logins/s per replica
+at cost 10 (native `@node-rs/bcrypt` on the libuv threadpool,
+`UV_THREADPOOL_SIZE=16`); 2 replicas measured 28.0/s (~1.9×). The cost
+factor is a project constant — the scaling lever is replicas, not cost 12
+(measured 3.7× more expensive).
+
+**Verified under load** (dates and raw numbers:
+[gateway-server/load-tests/results.md](https://github.com/fwmakc/gateway-server/blob/master/load-tests/results.md)):
+
+- 41 CI tests; live e2e-auth suite 43/43 (register → confirm → 2FA → login
+  → refresh rotation → JWKS), 2026-10-08.
+- Identity storm (1000 users: register → confirm → 2FA enrolment → login):
+  throttler trips exactly at the configured limits, 0 letters lost, mail
+  p95 2.6 s.
+- Chaos: a replica SIGKILLed mid-storm — 1.93% of requests failed inside a
+  ~40 s window (in-flight EOFs + stale DNS), the survivor carried 100% of
+  the load.
+- Live pentest 27/27: JWT forgery/replay, throttle bypass, injection probes.
+
+**Semantics to accept.** Deactivation is a soft delete: an already-issued
+access JWT stays valid until expiry (role/activation changes still reach
+consumers in seconds via events). Plaintext passwords are accepted only at
+`register` and `change/:code`, always through the env-driven
+`PasswordPolicyService` — no other route writes `accounts.password`.
+
+---
+
 ## Versioning
 
 Each service versions **independently** (semver): a `vX.Y.Z` git tag marks the released state of each repo. There is no stack-wide shared major — compatibility is guaranteed by **exact dependency pins**, not by version numbers.
 
 - Repos on `0.x` (toolkit, api/auth/file/message-server, gateway): the minor carries breaking changes while the stack is in development; patch = fixes.
 - `event-server` follows a `1.x` line (stable event-contract surface).
-- Consumers pin sources by tag: `"api-server-toolkit": "github:fwmakc/api-server-toolkit#v0.32.0"`, `"event-server": "github:fwmakc/event-server#v1.5.0"`.
+- Consumers pin sources by tag: `"api-server-toolkit": "github:fwmakc/api-server-toolkit#v0.32.0"`, `"event-server": "github:fwmakc/event-server#v1.6.0"`.
 
 ### Breaking-change procedure
 
@@ -663,7 +724,7 @@ Each service versions **independently** (semver): a `vX.Y.Z` git tag marks the r
 
 ### Current versions
 
-> Synced across all repos on 2026-10-07 (wave 13). Source of truth: the `v*` git tags at each repo HEAD.
+> Synced across all repos on 2026-10-08 (wave 15). Source of truth: the `v*` git tags at each repo HEAD.
 
 | Service | Version |
 |---------|---------|
@@ -674,5 +735,5 @@ Each service versions **independently** (semver): a `vX.Y.Z` git tag marks the r
 | [file-server](https://github.com/fwmakc/file-server) | v0.8.3 |
 | [chat-server](https://github.com/fwmakc/chat-server) | v0.1.3 (frozen) |
 | [api-server](https://github.com/fwmakc/api-server) | v0.9.0 |
-| [gateway-server](https://github.com/fwmakc/gateway-server) | v0.6.0 (infra) |
+| [gateway-server](https://github.com/fwmakc/gateway-server) | v0.7.0 (infra) |
 | [api-server-scaffold](https://github.com/fwmakc/api-server-scaffold) | v0.1.5 |
